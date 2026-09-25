@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # MongoDB - Relational Document Store
+  mongodb:
+    image: mongo:7.0
+    container_name: ai_placement_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ai_placement_db
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ai_placement_net
+
+  # Qdrant - Vector Database for Semantic Memory & RAG
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ai_placement_qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - ai_placement_net
+
+  # Redis - Caching, Rate Limiting & Background Task Broker
+  redis:
+    image: redis:7-alpine
+    container_name: ai_placement_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai_placement_net
+
+volumes:
+  mongodb_data:
+  qdrant_data:
+  redis_data:
+
+networks:
+  ai_placement_net:
+    driver: bridge

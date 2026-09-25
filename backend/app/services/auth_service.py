@@ -1,0 +1,161 @@
+import uuid
+from datetime import datetime, timezone, timedelta
+from typing import Tuple, Optional
+from beanie import PydanticObjectId
+from app.core.security import (
+    get_password_hash,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+    decode_refresh_token,
+)
+from app.core.exceptions import AuthenticationError, ConflictError, ResourceNotFoundError
+from app.models.user import UserDocument
+from app.models.profile import ProfileDocument
+from app.schemas.auth import UserRegisterRequest, UserLoginRequest, TokenResponse, UserResponse
+from app.core.config import settings
+
+
+class AuthService:
+    @staticmethod
+    async def register(req: UserRegisterRequest) -> Tuple[UserResponse, TokenResponse]:
+        # 1. Check if user already exists
+        existing_user = await UserDocument.find_one(UserDocument.email == req.email.lower())
+        if existing_user:
+            raise ConflictError(f"User with email '{req.email}' already exists", code="EMAIL_ALREADY_EXISTS")
+
+        # 2. Hash password & create user
+        hashed_password = get_password_hash(req.password)
+        user = UserDocument(
+            email=req.email.lower(),
+            hashed_password=hashed_password,
+            is_active=True,
+            is_verified=False,
+            verification_token=str(uuid.uuid4()),
+        )
+        await user.insert()
+
+        # 3. Create initial empty profile
+        profile = ProfileDocument(
+            user_id=user.id,
+            full_name=req.full_name or "",
+            contact_email=req.email.lower(),
+        )
+        await profile.insert()
+
+        # 4. Generate JWT tokens
+        access_token = create_access_token(subject=str(user.id))
+        refresh_token = create_refresh_token(subject=str(user.id))
+
+        user_resp = UserResponse(
+            id=str(user.id),
+            email=user.email,
+            is_active=user.is_active,
+            is_verified=user.is_verified,
+            created_at=user.created_at.isoformat(),
+        )
+        token_resp = TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        )
+        return user_resp, token_resp
+
+    @staticmethod
+    async def login(req: UserLoginRequest) -> Tuple[UserResponse, TokenResponse]:
+        user = await UserDocument.find_one(UserDocument.email == req.email.lower())
+        if not user:
+            raise AuthenticationError("Invalid email or password", code="INVALID_CREDENTIALS")
+
+        if not verify_password(req.password, user.hashed_password):
+            raise AuthenticationError("Invalid email or password", code="INVALID_CREDENTIALS")
+
+        if not user.is_active:
+            raise AuthenticationError("Your account has been deactivated. Please contact support.", code="ACCOUNT_INACTIVE")
+
+        access_token = create_access_token(subject=str(user.id))
+        refresh_token = create_refresh_token(subject=str(user.id))
+
+        user_resp = UserResponse(
+            id=str(user.id),
+            email=user.email,
+            is_active=user.is_active,
+            is_verified=user.is_verified,
+            created_at=user.created_at.isoformat(),
+        )
+        token_resp = TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        )
+        return user_resp, token_resp
+
+    @staticmethod
+    async def refresh_tokens(refresh_token: str) -> TokenResponse:
+        try:
+            payload = decode_refresh_token(refresh_token)
+            if payload.get("type") != "refresh":
+                raise AuthenticationError("Invalid token type", code="INVALID_TOKEN_TYPE")
+            user_id = payload.get("sub")
+            if not user_id:
+                raise AuthenticationError("Invalid token payload", code="INVALID_TOKEN")
+        except Exception:
+            raise AuthenticationError("Refresh token is expired or invalid", code="REFRESH_TOKEN_INVALID")
+
+        user = await UserDocument.get(PydanticObjectId(user_id))
+        if not user or not user.is_active:
+            raise AuthenticationError("User not found or inactive", code="USER_INACTIVE")
+
+        new_access_token = create_access_token(subject=str(user.id))
+        new_refresh_token = create_refresh_token(subject=str(user.id))
+
+        return TokenResponse(
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            token_type="bearer",
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        )
+
+    @staticmethod
+    async def request_password_reset(email: str) -> str:
+        user = await UserDocument.find_one(UserDocument.email == email.lower())
+        if not user:
+            # We still return success to prevent email enumeration attacks
+            return "If the email is registered, a password reset link has been generated."
+        
+        reset_token = str(uuid.uuid4())
+        user.reset_password_token = reset_token
+        user.reset_password_expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+        user.update_timestamp()
+        await user.save()
+        return "If the email is registered, a password reset link has been generated."
+
+    @staticmethod
+    async def reset_password(token: str, new_password: str) -> bool:
+        user = await UserDocument.find_one(UserDocument.reset_password_token == token)
+        if not user or not user.reset_password_expires_at:
+            raise AuthenticationError("Invalid or expired password reset token", code="INVALID_RESET_TOKEN")
+
+        if datetime.now(timezone.utc) > user.reset_password_expires_at:
+            raise AuthenticationError("Password reset token has expired", code="EXPIRED_RESET_TOKEN")
+
+        user.hashed_password = get_password_hash(new_password)
+        user.reset_password_token = None
+        user.reset_password_expires_at = None
+        user.update_timestamp()
+        await user.save()
+        return True
+
+    @staticmethod
+    async def verify_email(token: str) -> bool:
+        user = await UserDocument.find_one(UserDocument.verification_token == token)
+        if not user:
+            raise AuthenticationError("Invalid email verification token", code="INVALID_VERIFICATION_TOKEN")
+
+        user.is_verified = True
+        user.verification_token = None
+        user.update_timestamp()
+        await user.save()
+        return True
