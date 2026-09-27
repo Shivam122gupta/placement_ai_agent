@@ -80,9 +80,11 @@ export const Navbar: React.FC = () => {
     <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#FAF8F5]/10 bg-[#080607]/90 px-6 backdrop-blur-xl">
       <div className="flex items-center gap-4">
         <Link to="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/20 shadow-md shadow-[#FF6B6B]/25 flex items-center justify-center text-white font-serif font-bold text-base group-hover:scale-105 transition">
-            H
-          </div>
+          <img
+            src="/hirxora-logo-1.jpg"
+            alt="Hirxora"
+            className="w-9 h-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 group-hover:scale-105 transition"
+          />
           <div className="flex items-center gap-2">
             <span className="text-xl font-normal tracking-tight text-[#FAF8F5] font-serif">Hirxora</span>
             <span className="rounded-full bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/25">

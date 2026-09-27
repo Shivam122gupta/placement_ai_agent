@@ -223,9 +223,11 @@ export const LandingPage: React.FC = () => {
         backgroundImageUrl="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2000&q=80"
         logo={
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/20 shadow-md shadow-[#FF6B6B]/25 flex items-center justify-center text-white font-serif font-bold text-base">
-              H
-            </div>
+            <img
+              src="/hirxora-logo-1.jpg"
+              alt="Hirxora"
+              className="h-9 w-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20"
+            />
             <div className="flex items-center gap-2">
               <span className="font-serif text-xl font-normal tracking-tight text-[#FAF8F5]">
                 Hirxora
