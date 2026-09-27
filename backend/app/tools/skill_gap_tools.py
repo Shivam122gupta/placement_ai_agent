@@ -19,10 +19,15 @@ class GenerateStudyRoadmapTool(BaseTool):
     requires_confirmation = False
 
     async def execute(self, params: Dict[str, Any], context: ToolExecutionContext) -> Any:
+        gap_skills = params.get("gap_skills")
+        if isinstance(gap_skills, str):
+            gap_skills = [s.strip() for s in gap_skills.split(",") if s.strip()]
+
         req = RoadmapGenerateRequest(
-            target_role=params.get("target_role"),
+            target_role=params.get("target_role") or "Software Engineer",
             duration_type=params.get("duration_type", "2_weeks"),
-            custom_gap_skills=params.get("gap_skills"),
+            custom_gap_skills=gap_skills,
             job_id=params.get("job_id"),
         )
-        return await SkillGapService.generate_roadmap(user_id=context.user_id, request=req)
+        res = await SkillGapService.generate_roadmap(user_id=context.user_id, request=req)
+        return res.model_dump()

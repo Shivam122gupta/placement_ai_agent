@@ -15,4 +15,5 @@ class GetCandidateProfileTool(BaseTool):
     requires_confirmation = False
 
     async def execute(self, params: Dict[str, Any], context: ToolExecutionContext) -> Any:
-        return await ProfileService.get_profile(user_id=context.user_id)
+        profile_res = await ProfileService.get_profile(user_id=context.user_id)
+        return profile_res.model_dump()

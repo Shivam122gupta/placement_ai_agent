@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { Profile, Education, Skill, Project, Certification } from '../types/profile';
+import { Profile, Education, Experience, Skill, Project, Certification } from '../types/profile';
 import { StandardResponse } from '../types/common';
 
 export const profileService = {
@@ -13,6 +13,11 @@ export const profileService = {
     return response.data.data!;
   },
 
+  async autoSyncLatestResume(): Promise<Profile> {
+    const response = await apiClient.post<StandardResponse<Profile>>('/profile/auto-sync-latest-resume');
+    return response.data.data!;
+  },
+
   async addEducation(edu: Omit<Education, 'id'>): Promise<Profile> {
     const response = await apiClient.post<StandardResponse<Profile>>('/profile/education', edu);
     return response.data.data!;
@@ -20,6 +25,16 @@ export const profileService = {
 
   async deleteEducation(id: string): Promise<Profile> {
     const response = await apiClient.delete<StandardResponse<Profile>>(`/profile/education/${id}`);
+    return response.data.data!;
+  },
+
+  async addExperience(exp: Omit<Experience, 'id'>): Promise<Profile> {
+    const response = await apiClient.post<StandardResponse<Profile>>('/profile/experience', exp);
+    return response.data.data!;
+  },
+
+  async deleteExperience(id: string): Promise<Profile> {
+    const response = await apiClient.delete<StandardResponse<Profile>>(`/profile/experience/${id}`);
     return response.data.data!;
   },
 

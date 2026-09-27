@@ -9,28 +9,28 @@ interface Props {
 export const MatchScoreGauge: React.FC<Props> = ({
   score,
   size = 140,
-  strokeWidth = 12,
+  strokeWidth = 10,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
-  let color = '#EF4444'; // Red for < 50
+  let color = '#8E8E93';
   let label = 'High Skill Gap';
-  let badgeBg = 'bg-red-500/10 text-red-400 border-red-500/20';
+  let badgeStyle = 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20';
 
   if (score >= 80) {
-    color = '#10B981'; // Green
+    color = '#FAF8F5';
     label = 'Strong Match';
-    badgeBg = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+    badgeStyle = 'bg-white/15 text-[#FAF8F5] border-white/30 font-semibold';
   } else if (score >= 60) {
-    color = '#6366F1'; // Indigo
+    color = '#E8E2D6';
     label = 'Moderate Match';
-    badgeBg = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+    badgeStyle = 'bg-white/10 text-[#FAF8F5] border-white/20';
   } else if (score >= 40) {
-    color = '#F59E0B'; // Amber
+    color = '#C4C0B6';
     label = 'Partial Fit';
-    badgeBg = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    badgeStyle = 'bg-white/5 text-neutral-300 border-white/15';
   }
 
   return (
@@ -44,7 +44,7 @@ export const MatchScoreGauge: React.FC<Props> = ({
             r={radius}
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-slate-800"
+            className="text-white/[0.06]"
             fill="transparent"
           />
           {/* Progress circle */}
@@ -63,14 +63,15 @@ export const MatchScoreGauge: React.FC<Props> = ({
         </svg>
 
         <div className="absolute flex flex-col items-center justify-center text-center">
-          <span className="text-3xl font-black text-slate-100">{score}%</span>
-          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Match Fit</span>
+          <span className="text-3xl font-bold font-mono tracking-tight text-white">{score}%</span>
+          <span className="text-[9px] uppercase font-mono tracking-widest text-[#FAF8F5]/80">Match Fit</span>
         </div>
       </div>
 
-      <span className={`mt-3 px-3 py-1 rounded-full text-xs font-semibold border ${badgeBg}`}>
+      <span className={`mt-3 px-3 py-1 rounded-full text-xs font-mono border ${badgeStyle}`}>
         {label}
       </span>
     </div>
   );
 };
+

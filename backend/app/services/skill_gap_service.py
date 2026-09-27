@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 from beanie import PydanticObjectId
 
 from app.models.skill_gap import SkillGapRoadmapDocument, RoadmapMilestone
@@ -23,9 +23,10 @@ class SkillGapService:
     @classmethod
     async def generate_roadmap(
         cls,
-        user_id: PydanticObjectId,
+        user_id: Any,
         request: RoadmapGenerateRequest,
     ) -> SkillGapRoadmapResponse:
+        user_obj_id = PydanticObjectId(str(user_id)) if not isinstance(user_id, PydanticObjectId) else user_id
         gap_skills: List[str] = []
         target_role = request.target_role or "Software Engineer"
         job_obj_id: Optional[PydanticObjectId] = None
@@ -44,7 +45,7 @@ class SkillGapService:
             target_role = f"{job.title} at {job.company}"
 
             # Fetch or execute match to get exact missing gaps
-            match_res = await MatchingService.get_match_by_job(user_id, job_obj_id)
+            match_res = await MatchingService.get_match_by_job(user_obj_id, job_obj_id)
             gap_skills = match_res.missing_skills if match_res else []
 
             # If no missing skills found, use preferred skills or key required skills for mastery
@@ -64,7 +65,7 @@ class SkillGapService:
 
         now = datetime.now(timezone.utc)
         roadmap_doc = SkillGapRoadmapDocument(
-            user_id=user_id,
+            user_id=user_obj_id,
             job_id=job_obj_id,
             target_role=target_role,
             duration_type=request.duration_type,

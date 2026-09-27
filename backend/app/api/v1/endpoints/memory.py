@@ -7,6 +7,7 @@ from app.models.user import UserDocument
 from app.models.profile import ProfileDocument
 from app.models.resume import ResumeDocument, ResumeVersionDocument
 from app.api.deps import get_current_user
+from app.services.profile_service import ProfileService
 from app.services.memory_service import memory_service
 from app.schemas.memory import (
     MemorySearchRequest,
@@ -29,40 +30,55 @@ async def sync_memory(
     Chunks, embeds, and indexes the authenticated candidate's active profile
     and parsed resume versions into Qdrant vector memory.
     """
-    user_id = str(current_user.id)
+    user_id_str = str(current_user.id)
+    user_oid = current_user.id if isinstance(current_user.id, PydanticObjectId) else PydanticObjectId(user_id_str)
 
     # 1. Fetch Profile
-    profile = await ProfileDocument.find_one(ProfileDocument.user_id == current_user.id)
-    profile_dict = profile.model_dump() if profile else None
+    profile = await ProfileDocument.find_one(ProfileDocument.user_id == user_oid)
+    if not profile:
+        await ProfileService.get_by_user_id(user_oid)
+        profile = await ProfileDocument.find_one(ProfileDocument.user_id == user_oid)
 
-    # 2. Fetch Completed Resumes & Latest Versions
+    profile_dict = profile.model_dump() if profile else {
+        "full_name": current_user.email.split("@")[0] if current_user.email else "Candidate",
+        "skills": [],
+        "projects": [],
+        "experience": [],
+    }
+
+    # 2. Fetch All Resumes & Latest Versions
     resumes_to_index = []
     resumes = await ResumeDocument.find(
-        ResumeDocument.user_id == current_user.id,
-        ResumeDocument.status == "COMPLETED",
+        ResumeDocument.user_id == user_oid,
     ).to_list()
 
     for r in resumes:
+        if r.status == "FAILED":
+            continue
         version = await ResumeVersionDocument.find_one(
             ResumeVersionDocument.resume_id == r.id,
-            ResumeVersionDocument.user_id == current_user.id,
         )
-        if version:
+        if not version:
+            version = await ResumeVersionDocument.find_one(
+                ResumeVersionDocument.user_id == user_oid,
+            )
+        if version and version.parsed_data:
+            parsed = version.parsed_data.model_dump() if hasattr(version.parsed_data, "model_dump") else version.parsed_data
             resumes_to_index.append({
                 "id": str(r.id),
-                "parsed_data": version.parsed_data.model_dump() if hasattr(version.parsed_data, "model_dump") else version.parsed_data,
+                "parsed_data": parsed,
                 "raw_text": version.raw_text or "",
             })
 
     try:
         response = memory_service.sync_candidate_memory(
-            user_id=user_id,
+            user_id=user_id_str,
             profile_dict=profile_dict,
             resumes=resumes_to_index,
         )
         return response
     except Exception as e:
-        logger.error("Failed to sync candidate memory for user %s: %s", user_id, e)
+        logger.error("Failed to sync candidate memory for user %s: %s", user_id, e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Memory synchronization failed: {str(e)}",

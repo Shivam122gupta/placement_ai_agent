@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class CandidateChunk(BaseModel):
@@ -14,6 +14,23 @@ class CandidateChunk(BaseModel):
     skills: List[str] = Field(default_factory=list)
     source_id: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_skills(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "skills" in data and isinstance(data["skills"], list):
+            norm = []
+            for s in data["skills"]:
+                if isinstance(s, dict):
+                    norm.append(s.get("name") or str(s))
+                elif hasattr(s, "name"):
+                    norm.append(getattr(s, "name"))
+                elif isinstance(s, str):
+                    norm.append(s)
+                elif s is not None:
+                    norm.append(str(s))
+            data["skills"] = norm
+        return data
 
     def to_payload(self) -> Dict[str, Any]:
         return {
@@ -42,6 +59,7 @@ class SectionAwareChunker:
 
         # 1. Headline & Bio / Summary
         headline = profile_dict.get("headline") or profile_dict.get("full_name") or ""
+        bio = profile_dict.get("bio") or ""
         target_roles = profile_dict.get("target_roles") or []
         pref_locs = profile_dict.get("preferred_locations") or []
         exp_lvl = profile_dict.get("experience_level") or "Fresher / 0-1 years"
@@ -50,6 +68,7 @@ class SectionAwareChunker:
         summary_content = (
             f"[CANDIDATE PROFILE SUMMARY]\n"
             f"Candidate: {headline}\n"
+            f"Bio: {bio}\n"
             f"Target Roles: {', '.join(target_roles) if target_roles else 'Software Engineer'}\n"
             f"Preferred Locations: {', '.join(pref_locs) if pref_locs else 'Any'}\n"
             f"Experience Level: {exp_lvl}\n"
@@ -127,23 +146,29 @@ class SectionAwareChunker:
                 )
             )
 
-        # 4. Work Experiences
-        experiences = profile_dict.get("experiences") or profile_dict.get("work_experience") or []
+        # 4. Work Experiences & Internships
+        experiences = profile_dict.get("experience") or profile_dict.get("experiences") or profile_dict.get("work_experience") or []
         for exp in experiences:
             company = exp.get("company", "Company")
             role = exp.get("role") or exp.get("title") or "Software Engineer"
+            duration = exp.get("duration", "")
             start = exp.get("start_date", "")
             end = exp.get("end_date") or ("Present" if exp.get("is_current") else "")
+            tenure = duration or f"{start} to {end}".strip()
+            location = exp.get("location") or ""
             desc = exp.get("description", "")
+            highlights = "\n".join(f"- {h}" for h in exp.get("highlights", [])) if exp.get("highlights") else ""
+            full_desc = f"{desc}\n{highlights}".strip()
             exp_skills = exp.get("skills_used") or exp.get("technologies_used") or []
 
             exp_content = (
                 f"[WORK EXPERIENCE: {role} at {company}]\n"
                 f"Company: {company}\n"
                 f"Role: {role}\n"
-                f"Tenure: {start} to {end}\n"
+                f"Tenure: {tenure}\n"
+                f"Location: {location}\n"
                 f"Technologies: {', '.join(exp_skills)}\n"
-                f"Impact & Contributions:\n{desc}"
+                f"Impact & Contributions:\n{full_desc}"
             )
             chunks.append(
                 CandidateChunk(
@@ -222,6 +247,12 @@ class SectionAwareChunker:
         if isinstance(parsed_data, BaseModel):
             parsed_data = parsed_data.model_dump()
 
+        raw_skills = parsed_data.get("skills") or []
+        clean_skills = [
+            s.get("name") if isinstance(s, dict) else (getattr(s, "name") if hasattr(s, "name") else str(s))
+            for s in raw_skills if s
+        ]
+
         # 1. Summary
         summary = parsed_data.get("summary")
         if summary:
@@ -232,7 +263,7 @@ class SectionAwareChunker:
                     title="Resume Summary",
                     content=f"[RESUME SUMMARY]\n{summary}",
                     section="SUMMARY",
-                    skills=parsed_data.get("skills", []),
+                    skills=clean_skills,
                     source_id=resume_id,
                 )
             )
@@ -285,7 +316,7 @@ class SectionAwareChunker:
                             title=f"Resume Section {idx + 1}",
                             content=f"[RESUME TEXT]\n{p}",
                             section="RESUME",
-                            skills=parsed_data.get("skills", []),
+                            skills=clean_skills,
                             source_id=resume_id,
                         )
                     )

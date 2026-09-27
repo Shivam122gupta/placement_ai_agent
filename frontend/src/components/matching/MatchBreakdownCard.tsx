@@ -31,16 +31,20 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-8">
+    <div className="bg-[#121214] border border-[#FAF8F5]/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-8 backdrop-blur-xl">
       {/* Top Header & Gauge */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-800">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-[#FAF8F5]/10">
         <div className="flex-1 space-y-2 text-center md:text-left">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-mono font-medium bg-white/10 text-[#FAF8F5] border border-white/20">
+            <span className="p-1 rounded bg-white/10">
+              <Sparkles className="h-3 w-3 text-[#FAF8F5]" />
+            </span>
             <span>AI Placement Evaluator</span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-100">Candidate Match Diagnostics</h2>
-          <p className="text-slate-400 text-sm max-w-xl leading-relaxed">
+          <h2 className="text-2xl sm:text-3xl font-serif font-normal text-[#FAF8F5]">
+            Candidate Match Diagnostics
+          </h2>
+          <p className="text-neutral-300 text-sm max-w-xl leading-relaxed font-sans">
             {match.summary_reasoning || `Objective assessment of candidate compatibility for ${jobTitle} at ${company}.`}
           </p>
         </div>
@@ -52,37 +56,37 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
 
       {/* Sub-Scores Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-black/40 border border-[#FAF8F5]/10 flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-0.5">
+            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block mb-1">
               Technical Skills Alignment
             </span>
-            <span className="text-xl font-bold text-indigo-400">{match.skills_score}%</span>
+            <span className="text-2xl font-bold font-mono text-white">{match.skills_score}%</span>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+          <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FAF8F5]">
             <TrendingUp className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-black/40 border border-[#FAF8F5]/10 flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-0.5">
+            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider block mb-1">
               Experience & Career Level
             </span>
-            <span className="text-xl font-bold text-purple-400">{match.experience_score}%</span>
+            <span className="text-2xl font-bold font-mono text-white">{match.experience_score}%</span>
           </div>
-          <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+          <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FAF8F5]">
             <Sparkles className="h-5 w-5" />
           </div>
         </div>
       </div>
 
-      {/* 3-Column Skills Diagnostics */}
+      {/* 2-Column Skills Diagnostics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Matched Skills */}
-        <div className="p-5 rounded-2xl bg-slate-950 border border-emerald-500/20 space-y-3">
-          <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-            <CheckCircle2 className="h-4 w-4" />
+        <div className="p-5 rounded-2xl bg-black/30 border border-[#FAF8F5]/10 space-y-3">
+          <div className="flex items-center space-x-2 text-white font-medium text-xs font-mono uppercase tracking-wider">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
             <span>Verified Matched Competencies ({match.matched_skills.length})</span>
           </div>
 
@@ -92,16 +96,16 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
               .map((d, idx) => (
                 <div
                   key={idx}
-                  className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between"
+                  className="p-3 rounded-xl bg-[#18181B] border border-[#FAF8F5]/10 flex flex-col justify-between hover:border-[#FAF8F5]/30 transition"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-300">{d.skill}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="text-xs font-semibold text-white">{d.skill}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/10 text-[#FAF8F5] border border-white/15">
                       {d.is_required ? 'Required' : 'Bonus'}
                     </span>
                   </div>
                   {d.evidence_snippet && (
-                    <span className="text-[11px] text-slate-400 mt-1 italic">
+                    <span className="text-[11px] text-neutral-400 mt-1.5 italic">
                       📎 {d.evidence_snippet}
                     </span>
                   )}
@@ -109,16 +113,16 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
               ))}
 
             {match.matched_skills.length === 0 && (
-              <p className="text-xs text-slate-500 italic py-2">No matching skills identified in candidate profile.</p>
+              <p className="text-xs text-neutral-500 italic py-2">No matching skills identified in candidate profile.</p>
             )}
           </div>
         </div>
 
         {/* Missing Skills / Gaps */}
-        <div className="p-5 rounded-2xl bg-slate-950 border border-red-500/20 space-y-3 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-black/30 border border-[#FAF8F5]/10 space-y-3 flex flex-col justify-between">
           <div>
-            <div className="flex items-center space-x-2 text-red-400 font-bold text-sm mb-3">
-              <XCircle className="h-4 w-4" />
+            <div className="flex items-center space-x-2 text-neutral-300 font-medium text-xs font-mono uppercase tracking-wider mb-3">
+              <XCircle className="h-4 w-4 text-rose-400" />
               <span>Missing Skill Gaps ({match.missing_skills.length})</span>
             </div>
 
@@ -126,10 +130,10 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
               {match.missing_skills.map((skill, idx) => (
                 <div
                   key={idx}
-                  className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between"
+                  className="p-3 rounded-xl bg-[#18181B] border border-[#FAF8F5]/10 flex items-center justify-between"
                 >
-                  <span className="text-xs font-bold text-red-300">{skill}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                  <span className="text-xs font-semibold text-neutral-200">{skill}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
                     Action Required
                   </span>
                 </div>
@@ -144,7 +148,7 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
           {match.missing_skills.length > 0 && (
             <button
               onClick={handleGenerateRoadmap}
-              className="mt-4 w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all"
+              className="mt-4 w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white font-semibold text-xs py-2.5 px-4 rounded-xl shadow-lg shadow-[#FF6B6B]/25 transition-all cursor-pointer active:scale-95"
             >
               <span>Bridge Gaps with AI Study Roadmap</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -155,14 +159,14 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
 
       {/* Recruiter Strengths & Key Gaps Summary */}
       {(match.strengths.length > 0 || match.key_gaps.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#FAF8F5]/10">
           {match.strengths.length > 0 && (
-            <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 space-y-2">
-              <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
-                <Sparkles className="h-3.5 w-3.5" />
+            <div className="p-4 rounded-2xl bg-black/40 border border-[#FAF8F5]/10 space-y-2">
+              <span className="text-xs font-mono font-medium text-[#FAF8F5] uppercase tracking-wider flex items-center space-x-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#FAF8F5]" />
                 <span>Key Candidate Strengths</span>
               </span>
-              <ul className="space-y-1 text-xs text-slate-300 pl-4 list-disc">
+              <ul className="space-y-1 text-xs text-neutral-300 pl-4 list-disc font-sans">
                 {match.strengths.map((s, idx) => (
                   <li key={idx}>{s}</li>
                 ))}
@@ -171,12 +175,12 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
           )}
 
           {match.key_gaps.length > 0 && (
-            <div className="p-4 rounded-2xl bg-slate-950 border border-amber-500/20 space-y-2">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
-                <ShieldAlert className="h-3.5 w-3.5" />
+            <div className="p-4 rounded-2xl bg-black/40 border border-[#FAF8F5]/10 space-y-2">
+              <span className="text-xs font-mono font-medium text-amber-300 uppercase tracking-wider flex items-center space-x-1.5">
+                <ShieldAlert className="h-3.5 w-3.5 text-amber-300" />
                 <span>Primary Focus Areas</span>
               </span>
-              <ul className="space-y-1 text-xs text-slate-300 pl-4 list-disc">
+              <ul className="space-y-1 text-xs text-neutral-300 pl-4 list-disc font-sans">
                 {match.key_gaps.map((g, idx) => (
                   <li key={idx}>{g}</li>
                 ))}
@@ -188,3 +192,4 @@ export const MatchBreakdownCard: React.FC<Props> = ({ match, jobTitle, company }
     </div>
   );
 };
+

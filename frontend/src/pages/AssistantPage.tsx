@@ -18,7 +18,7 @@ export const AssistantPage: React.FC = () => {
       id: 'welcome_msg',
       role: 'assistant',
       content:
-        "👋 Hello! I am your **AI Placement Agent & Career Copilot**.\n\nI can analyze your active profile, search live tech jobs & internships, evaluate your match score with evidence, diagnose skill gaps, and generate customized study plans.\n\nHow can I help you take the next step in your career today?",
+        "👋 Hello! I am **Hirxora AI Career Copilot**.\n\nI can inspect your active profile, search live tech jobs & internships, evaluate your match score with deterministic evidence, diagnose skill gaps, and generate customized 2-week study plans.\n\nHow can I assist your placement preparation today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -115,27 +115,27 @@ export const AssistantPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto h-[calc(100vh-8rem)] flex flex-col space-y-4 pb-4">
+    <div className="max-w-5xl mx-auto h-[calc(100vh-8rem)] flex flex-col space-y-4 pb-4 text-[#FAF8F5]">
       {/* Header */}
-      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl px-6 py-4 shadow-xl">
-        <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
-            <Sparkles className="h-5 w-5" />
+      <div className="flex items-center justify-between bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl px-6 py-4 shadow-xl backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25 shadow-lg shadow-white/5">
+            <Sparkles className="h-4 w-4 text-[#FAF8F5]" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-100 flex items-center space-x-2">
+            <h1 className="text-sm md:text-base font-serif font-normal text-white flex items-center gap-2">
               <span>Autonomous Career Copilot</span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                ReAct + Tools
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
+                ReAct + Grounded Tools
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Multi-step autonomous reasoning with safety guardrails</p>
+            <p className="text-xs text-neutral-400 font-sans">Multi-step autonomous reasoning with safety guardrails</p>
           </div>
         </div>
 
         <button
           onClick={() => window.location.reload()}
-          className="p-2 rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+          className="p-2 rounded-xl border border-[#FAF8F5]/20 hover:bg-[#FAF8F5]/10 text-neutral-400 hover:text-white transition cursor-pointer"
           title="New Session"
         >
           <RotateCcw className="h-4 w-4" />
@@ -143,20 +143,20 @@ export const AssistantPage: React.FC = () => {
       </div>
 
       {/* Messages Canvas */}
-      <div className="flex-1 bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 overflow-y-auto space-y-6 shadow-inner">
+      <div className="flex-1 bg-[#121214]/90 border border-[#FAF8F5]/15 rounded-3xl p-6 overflow-y-auto space-y-5 shadow-inner backdrop-blur-xl">
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-start space-x-3.5 ${msg.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
+            className={`flex items-start gap-3.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div
-              className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
+              className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 border ${
                 msg.role === 'user'
-                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                  : 'bg-slate-950 border-slate-800 text-indigo-400'
+                  ? 'bg-[#FAF8F5] text-black border-white shadow-md shadow-white/10'
+                  : 'bg-[#18181B] border-[#FAF8F5]/20 text-[#FAF8F5]'
               }`}
             >
-              {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+              {msg.role === 'user' ? <User className="h-3.5 w-3.5 text-black" /> : <Bot className="h-3.5 w-3.5 text-[#FAF8F5]" />}
             </div>
 
             <div className={`max-w-2xl space-y-2 ${msg.role === 'user' ? 'items-end' : ''}`}>
@@ -171,10 +171,10 @@ export const AssistantPage: React.FC = () => {
 
               {/* Message Bubble */}
               <div
-                className={`p-4 rounded-2xl text-sm leading-relaxed ${
+                className={`p-4 rounded-2xl text-xs md:text-sm leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-600/10'
-                    : 'bg-slate-900 border border-slate-800 text-slate-200 whitespace-pre-wrap shadow-md'
+                    ? 'bg-[#FAF8F5] text-black font-medium shadow-md shadow-white/10'
+                    : 'bg-[#18181B] border border-[#FAF8F5]/15 text-neutral-200 whitespace-pre-wrap shadow-sm font-sans'
                 }`}
               >
                 {msg.content}
@@ -189,25 +189,25 @@ export const AssistantPage: React.FC = () => {
                 />
               )}
 
-              <span className="text-[10px] text-slate-500 block px-1">{msg.timestamp}</span>
+              <span className="text-[10px] font-mono text-[#FAF8F5]/60 block px-1">{msg.timestamp}</span>
             </div>
           </div>
         ))}
 
         {loading && (
-          <div className="flex items-center space-x-3 text-slate-400 text-xs italic pl-12 py-2">
+          <div className="flex items-center gap-3 text-[#FAF8F5] text-xs italic pl-11 py-2">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FAF8F5] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FAF8F5] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FAF8F5] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span>Agent is planning and calling tools...</span>
+            <span className="font-mono text-[#FAF8F5]/80">Agent is planning and reasoning over tools...</span>
           </div>
         )}
 
         {error && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center space-x-3 text-red-400 text-sm">
-            <AlertCircle className="h-5 w-5 shrink-0" />
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center space-x-3 text-rose-300 text-xs">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -222,7 +222,7 @@ export const AssistantPage: React.FC = () => {
             <button
               key={idx}
               onClick={() => handleSend(suggestion)}
-              className="text-xs px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/60 text-slate-300 hover:text-white transition-colors"
+              className="text-xs px-3 py-1.5 rounded-xl bg-[#121214] border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/50 text-neutral-300 hover:text-white transition cursor-pointer"
             >
               {suggestion}
             </button>
@@ -236,7 +236,7 @@ export const AssistantPage: React.FC = () => {
           e.preventDefault();
           handleSend();
         }}
-        className="bg-slate-900 border border-slate-800 rounded-2xl p-2 shadow-2xl flex items-center space-x-2"
+        className="bg-[#121214] border border-[#FAF8F5]/20 rounded-2xl p-2 shadow-2xl flex items-center gap-2 backdrop-blur-xl"
       >
         <input
           type="text"
@@ -244,14 +244,14 @@ export const AssistantPage: React.FC = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask anything: find jobs, diagnose skill gaps, build roadmaps..."
           disabled={loading}
-          className="flex-1 bg-transparent px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+          className="flex-1 bg-transparent px-4 py-2.5 text-xs md:text-sm text-white placeholder-neutral-500 focus:outline-none font-sans"
         />
         <button
           type="submit"
           disabled={!input.trim() || loading}
-          className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-2.5 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white shadow-md shadow-[#FF6B6B]/25 transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-95"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-4 w-4 text-white" />
         </button>
       </form>
     </div>

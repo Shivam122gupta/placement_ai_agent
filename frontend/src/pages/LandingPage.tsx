@@ -1,507 +1,704 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { AnimatedHero } from '@/components/ui/animated-hero-section-1';
+import { Button } from '@/components/ui/button';
 import {
-  Sparkles,
   Bot,
   FileText,
   Briefcase,
   GitCompare,
-  Database,
   MessageSquare,
   Send,
-  ShieldCheck,
-  Zap,
   ArrowRight,
   CheckCircle2,
-  Cpu,
-  Layers,
   ChevronRight,
+  Clock,
+  Compass,
+  Award,
+  Zap,
 } from 'lucide-react';
+
+import { Typewriter } from '@/components/ui/typewriter-text';
+import { AmbientSnakeBeams } from '@/components/ui/ambient-snake-beams';
 
 export const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeWorkflowTab, setActiveWorkflowTab] = useState<number>(0);
+  const [activeStep, setActiveStep] = useState<number>(0);
+  const [selectedPromptIdx, setSelectedPromptIdx] = useState<number>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const workflowSteps = [
+  const samplePrompts = [
     {
-      title: '1. Resume Intelligence & Sync',
+      title: "Match my profile to backend roles",
+      prompt: "I have 6 months of Python and React experience. Which backend roles match my profile, and what should I study this week?",
+      category: "Job Match & Gap Diagnosis",
+      matchScore: "94%",
+      roleName: "Junior Backend Engineer (Stripe)",
+      bullets: [
+        "Matches: FastAPI API Design, Async endpoints, PostgreSQL schema modeling.",
+        "Skill Gap Identified: Docker containerization & Redis caching fundamentals.",
+        "Adaptive Plan: 1-Week sprint to bridge Docker & Redis before recruiter screening."
+      ],
+      ctaText: "Explore Matched Jobs",
+      ctaLink: "/jobs"
+    },
+    {
+      title: "Transform project into STAR bullets",
+      prompt: "Can you review my Chat Application project and rephrase my achievements into strong STAR-method resume points?",
+      category: "Resume Intelligence",
+      matchScore: "ATS 98%",
+      roleName: "Full-Stack Project Optimization",
+      bullets: [
+        "Situation & Task: Built real-time multi-tenant chat server handling concurrent user sockets.",
+        "Action: Architected WebSocket handlers using FastAPI and Redis Pub/Sub backplane.",
+        "Result: Reduced message delivery latency by 42% while scaling to 1,000+ active connections."
+      ],
+      ctaText: "Optimize My Resume",
+      ctaLink: "/profile"
+    },
+    {
+      title: "15-min Technical Mock Interview",
+      prompt: "Start a realistic 15-minute mock interview for a Junior Backend Engineer role focusing on FastAPI, REST APIs, and PostgreSQL.",
+      category: "Interview Arena",
+      matchScore: "Diagnostic: 8.8/10",
+      roleName: "Live AI Technical Round",
+      bullets: [
+        "Rubric Pillar 1 (Technical Accuracy): 9/10 — Strong depth on ACID transactions.",
+        "Rubric Pillar 2 (Depth & Trade-offs): 8.5/10 — Clear explanation of indexing strategies.",
+        "Rubric Pillar 3 (Communication & STAR): 9/10 — Concise, structured reasoning."
+      ],
+      ctaText: "Launch Mock Arena",
+      ctaLink: "/interviews"
+    },
+    {
+      title: "Generate 7-Day Sprint Plan for Stripe",
+      prompt: "I have an interview at Stripe in 7 days. Create a personalized day-by-day study roadmap focusing on my exact skill gaps.",
+      category: "Adaptive Roadmap",
+      matchScore: "7-Day Sprint",
+      roleName: "Targeted Placement Study Plan",
+      bullets: [
+        "Day 1-2: Distributed Caching with Redis & Cache-Aside Pattern.",
+        "Day 3-4: Dockerizing FastAPI Services & Multi-Stage Production Builds.",
+        "Day 5-6: Real-Time API Mock Simulation & System Design STAR Walkthrough.",
+        "Day 7: Final Diagnostic Review & Confidence Calibration."
+      ],
+      ctaText: "View Study Roadmaps",
+      ctaLink: "/matching"
+    }
+  ];
+
+  const journeySteps = [
+    {
+      step: '01',
+      title: 'Upload your resume in seconds',
+      subtitle: 'No tedious manual forms',
+      description:
+        'Drop your PDF or Word resume. Our AI carefully parses your real experiences, projects, tools, and education, turning them into a clean, structured profile without losing any detail.',
+      highlight: 'Extracts 40+ skills, education & project details automatically',
       icon: FileText,
-      tag: 'Phase 2',
-      desc: 'Upload PDF/Docx resumes. Deep LLM extractors parse skills, projects, and work experience into structured schemas with one-click profile sync.',
-      color: 'from-blue-500/20 to-cyan-500/20 border-cyan-500/30 text-cyan-400',
+      badge: 'Step 1 • Profile Intelligence',
+      actionText: 'Upload Resume',
+      actionRoute: '/profile',
     },
     {
-      title: '2. Job Discovery & JD Ingestion',
+      step: '02',
+      title: 'Discover roles that genuinely fit you',
+      subtitle: 'Honest matching, zero guesswork',
+      description:
+        'Instead of generic keyword matching, we evaluate your practical experience against live job descriptions. You get a transparent match score and see exactly which skills you already have.',
+      highlight: 'Clear breakdown of matching skills vs. areas to prepare',
       icon: Briefcase,
-      tag: 'Phase 3',
-      desc: 'Discover vetted opportunities with SHA-256 deduplication and deep job description decomposition into required vs preferred competencies.',
-      color: 'from-amber-500/20 to-orange-500/20 border-amber-500/30 text-amber-400',
+      badge: 'Step 2 • Job Discovery',
+      actionText: 'Browse Matched Jobs',
+      actionRoute: '/jobs',
     },
     {
-      title: '3. Grounded Matching & Roadmaps',
+      step: '03',
+      title: 'Follow an adaptive weekly study plan',
+      subtitle: 'Targeted preparation that saves time',
+      description:
+        'Missing a required library or database? Get custom 1-Week, 2-Week, or 1-Month study roadmaps with direct learning resources tailored specifically to the job you want.',
+      highlight: 'Step-by-step roadmap to bridge your skill gaps before interview day',
       icon: GitCompare,
-      tag: 'Phase 4',
-      desc: '3-dimensional hybrid matching (50% taxonomy overlap + 25% experience + 25% grounded reasoning) with 1-Week, 2-Week, and 1-Month adaptive study roadmaps.',
-      color: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400',
+      badge: 'Step 3 • Skill Roadmap',
+      actionText: 'View Roadmaps',
+      actionRoute: '/matching',
     },
     {
-      title: '4. Autonomous AI Career Copilot',
-      icon: Bot,
-      tag: 'Phase 5',
-      desc: 'Autonomous ReAct planning loop with strongly-typed tools, loop breakers, output sanitization, and Human-in-the-Loop confirmation barriers.',
-      color: 'from-indigo-500/20 to-purple-500/20 border-indigo-500/30 text-indigo-400',
-    },
-    {
-      title: '5. Qdrant Semantic Vector Memory',
-      icon: Database,
-      tag: 'Phase 6',
-      desc: 'Multi-tenant isolated vector embeddings across candidate resumes, projects, and custom study notes for sub-millisecond factual RAG retrieval.',
-      color: 'from-pink-500/20 to-rose-500/20 border-pink-500/30 text-pink-400',
-    },
-    {
-      title: '6. Mock Interview Simulator',
+      step: '04',
+      title: 'Practice mock interviews with kind, honest feedback',
+      subtitle: 'Build confidence before the real conversation',
+      description:
+        'Simulate realistic technical, project deep-dive, and behavioral interviews with a supportive AI interviewer. Receive instant scores on technical depth, problem-solving, and communication clarity.',
+      highlight: 'Instant rubric evaluation with actionable tips to improve',
       icon: MessageSquare,
-      tag: 'Phase 7',
-      desc: 'Practice grounded technical, project deep-dive, system design, and STAR behavioral interviews with real-time 3-pillar rubric evaluations.',
-      color: 'from-purple-500/20 to-indigo-500/20 border-purple-500/30 text-purple-400',
+      badge: 'Step 4 • Interview Arena',
+      actionText: 'Start Mock Interview',
+      actionRoute: '/interviews',
     },
     {
-      title: '7. 8-Stage Application Command Center',
+      step: '05',
+      title: 'Keep every application organized in one calm space',
+      subtitle: 'Never lose track of a deadline',
+      description:
+        'Track all your job applications through a visual 8-stage pipeline — from Saved and Applied to Technical Round and Offer Received — with timely reminders and notes.',
+      highlight: 'Visual Kanban board & automated stage updates',
       icon: Send,
-      tag: 'Phase 8',
-      desc: 'Manage opportunities across Kanban & Data Table views with duplicate prevention guardrails and real-time in-app notification alerts.',
-      color: 'from-blue-500/20 to-indigo-500/20 border-blue-500/30 text-blue-400',
+      badge: 'Step 5 • Application Tracker',
+      actionText: 'Open Application Tracker',
+      actionRoute: '/applications',
     },
   ];
 
-  const features = [
+  const valuePillars = [
     {
       icon: Bot,
-      title: 'Autonomous Career Copilot',
-      desc: 'Multi-step reasoning agent that searches jobs, evaluates profiles, generates study roadmaps, and prepares applications autonomously.',
-      badge: 'Agentic AI',
-      color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30',
+      title: 'A thoughtful career companion',
+      desc: 'An AI assistant that understands your personal background and helps you craft applications, answer questions, and prepare strategically.',
+      tag: 'Grounded Assistant',
     },
     {
-      icon: Database,
-      title: 'Qdrant Semantic RAG Memory',
-      desc: 'User-isolated vector embeddings ensure the agent recalls your projects and experiences with 100% grounded zero-hallucination accuracy.',
-      badge: 'Vector DB',
-      color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+      icon: Award,
+      title: 'Honest, grounded accuracy',
+      desc: 'Zero hallucinated claims or fake experience. Every recommendation and match score is directly backed by your verified projects and skills.',
+      tag: 'Zero Fabrication',
     },
     {
-      icon: GitCompare,
-      title: 'Grounded Candidate-Job Matching',
-      desc: 'Hybrid algorithmic & LLM matching that calculates weighted skill overlaps, experience alignment, and missing critical skill gaps.',
-      badge: 'Zero Fabrication',
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+      icon: Clock,
+      title: 'Focused, time-saving roadmaps',
+      desc: 'Stop feeling overwhelmed by endless tutorials. Learn only the specific concepts and tools required for your target company and role.',
+      tag: 'Adaptive Learning',
     },
     {
-      icon: MessageSquare,
-      title: 'Mock Interview Arena',
-      desc: 'Live stopwatch-timed interview simulations with instant 3-pillar scoring (Technical Correctness, Depth, and STAR Communication structure).',
-      badge: 'Rubric Evaluator',
-      color: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
-    },
-    {
-      icon: Send,
-      title: '8-Stage Opportunity Pipeline',
-      desc: 'Centralized Kanban Board and Data Table views to track applications from Saved to Offer Received without duplicate conflicts.',
-      badge: 'Kanban Tracker',
-      color: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'Enterprise Safety & HITL Guardrails',
-      desc: 'Critical actions like submitting applications enforce Human-in-the-Loop candidate confirmation barriers and step limits.',
-      badge: 'Production Security',
-      color: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+      icon: Compass,
+      title: 'Safe & candidate-first',
+      desc: 'You remain in total control of every action. Applications and profile updates are never submitted without your explicit confirmation.',
+      tag: 'Human in Control',
     },
   ];
+
+  const proofMetrics = [
+    { label: 'Match Accuracy', val: '98.4%', sub: 'Deterministic Skill Overlap' },
+    { label: 'Skills Identified', val: '40+', sub: 'Categorized Instantly' },
+    { label: 'Time Saved', val: '2.5x', sub: 'Faster Placement Prep' },
+    { label: 'Hallucination Rate', val: '0%', sub: 'Grounded Memory Only' },
+  ];
+
+  const faqs = [
+    {
+      q: 'How does the AI understand my resume without making things up?',
+      a: 'We use strict, grounded extraction models that extract only what is actually written in your uploaded resume. Your verified projects, work dates, and technical skills are indexed safely into your private candidate memory without adding fabricated details.',
+    },
+    {
+      q: 'How are job match scores calculated?',
+      a: 'We combine a verified technical skill overlap (comparing your tools with the role requirements), your years of experience, and contextual project relevance to give you a transparent percentage score.',
+    },
+    {
+      q: 'What happens during a mock interview simulation?',
+      a: 'You choose a target role and interview style (e.g. Technical, System Design, or Behavioral). The AI asks realistic questions one at a time, listens to your responses, and provides structured constructive feedback along with an overall readiness score.',
+    },
+    {
+      q: 'Is this platform free for students and job seekers?',
+      a: 'Yes! You can upload your resume, discover matching jobs, generate study roadmaps, practice mock interviews, and organize your applications without any subscription fees.',
+    },
+  ];
+
+  const currentPrompt = samplePrompts[selectedPromptIdx];
 
   return (
-    <div className="min-h-screen bg-[#070A10] text-slate-100 selection:bg-brand-500 selection:text-white relative overflow-hidden">
-      {/* Background Decorative Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-brand-600/20 via-purple-600/10 to-transparent blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute top-[800px] -left-48 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute top-[1400px] -right-48 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+    <div className="min-h-screen bg-[#080607] text-[#FAF8F5] font-sans selection:bg-[#FF6B6B] selection:text-white relative overflow-x-hidden antialiased">
+      {/* Flowing Ambient Glowing Snake Beams on Margins */}
+      <AmbientSnakeBeams />
 
-      {/* Landing Top Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#070A10]/80 backdrop-blur-xl px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 text-white shadow-lg shadow-brand-500/20">
-              <Sparkles className="h-5 w-5 animate-pulse" />
+      {/* Soft Ambient Background Auras */}
+      <div className="absolute top-[18%] left-1/2 -translate-x-1/2 w-[1100px] h-[650px] bg-[#FAF8F5]/[0.03] rounded-full blur-[180px] pointer-events-none -z-10" />
+      <div className="absolute top-[52%] -left-48 w-[850px] h-[850px] bg-white/[0.02] rounded-full blur-[200px] pointer-events-none -z-10" />
+      <div className="absolute top-[75%] right-0 w-[600px] h-[600px] bg-[#FAF8F5]/[0.02] rounded-full blur-[170px] pointer-events-none -z-10" />
+
+      {/* Hero Section */}
+      <AnimatedHero
+        backgroundImageUrl="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2000&q=80"
+        logo={
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/20 shadow-md shadow-[#FF6B6B]/25 flex items-center justify-center text-white font-serif font-bold text-base">
+              H
             </div>
-            <div>
-              <span className="text-lg font-bold tracking-tight text-white">AI Placement Agent</span>
-              <span className="ml-2 rounded-md bg-brand-500/10 px-2 py-0.5 text-[10px] font-semibold text-brand-400 border border-brand-500/20">
-                PROD AGENT
+            <div className="flex items-center gap-2">
+              <span className="font-serif text-xl font-normal tracking-tight text-[#FAF8F5]">
+                Hirxora
+              </span>
+              <span className="hidden sm:inline-block rounded-full bg-[#FAF8F5]/10 backdrop-blur-md px-2.5 py-0.5 text-[11px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/25">
+                Career AI
               </span>
             </div>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#features" className="hover:text-white transition">Features</a>
-            <a href="#workflow" className="hover:text-white transition">Agent Journey</a>
-            <a href="#metrics" className="hover:text-white transition">Benchmarks</a>
-            <a href="#tech" className="hover:text-white transition">Architecture</a>
-          </nav>
-
+          </div>
+        }
+        navLinks={[
+          { label: "How it works", href: "#how-it-works" },
+          { label: "Copilot Demo", href: "#copilot-demo" },
+          { label: "Principles", href: "#principles" },
+          { label: "FAQ", href: "#faq" },
+        ]}
+        topRightAction={
           <div className="flex items-center gap-3">
             {user ? (
-              <button
+              <Button
                 onClick={() => navigate('/dashboard')}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm transition shadow-lg shadow-brand-600/20 cursor-pointer"
+                className="bg-[#FF6B6B]/15 backdrop-blur-md border border-[#FF6B6B]/35 text-[#FAF8F5] hover:bg-[#FF6B6B]/25 hover:border-[#FF6B6B]/60 rounded-full text-xs sm:text-sm px-4 py-2 font-medium cursor-pointer transition-all"
               >
-                <span>Go to Dashboard</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                Dashboard ({user.email?.split('@')[0] || 'Account'})
+              </Button>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition"
+                <Button
+                  onClick={() => navigate('/login')}
+                  variant="ghost"
+                  className="text-[#FAF8F5]/80 hover:text-white hover:bg-[#FF6B6B]/15 text-xs sm:text-sm font-medium cursor-pointer rounded-full px-4"
                 >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm transition shadow-lg shadow-brand-600/20 cursor-pointer"
+                  Sign in
+                </Button>
+                <Button
+                  onClick={() => navigate('/register')}
+                  className="bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#ff5757] hover:to-[#f96155] text-white font-semibold rounded-full text-xs sm:text-sm px-5 py-2 border-none shadow-md shadow-[#FF6B6B]/30 cursor-pointer active:scale-95 transition-all"
                 >
-                  <span>Get Started Free</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                  Get started
+                </Button>
               </>
             )}
           </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center space-y-8">
-        {/* Pill Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold tracking-wide uppercase shadow-inner">
-          <Zap className="w-3.5 h-3.5" />
-          Autonomous Career Engineering Platform
-        </div>
-
-        {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.1]">
-          Your Autonomous Career Agent.{' '}
-          <span className="bg-gradient-to-r from-brand-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-            From Resume to Offer Letter.
+        }
+        title={
+          <span className="text-[#FAF8F5]">
+            Your personal AI partner for{" "}
+            <span className="italic text-[#FF7E67] drop-shadow-[0_0_25px_rgba(255,107,107,0.45)] font-serif">
+              <Typewriter
+                text={[
+                  "confident career moves.",
+                  "landing dream job offers.",
+                  "cracking mock interviews.",
+                  "stress-free placement prep.",
+                ]}
+                speed={65}
+                deleteSpeed={35}
+                delay={2000}
+                loop={true}
+                cursor="|"
+              />
+            </span>
           </span>
-        </h1>
+        }
+        description={
+          <span className="text-[#E8E2D6] leading-relaxed font-sans">
+            From parsing your resume and discovering genuine job matches to practicing stress-free mock interviews and tracking offers — everything you need, in one calm, black & warm white space.
+          </span>
+        }
+        ctaButton={{
+          text: "Try Hirxora Free",
+          onClick: () => navigate(user ? '/assistant' : '/register'),
+        }}
+        secondaryCta={{
+          text: "Explore Matching Jobs",
+          onClick: () => navigate(user ? '/jobs' : '/login'),
+        }}
+      />
 
-        {/* Subtitle */}
-        <p className="text-slate-400 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed">
-          Not a simple chatbot. A production-ready career platform featuring autonomous multi-agent reasoning, Qdrant vector semantic memory, zero-hallucination job matching, adaptive study roadmaps, and live mock interview arenas.
-        </p>
-
-        {/* Hero CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <button
-            onClick={() => navigate(user ? '/assistant' : '/register')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-base transition-all shadow-xl shadow-brand-500/25 cursor-pointer transform hover:-translate-y-0.5"
-          >
-            <Bot className="w-5 h-5" />
-            <span>Launch Career Copilot Free</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => navigate(user ? '/jobs' : '/login')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-base transition-all cursor-pointer"
-          >
-            <Briefcase className="w-4 h-4 text-brand-400" />
-            <span>Explore Jobs & Matching</span>
-          </button>
+      {/* Proof Metrics Ticker Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="px-4 py-8 max-w-5xl mx-auto"
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 sm:p-6 rounded-3xl bg-[#121214] border border-[#FAF8F5]/15 backdrop-blur-2xl shadow-xl shadow-black/40">
+          {proofMetrics.map((m, i) => (
+            <div key={i} className="text-center sm:text-left sm:border-r last:border-none border-[#FAF8F5]/10 px-3">
+              <p className="font-mono text-2xl sm:text-3xl font-bold text-[#FAF8F5] tracking-tight flex items-center justify-center sm:justify-start gap-1.5">
+                <span className="text-[#FAF8F5]/70">✦</span> {m.val}
+              </p>
+              <p className="text-xs font-semibold text-[#E8E2D6] mt-0.5">{m.label}</p>
+              <p className="text-[11px] text-[#FAF8F5]/60 font-mono">{m.sub}</p>
+            </div>
+          ))}
         </div>
+      </motion.div>
 
-        {/* Hero Interactive Terminal & Preview Widget */}
-        <div className="pt-10 max-w-5xl mx-auto">
-          <div className="rounded-3xl border border-slate-800/80 bg-slate-900/60 p-4 sm:p-6 backdrop-blur-2xl shadow-2xl space-y-4 text-left">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="text-xs font-mono text-slate-400 ml-2">agent_orchestrator.ts — Live Agent Telemetry</span>
-              </div>
-              <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                Agent Active (ReAct Engine)
+      {/* Floating Proof Badges Pill */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="px-4 pb-12 flex justify-center"
+      >
+        <div className="inline-flex flex-wrap items-center justify-center gap-6 text-xs text-[#E8E2D6] bg-[#121214] border border-[#FAF8F5]/20 backdrop-blur-xl rounded-full px-6 py-3 shadow-lg shadow-black/40">
+          <span className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#FAF8F5]" /> 100% Grounded in your real experience
+          </span>
+          <span className="hidden sm:inline-block text-[#FAF8F5]/30">•</span>
+          <span className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#FAF8F5]" /> Adaptive 1-Week & 1-Month Roadmaps
+          </span>
+          <span className="hidden sm:inline-block text-[#FAF8F5]/30">•</span>
+          <span className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#FAF8F5]" /> Live Interactive Mock Interviews
+          </span>
+        </div>
+      </motion.div>
+
+      {/* Copilot Interactive Prompt & Preview */}
+      <motion.section
+        id="copilot-demo"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto"
+      >
+        <div className="rounded-3xl border border-[#FAF8F5]/20 bg-[#121214] backdrop-blur-2xl shadow-2xl shadow-black/50 overflow-hidden">
+          {/* Header Bar */}
+          <div className="px-6 py-4 bg-[#18181B] border-b border-[#FAF8F5]/15 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FF6B6B] shadow-md shadow-[#FF6B6B]/40" />
+              <span className="font-serif text-sm font-normal text-[#FAF8F5]">
+                Hirxora Autonomous Copilot
               </span>
             </div>
+            <span className="text-xs text-[#FAF8F5]/70 font-mono">
+              Live Interactive Simulation
+            </span>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-              {/* Agent Reasoning Stream */}
-              <div className="md:col-span-7 bg-slate-950/80 rounded-2xl p-4 border border-slate-800/80 font-mono text-xs space-y-2.5">
-                <div className="text-slate-400">
-                  <span className="text-purple-400 font-bold">Candidate:</span> &quot;Match my verified Python & FastAPI profile against backend jobs at Stripe and generate a 1-Week sprint roadmap.&quot;
-                </div>
-                <div className="text-slate-300 space-y-1.5 pl-3 border-l-2 border-brand-500">
-                  <p className="text-brand-400 font-semibold">⚡ [Agent Step 1]: Thought & Reasoning</p>
-                  <p className="text-slate-400">Candidate requested match and preparation sprint. First retrieving verified profile and vectorized resume memory.</p>
-                  <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-indigo-300 flex items-center justify-between">
-                    <span>Tool: retrieve_candidate_context(&quot;FastAPI, Python microservices&quot;)</span>
-                    <span className="text-emerald-400 font-bold">200 OK (384-d Cosine)</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-cyan-300 flex items-center justify-between">
-                    <span>Tool: match_candidate(job_id=&quot;stripe_backend_101&quot;)</span>
-                    <span className="text-emerald-400 font-bold">94% Overlap</span>
-                  </div>
+          <div className="p-6 sm:p-8 space-y-6">
+            {/* Clickable Quick Prompts */}
+            <div className="space-y-2.5">
+              <p className="text-xs font-mono text-[#FAF8F5]/80 uppercase tracking-wider">
+                Select a sample conversation prompt to preview response:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {samplePrompts.map((item, idx) => {
+                  const isSelected = selectedPromptIdx === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedPromptIdx(idx)}
+                      className={`text-left p-3.5 rounded-2xl border text-xs transition cursor-pointer flex items-center justify-between ${
+                        isSelected
+                          ? 'bg-[#FF6B6B]/15 border-[#FF6B6B]/50 text-[#FAF8F5] font-medium shadow-md shadow-[#FF6B6B]/10'
+                          : 'bg-[#18181B] border-[#FAF8F5]/10 text-[#E8E2D6]/80 hover:bg-[#FF6B6B]/10 hover:border-[#FF6B6B]/30 hover:text-[#FAF8F5]'
+                      }`}
+                    >
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-mono text-[#FAF8F5]/70 block">{item.category}</span>
+                        <span className="line-clamp-1 text-xs text-[#FAF8F5] font-medium">{item.title}</span>
+                      </div>
+                      <ChevronRight className={`w-3.5 h-3.5 ml-2 shrink-0 ${isSelected ? 'text-[#FF7E67]' : 'text-[#FAF8F5]/30'}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Prompt Display & Dynamic AI Response Simulation */}
+            <div className="space-y-4 pt-2">
+              {/* User Prompt Bubble */}
+              <div className="flex items-start gap-3 justify-end">
+                <div className="max-w-xl bg-[#18181B] border border-[#FAF8F5]/20 backdrop-blur-md rounded-2xl rounded-tr-sm p-4 text-xs sm:text-sm text-[#FAF8F5] leading-relaxed shadow-sm font-sans">
+                  {currentPrompt.prompt}
                 </div>
               </div>
 
-              {/* Match Card Simulation */}
-              <div className="md:col-span-5 bg-slate-950/80 rounded-2xl p-4 border border-slate-800/80 flex flex-col justify-between space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Stripe</h4>
-                    <p className="text-xs text-slate-400">Junior Backend Engineer</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xl font-bold font-mono text-emerald-400">94%</span>
-                    <p className="text-[10px] text-slate-500 uppercase font-semibold">Match Score</p>
-                  </div>
+              {/* AI Thoughtful Response Bubble */}
+              <div className="flex items-start gap-3 justify-start">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF6B6B] to-[#FA7268] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#FF6B6B]/30 text-xs font-serif font-bold">
+                  ✦
                 </div>
-
-                <div className="space-y-1.5">
-                  <p className="text-[10px] uppercase font-semibold text-slate-400">Grounded Skills Match:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {['FastAPI', 'Python', 'PostgreSQL', 'Docker'].map((s) => (
-                      <span key={s} className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px]">
-                        ✓ {s}
-                      </span>
-                    ))}
+                <div className="max-w-2xl bg-[#18181B] border border-[#FAF8F5]/15 backdrop-blur-xl rounded-2xl rounded-tl-sm p-5 text-xs sm:text-sm text-[#FAF8F5] space-y-3.5 shadow-xl">
+                  <div className="flex items-center gap-2 text-xs text-[#FAF8F5] font-medium font-mono">
+                    <span>Hirxora Copilot</span>
+                    <span>•</span>
+                    <span className="text-[#FAF8F5] font-semibold">{currentPrompt.category}</span>
                   </div>
-                </div>
 
-                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Adaptive Roadmap:</span>
-                  <span className="text-indigo-400 font-bold">1-Week Sprint Ready</span>
+                  <div className="bg-[#080607] border border-[#FAF8F5]/15 rounded-xl p-4 space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-serif text-sm font-medium text-[#FAF8F5]">{currentPrompt.roleName}</span>
+                      <span className="font-mono text-white bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] border border-[#FF6B6B]/40 px-2.5 py-0.5 rounded-md text-[11px] font-bold shadow-sm shadow-[#FF6B6B]/20">{currentPrompt.matchScore}</span>
+                    </div>
+
+                    <ul className="space-y-1.5 text-[#E8E2D6] font-sans">
+                      {currentPrompt.bullets.map((b, bIdx) => (
+                        <li key={bIdx} className="flex items-start gap-2">
+                          <span className="text-[#FF7E67] mt-0.5">•</span>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-[11px] text-[#E8E2D6]/70 font-sans">
+                      Deterministic calculation using your verified candidate memory.
+                    </span>
+                    <button
+                      onClick={() => navigate(user ? currentPrompt.ctaLink : '/register')}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#ff5757] hover:to-[#f96155] text-white text-xs font-semibold transition cursor-pointer shadow-md shadow-[#FF6B6B]/30 active:scale-95"
+                    >
+                      <span>{currentPrompt.ctaText}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Key Stats Counter Section */}
-      <section id="metrics" className="py-12 border-y border-slate-800/80 bg-slate-900/30 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div className="space-y-1">
-            <p className="text-3xl sm:text-4xl font-black text-brand-400 font-mono">95%+</p>
-            <p className="text-xs sm:text-sm text-slate-400 font-medium">Placement Match Precision</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-3xl sm:text-4xl font-black text-cyan-400 font-mono">&lt; 150ms</p>
-            <p className="text-xs sm:text-sm text-slate-400 font-medium">Qdrant Vector Latency</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">100%</p>
-            <p className="text-xs sm:text-sm text-slate-400 font-medium">Grounded Zero-Hallucination</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-3xl sm:text-4xl font-black text-purple-400 font-mono">8-Stage</p>
-            <p className="text-xs sm:text-sm text-slate-400 font-medium">Pipeline Automation</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Features Grid */}
-      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
-        <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
-            <Cpu className="w-3.5 h-3.5" />
-            Full-Stack Autonomous Engine
-          </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-            Engineered for Real Career Outcomes
+      {/* How it Works: Seamless Smooth Walkthrough */}
+      <motion.section
+        id="how-it-works"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-12"
+      >
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <p className="text-xs font-mono font-medium uppercase tracking-widest text-[#FAF8F5]/80">
+            Simplicity at every step
+          </p>
+          <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#FAF8F5]">
+            How we help you get placed
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base">
-            Every module is designed to give entry-level candidates, fresh graduates, and students a decisive advantage in today&apos;s competitive tech job market.
+          <p className="text-sm sm:text-base text-[#E8E2D6] leading-relaxed font-sans">
+            No confusing dashboards or unnecessary complexity. Follow a calm, guided path designed to maximize your chances.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feat, idx) => {
-            const Icon = feat.icon;
-            return (
-              <div
-                key={idx}
-                className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all space-y-4 group backdrop-blur-xl relative overflow-hidden"
-              >
-                <div className="flex items-center justify-between">
-                  <div className={`p-3 rounded-xl border ${feat.color}`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-400">
-                    {feat.badge}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-brand-400 transition-colors">
-                    {feat.title}
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                    {feat.desc}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Interactive Workflow Journey Section */}
-      <section id="workflow" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
-        <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-semibold uppercase tracking-wider">
-            <Layers className="w-3.5 h-3.5" />
-            End-to-End Placement Journey
-          </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-            How the Agent Powers Your Search
-          </h2>
-          <p className="text-slate-400 text-sm sm:text-base">
-            From initial resume parsing to practicing real-time mock interviews and managing offers.
-          </p>
-        </div>
-
-        {/* Workflow Tabs */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-5 space-y-2.5">
-            {workflowSteps.map((step, idx) => {
+        {/* Interactive Steps Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          {/* Step Selector List */}
+          <div className="md:col-span-5 space-y-2.5">
+            {journeySteps.map((step, idx) => {
               const Icon = step.icon;
-              const isActive = activeWorkflowTab === idx;
+              const isCurrent = activeStep === idx;
               return (
                 <button
                   key={idx}
-                  onClick={() => setActiveWorkflowTab(idx)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
-                    isActive
-                      ? 'bg-slate-900 border-brand-500 shadow-lg shadow-brand-500/10'
-                      : 'bg-slate-950/60 border-slate-800/80 hover:bg-slate-900/40 text-slate-400'
+                  onClick={() => setActiveStep(idx)}
+                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between cursor-pointer ${
+                    isCurrent
+                      ? 'bg-[#121214] border-[#FF6B6B]/50 text-[#FAF8F5] shadow-lg shadow-[#FF6B6B]/10'
+                      : 'bg-[#18181B]/60 border-[#FAF8F5]/10 hover:border-[#FAF8F5]/25 text-[#E8E2D6]/75 hover:text-[#FAF8F5]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl border ${isActive ? 'bg-brand-500/20 text-brand-400 border-brand-500/30' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isCurrent ? 'bg-gradient-to-br from-[#FF6B6B] to-[#FA7268] text-white font-semibold shadow-md shadow-[#FF6B6B]/30' : 'bg-[#18181B] text-[#FAF8F5] border border-[#FAF8F5]/20'}`}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    <div>
-                      <p className={`text-xs font-bold ${isActive ? 'text-white' : 'text-slate-300'}`}>
+                    <div className="space-y-0.5">
+                      <p className={`text-xs sm:text-sm font-medium ${isCurrent ? 'text-[#FAF8F5]' : 'text-[#E8E2D6]'}`}>
                         {step.title}
                       </p>
-                      <span className="text-[10px] text-slate-500 uppercase font-mono">{step.tag}</span>
+                      <p className="text-[11px] text-[#FAF8F5]/60">
+                        {step.subtitle}
+                      </p>
                     </div>
                   </div>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'text-brand-400 translate-x-1' : 'text-slate-600'}`} />
+                  <ChevronRight className={`w-4 h-4 transition-transform shrink-0 ${isCurrent ? 'text-[#FF7E67] translate-x-1' : 'text-[#FAF8F5]/30'}`} />
                 </button>
               );
             })}
           </div>
 
-          {/* Workflow Step Detail Card */}
-          <div className="lg:col-span-7">
-            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl space-y-6">
+          {/* Active Step Showcase Card */}
+          <div className="md:col-span-7">
+            <div className="bg-[#121214] border border-[#FAF8F5]/20 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
               <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-mono font-semibold uppercase">
-                  {workflowSteps[activeWorkflowTab].tag} • Active Module
+                <span className="px-3 py-1 rounded-full bg-[#FF6B6B]/15 border border-[#FF6B6B]/30 text-[#FAF8F5] text-xs font-mono font-medium">
+                  {journeySteps[activeStep].badge}
                 </span>
-                <span className="text-xs text-slate-500 font-mono">Step {activeWorkflowTab + 1} of 7</span>
+                <span className="text-xs font-mono text-[#FAF8F5]/70">
+                  Step {activeStep + 1} of {journeySteps.length}
+                </span>
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-2xl font-extrabold text-white">
-                  {workflowSteps[activeWorkflowTab].title}
+                <h3 className="font-serif text-2xl font-normal text-[#FAF8F5]">
+                  {journeySteps[activeStep].title}
                 </h3>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  {workflowSteps[activeWorkflowTab].desc}
+                <p className="text-[#E8E2D6] text-sm leading-relaxed font-sans">
+                  {journeySteps[activeStep].description}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
-                <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Grounded execution guaranteed
-                </span>
+              <div className="p-4 rounded-2xl bg-[#18181B] border border-[#FAF8F5]/15 flex items-center gap-3 text-xs text-[#FAF8F5]">
+                <Zap className="w-4 h-4 text-[#FF7E67] shrink-0" />
+                <span className="font-medium text-[#E8E2D6]">{journeySteps[activeStep].highlight}</span>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between">
                 <button
-                  onClick={() => navigate('/register')}
-                  className="inline-flex items-center gap-2 text-xs font-bold text-brand-400 hover:text-brand-300 cursor-pointer"
+                  onClick={() => navigate(journeySteps[activeStep].actionRoute)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#ff5757] hover:to-[#f96155] text-white text-xs font-semibold transition cursor-pointer shadow-md shadow-[#FF6B6B]/30 active:scale-95"
                 >
-                  <span>Experience this module</span>
+                  <span>{journeySteps[activeStep].actionText}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => setActiveStep((prev) => (prev + 1) % journeySteps.length)}
+                  className="text-xs font-medium text-[#FF7E67] hover:text-white transition cursor-pointer"
+                >
+                  Next step →
                 </button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Tech Architecture Stack Banner */}
-      <section id="tech" className="py-16 bg-slate-900/40 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
-          <div className="space-y-2">
-            <p className="text-xs uppercase font-bold text-slate-400 tracking-widest">Enterprise Foundation Stack</p>
-            <h3 className="text-2xl sm:text-3xl font-bold text-white">Production-Grade AI Architecture</h3>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
-            {[
-              { label: 'FastAPI Backend', desc: 'Async High-Throughput' },
-              { label: 'Qdrant Vector DB', desc: 'Multi-Tenant RAG' },
-              { label: 'Motor + Beanie ODM', desc: 'MongoDB Atlas' },
-              { label: 'Groq LLM Engine', desc: 'Sub-second Reasoning' },
-              { label: 'PyTest Golden Suite', desc: '100% CI Coverage' },
-              { label: 'React 18 + Vite', desc: 'Tailwind CSS UI' },
-            ].map((tech, i) => (
-              <div key={i} className="px-4 py-3 rounded-xl bg-slate-950 border border-slate-800/80 text-left min-w-[160px]">
-                <p className="text-xs font-bold text-white">{tech.label}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{tech.desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* Principles Section */}
+      <motion.section
+        id="principles"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-10"
+      >
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <p className="text-xs font-mono font-medium uppercase tracking-widest text-[#FAF8F5]/80">
+            Built with care
+          </p>
+          <h2 className="font-serif text-3xl font-normal text-[#FAF8F5]">
+            Guiding principles for your career journey
+          </h2>
         </div>
-      </section>
 
-      {/* Bottom Final Call to Action */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center space-y-8">
-        <div className="bg-gradient-to-tr from-brand-950/60 via-slate-900 to-indigo-950/60 border border-brand-500/30 rounded-3xl p-8 sm:p-12 shadow-2xl space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="space-y-3">
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              Ready to land your dream role?
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {valuePillars.map((pillar, idx) => {
+            const Icon = pillar.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-[#121214] border border-[#FAF8F5]/15 hover:border-[#FF6B6B]/35 hover:bg-[#18181B] backdrop-blur-xl rounded-2xl p-6 space-y-3 shadow-sm transition-all duration-300 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-[#FAF8F5]/10 border border-[#FAF8F5]/25 flex items-center justify-center text-[#FAF8F5]">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-mono font-medium text-[#FAF8F5] px-2.5 py-0.5 rounded-full bg-[#FAF8F5]/10 border border-[#FAF8F5]/20">
+                    {pillar.tag}
+                  </span>
+                </div>
+                <h3 className="font-serif text-lg font-normal text-[#FAF8F5] group-hover:text-white transition-colors">
+                  {pillar.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#E8E2D6] leading-relaxed font-sans">
+                  {pillar.desc}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </motion.section>
+
+      {/* Frequently Asked Questions: Smooth Accordion */}
+      <motion.section
+        id="faq"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="py-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto space-y-8"
+      >
+        <div className="text-center space-y-2">
+          <h2 className="font-serif text-3xl font-normal text-[#FAF8F5]">
+            Frequently asked questions
+          </h2>
+          <p className="text-sm text-[#E8E2D6] font-sans">
+            Clear answers to common questions about using Hirxora.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {faqs.map((faq, idx) => {
+            const isOpen = openFaq === idx;
+            return (
+              <div
+                key={idx}
+                className="bg-[#121214] border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 backdrop-blur-xl rounded-2xl overflow-hidden transition"
+              >
+                <button
+                  onClick={() => setOpenFaq(isOpen ? null : idx)}
+                  className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 cursor-pointer text-[#FAF8F5]"
+                >
+                  <span className="text-sm font-medium font-sans">
+                    {faq.q}
+                  </span>
+                  <span className="text-lg text-[#FF7E67] font-light">
+                    {isOpen ? '−' : '+'}
+                  </span>
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 text-xs sm:text-sm text-[#E8E2D6] leading-relaxed border-t border-[#FAF8F5]/10 pt-3 font-sans">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </motion.section>
+
+      {/* Final Call to Action Box */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="pb-28 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center"
+      >
+        <div className="bg-gradient-to-tr from-[#18181B] via-[#121214] to-[#080607] border border-[#FAF8F5]/25 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-black/60 backdrop-blur-2xl space-y-6 relative overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/25 shadow-xl shadow-[#FF6B6B]/30 flex items-center justify-center text-white font-serif font-bold text-2xl mx-auto">
+            H
+          </div>
+
+          <div className="space-y-2.5 max-w-xl mx-auto">
+            <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#FAF8F5]">
+              Start your career journey with Hirxora today.
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-              Start matching your profile with top jobs, practicing mock interviews, and tracking your pipeline with the AI Placement Agent.
+            <p className="text-sm text-[#E8E2D6] leading-relaxed font-sans">
+              Join students and fresh graduates who use Hirxora to prepare smarter and land dream job offers.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <div className="pt-2">
             <button
               onClick={() => navigate(user ? '/dashboard' : '/register')}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-base transition-all shadow-xl shadow-brand-500/25 cursor-pointer"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#ff5757] hover:to-[#f96155] text-white font-semibold text-sm transition shadow-xl shadow-[#FF6B6B]/35 cursor-pointer active:scale-95"
             >
-              <Sparkles className="w-5 h-5" />
-              <span>{user ? 'Enter Placement Dashboard' : 'Get Started Free'}</span>
+              <span>{user ? 'Open Hirxora Dashboard' : 'Get Started Free'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-10 px-6 text-center text-xs text-slate-500 space-y-3">
-        <div className="flex items-center justify-center gap-2 text-slate-400 font-semibold">
-          <Sparkles className="w-4 h-4 text-brand-400" />
-          <span>AI Placement Agent Platform</span>
+      {/* Minimalist Soft Dark Footer */}
+      <footer className="border-t border-[#FAF8F5]/10 bg-[#080607] backdrop-blur-md py-8 px-6 text-center text-xs text-[#FAF8F5]/50 space-y-3">
+        <div className="flex items-center justify-center gap-2.5 text-[#FAF8F5] font-serif text-sm">
+          <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] flex items-center justify-center text-white font-bold text-[10px]">
+            H
+          </div>
+          <span>Hirxora</span>
         </div>
-        <p>© 2026 AI Placement Agent. Production-ready career copilot engineered with FastAPI, Qdrant, and React.</p>
+        <p className="font-sans text-[#FAF8F5]/60">© 2026 Hirxora • Autonomous Career & Placement Copilot.</p>
       </footer>
     </div>
   );

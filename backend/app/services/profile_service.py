@@ -1,10 +1,13 @@
 import uuid
-from typing import List, Optional
+import logging
+from typing import List, Optional, Any, Dict
 from beanie import PydanticObjectId
 from app.core.exceptions import ResourceNotFoundError
+from app.models.user import UserDocument
 from app.models.profile import (
     ProfileDocument,
     EducationItem,
+    ExperienceItem,
     SkillItem,
     ProjectItem,
     CertificationItem,
@@ -12,11 +15,15 @@ from app.models.profile import (
 from app.schemas.profile import (
     ProfileUpdateRequest,
     EducationCreateRequest,
+    ExperienceCreateRequest,
     SkillCreateRequest,
     ProjectCreateRequest,
     CertificationCreateRequest,
     ProfileResponse,
 )
+from app.schemas.resume import ParsedResumeSchema
+
+logger = logging.getLogger("app.services.profile")
 
 
 class ProfileService:
@@ -24,14 +31,14 @@ class ProfileService:
     def calculate_completion_score(profile: ProfileDocument) -> int:
         score = 0
         
-        # 1. Personal & Contact info (20 points)
+        # 1. Personal & Contact info & Preferences (20 points)
         if profile.full_name and len(profile.full_name.strip()) > 0:
             score += 5
-        if profile.contact_email:
+        if profile.contact_email or profile.phone:
             score += 5
-        if profile.target_roles and len(profile.target_roles) > 0:
+        if (profile.target_roles and len(profile.target_roles) > 0) or profile.location:
             score += 5
-        if profile.preferred_locations and len(profile.preferred_locations) > 0:
+        if (profile.preferred_locations and len(profile.preferred_locations) > 0) or profile.headline or profile.bio:
             score += 5
 
         # 2. Education (20 points)
@@ -49,8 +56,13 @@ class ProfileService:
         if profile.projects and len(profile.projects) > 0:
             score += 25
 
-        # 5. Certifications & Extra links (10 points)
-        if profile.certifications and len(profile.certifications) > 0:
+        # 5. Certifications / Work Experience / Extra links (10 points)
+        if (
+            (profile.certifications and len(profile.certifications) > 0)
+            or (profile.experience and len(profile.experience) > 0)
+            or profile.linkedin_url
+            or profile.github_url
+        ):
             score += 10
 
         return min(score, 100)
@@ -61,15 +73,21 @@ class ProfileService:
             id=str(profile.id),
             user_id=str(profile.user_id),
             full_name=profile.full_name,
+            headline=profile.headline,
+            bio=profile.bio,
             contact_email=profile.contact_email,
             phone=profile.phone,
             location=profile.location,
+            linkedin_url=profile.linkedin_url,
+            github_url=profile.github_url,
+            portfolio_url=profile.portfolio_url,
             target_roles=profile.target_roles,
             preferred_locations=profile.preferred_locations,
             experience_level=profile.experience_level,
             work_preference=profile.work_preference,
             employment_type=profile.employment_type,
             education=profile.education,
+            experience=profile.experience,
             skills=profile.skills,
             projects=profile.projects,
             certifications=profile.certifications,
@@ -79,11 +97,24 @@ class ProfileService:
         )
 
     @classmethod
-    async def get_by_user_id(cls, user_id: PydanticObjectId) -> ProfileResponse:
-        profile = await ProfileDocument.find_one(ProfileDocument.user_id == user_id)
+    async def get_profile(cls, user_id: Any) -> ProfileResponse:
+        """Alias for get_by_user_id with automatic ObjectId casting."""
+        return await cls.get_by_user_id(user_id=user_id)
+
+    @classmethod
+    async def get_by_user_id(cls, user_id: Any) -> ProfileResponse:
+        uid = PydanticObjectId(str(user_id)) if not isinstance(user_id, PydanticObjectId) else user_id
+        profile = await ProfileDocument.find_one(ProfileDocument.user_id == uid)
         if not profile:
             # Auto-create if not present
-            profile = ProfileDocument(user_id=user_id)
+            user = await UserDocument.get(uid)
+            contact_email = user.email if user else None
+            profile = ProfileDocument(
+                user_id=uid,
+                full_name="",
+                contact_email=contact_email,
+            )
+            profile.completion_score = cls.calculate_completion_score(profile)
             await profile.insert()
         return cls.to_profile_response(profile)
 
@@ -102,6 +133,144 @@ class ProfileService:
         profile.completion_score = cls.calculate_completion_score(profile)
         profile.update_timestamp()
         await profile.save()
+        return cls.to_profile_response(profile)
+
+    @classmethod
+    async def sync_full_from_parsed_resume(
+        cls, user_id: PydanticObjectId, parsed: ParsedResumeSchema
+    ) -> ProfileResponse:
+        """
+        Auto-populates candidate profile from a freshly parsed resume.
+        Fills Name, Location, Bio, Headline, Education, Experience, Projects, Skills, and Certifications.
+        """
+        logger.info(f"Auto-syncing full profile from parsed resume for user {user_id}")
+        profile = await ProfileDocument.find_one(ProfileDocument.user_id == user_id)
+        if not profile:
+            profile = ProfileDocument(user_id=user_id)
+            await profile.insert()
+
+        # 1. Update Personal & Contact Info
+        if parsed.full_name and len(parsed.full_name.strip()) > 0:
+            profile.full_name = parsed.full_name.strip()
+
+        if parsed.contact_email:
+            profile.contact_email = parsed.contact_email
+        if parsed.phone:
+            profile.phone = parsed.phone
+        if parsed.location:
+            profile.location = parsed.location
+        if parsed.summary:
+            profile.bio = parsed.summary
+        if parsed.headline:
+            profile.headline = parsed.headline
+        elif parsed.skills and not profile.headline:
+            top_skills = [s.name for s in parsed.skills[:3]]
+            profile.headline = f"Software Engineer | {', '.join(top_skills)}"
+
+        if parsed.linkedin_url:
+            profile.linkedin_url = parsed.linkedin_url
+        if parsed.github_url:
+            profile.github_url = parsed.github_url
+        if parsed.portfolio_url:
+            profile.portfolio_url = parsed.portfolio_url
+
+        # 2. Merge Education
+        if parsed.education:
+            existing_edu_degrees = {e.degree.lower().strip() for e in profile.education}
+            for edu in parsed.education:
+                if edu.degree.lower().strip() not in existing_edu_degrees:
+                    profile.education.append(
+                        EducationItem(
+                            degree=edu.degree,
+                            college=edu.college,
+                            branch=edu.branch,
+                            graduation_year=edu.graduation_year,
+                            cgpa=edu.cgpa,
+                        )
+                    )
+                    existing_edu_degrees.add(edu.degree.lower().strip())
+
+        # 3. Merge Experience
+        if parsed.experience:
+            existing_exp = {(e.company.lower().strip(), e.role.lower().strip()) for e in profile.experience}
+            for exp in parsed.experience:
+                key = (exp.company.lower().strip(), exp.role.lower().strip())
+                if key not in existing_exp:
+                    profile.experience.append(
+                        ExperienceItem(
+                            company=exp.company,
+                            role=exp.role,
+                            duration=exp.duration,
+                            location=exp.location,
+                            highlights=exp.highlights,
+                        )
+                    )
+                    existing_exp.add(key)
+
+        # 4. Merge Skills
+        if parsed.skills:
+            existing_skill_names = {s.name.lower().strip() for s in profile.skills}
+            for s in parsed.skills:
+                if s.name.lower().strip() not in existing_skill_names:
+                    profile.skills.append(
+                        SkillItem(
+                            name=s.name,
+                            category=s.category or "General",
+                            proficiency=s.proficiency or "Intermediate",
+                        )
+                    )
+                    existing_skill_names.add(s.name.lower().strip())
+
+        # 5. Merge Projects
+        if parsed.projects:
+            existing_proj_names = {p.name.lower().strip() for p in profile.projects}
+            for proj in parsed.projects:
+                if proj.name.lower().strip() not in existing_proj_names:
+                    profile.projects.append(
+                        ProjectItem(
+                            name=proj.name,
+                            description=proj.description,
+                            technologies=proj.technologies,
+                            github_url=proj.github_url,
+                            live_url=proj.live_url,
+                            role=proj.role or "Developer",
+                        )
+                    )
+                    existing_proj_names.add(proj.name.lower().strip())
+
+        # 6. Merge Certifications
+        if parsed.certifications:
+            existing_cert_names = {c.name.lower().strip() for c in profile.certifications}
+            for cert in parsed.certifications:
+                if cert.name.lower().strip() not in existing_cert_names:
+                    profile.certifications.append(
+                        CertificationItem(
+                            name=cert.name,
+                            issuer=cert.issuer,
+                            issue_date=cert.issue_date,
+                            credential_url=cert.credential_url,
+                        )
+                    )
+                    existing_cert_names.add(cert.name.lower().strip())
+
+        # Auto-infer target roles if empty
+        if not profile.target_roles and parsed.skills:
+            skill_names = [s.name.lower() for s in parsed.skills]
+            inferred = []
+            if any(k in skill_names for k in ["python", "fastapi", "django", "flask", "node", "java", "golang"]):
+                inferred.append("Backend Developer")
+            if any(k in skill_names for k in ["react", "vue", "angular", "next.js", "typescript", "tailwind"]):
+                inferred.append("Frontend Developer")
+            if any(k in skill_names for k in ["pytorch", "tensorflow", "machine learning", "rag", "llm", "deep learning"]):
+                inferred.append("AI / ML Engineer")
+            if not inferred:
+                inferred = ["Software Engineer"]
+            profile.target_roles = inferred
+
+        profile.completion_score = cls.calculate_completion_score(profile)
+        profile.update_timestamp()
+        await profile.save()
+        logger.info(f"Profile auto-built successfully for {user_id}. Completion score: {profile.completion_score}%")
         return cls.to_profile_response(profile)
 
     # ------------------- Nested Array Operations -------------------
@@ -133,6 +302,38 @@ class ProfileService:
             raise ResourceNotFoundError("Profile")
 
         profile.education = [e for e in profile.education if e.id != item_id]
+        profile.completion_score = cls.calculate_completion_score(profile)
+        profile.update_timestamp()
+        await profile.save()
+        return cls.to_profile_response(profile)
+
+    @classmethod
+    async def add_experience(cls, user_id: PydanticObjectId, req: ExperienceCreateRequest) -> ProfileResponse:
+        profile = await ProfileDocument.find_one(ProfileDocument.user_id == user_id)
+        if not profile:
+            raise ResourceNotFoundError("Profile")
+
+        item = ExperienceItem(
+            id=str(uuid.uuid4()),
+            company=req.company,
+            role=req.role,
+            duration=req.duration,
+            location=req.location,
+            highlights=req.highlights,
+        )
+        profile.experience.append(item)
+        profile.completion_score = cls.calculate_completion_score(profile)
+        profile.update_timestamp()
+        await profile.save()
+        return cls.to_profile_response(profile)
+
+    @classmethod
+    async def delete_experience(cls, user_id: PydanticObjectId, item_id: str) -> ProfileResponse:
+        profile = await ProfileDocument.find_one(ProfileDocument.user_id == user_id)
+        if not profile:
+            raise ResourceNotFoundError("Profile")
+
+        profile.experience = [e for e in profile.experience if e.id != item_id]
         profile.completion_score = cls.calculate_completion_score(profile)
         profile.update_timestamp()
         await profile.save()

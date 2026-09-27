@@ -121,23 +121,10 @@ export const MockInterviewArenaPage: React.FC = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'PROJECT_DEEP_DIVE':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-      case 'SYSTEM_DESIGN':
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
-      case 'BEHAVIORAL_STAR':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-      case 'TECHNICAL':
-      default:
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+      <div className="py-24 flex items-center justify-center text-[#FAF8F5] font-mono text-sm gap-2">
+        <div className="w-3 h-3 rounded-full bg-[#FAF8F5] animate-ping" />
         Loading interview simulation arena...
       </div>
     );
@@ -145,12 +132,12 @@ export const MockInterviewArenaPage: React.FC = () => {
 
   if (error || !interview) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 space-y-4">
-        <AlertCircle className="w-12 h-12 text-red-400" />
-        <p className="text-white text-lg font-semibold">{error || 'Interview session not found.'}</p>
+      <div className="py-20 flex flex-col items-center justify-center p-4 space-y-4 text-center text-[#FAF8F5]">
+        <AlertCircle className="w-10 h-10 text-rose-400" />
+        <p className="text-white text-base font-semibold">{error || 'Interview session not found.'}</p>
         <button
           onClick={() => navigate('/interviews')}
-          className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 text-sm"
+          className="px-4 py-2 rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE0] text-black font-semibold text-xs transition shadow-md shadow-white/10 cursor-pointer active:scale-95"
         >
           Back to Interviews
         </button>
@@ -163,335 +150,337 @@ export const MockInterviewArenaPage: React.FC = () => {
   const wordCount = candidateAnswer.trim() ? candidateAnswer.trim().split(/\s+/).length : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Top Navigation & Status Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 backdrop-blur-xl">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/interviews')}
-              className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div>
-              <h1 className="text-lg font-bold text-white">{interview.title}</h1>
-              <p className="text-xs text-slate-400">
-                {interview.target_role} • {interview.experience_level}
-              </p>
-            </div>
+    <div className="space-y-6 pb-16 text-[#FAF8F5]">
+      {/* Top Navigation & Status Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#121214] border border-[#FAF8F5]/20 rounded-2xl p-4 sm:p-5 backdrop-blur-xl">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/interviews')}
+            className="p-2 rounded-xl bg-[#18181B] border border-[#FAF8F5]/20 text-neutral-400 hover:text-white hover:border-[#FAF8F5]/50 transition-all cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#FAF8F5]" />
+          </button>
+          <div>
+            <h1 className="text-base sm:text-lg font-serif font-normal text-white">{interview.title}</h1>
+            <p className="text-xs text-[#FAF8F5]/70 font-mono">
+              {interview.target_role} • {interview.experience_level}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Timer */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#18181B] border border-[#FAF8F5]/20 text-[#FAF8F5] font-mono text-xs">
+            <Timer className="w-3.5 h-3.5 text-[#FAF8F5]" />
+            <span>{formatTimer(secondsElapsed)}</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Timer */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-mono text-sm">
-              <Timer className="w-4 h-4 text-purple-400" />
-              <span>{formatTimer(secondsElapsed)}</span>
-            </div>
+          {/* Status Badge */}
+          <span
+            className={`px-3 py-1 rounded-xl text-xs font-mono font-medium border ${
+              isCompleted
+                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                : 'bg-[#FAF8F5]/15 text-[#FAF8F5] border-[#FAF8F5]/30'
+            }`}
+          >
+            {isCompleted ? 'Completed' : `Question ${activeQuestionIdx + 1} of ${interview.total_questions}`}
+          </span>
+        </div>
+      </div>
 
-            {/* Status Badge */}
-            <span
-              className={`px-3 py-1 rounded-xl text-xs font-semibold border ${
-                isCompleted
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+      {/* Question Selector Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {interview.questions.map((q, idx) => {
+          const isAnswered = q.candidate_answer !== null && q.candidate_answer !== undefined;
+          const isCurrent = idx === activeQuestionIdx;
+
+          return (
+            <button
+              key={q.question_id}
+              onClick={() => handleSelectQuestion(idx)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
+                isCurrent
+                  ? 'bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] text-white font-semibold shadow-md shadow-[#FF6B6B]/25'
+                  : isAnswered
+                  ? 'bg-[#121214] border border-[#FAF8F5]/30 text-white hover:border-[#FAF8F5]/60'
+                  : 'bg-[#18181B] border border-[#FAF8F5]/15 text-neutral-400 hover:text-white'
               }`}
             >
-              {isCompleted ? 'Completed' : `Question ${activeQuestionIdx + 1} of ${interview.total_questions}`}
-            </span>
-          </div>
-        </div>
+              {isAnswered && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+              <span>Q{idx + 1}: {q.category.replace('_', ' ')}</span>
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Question Selector Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {interview.questions.map((q, idx) => {
-            const isAnswered = q.candidate_answer !== null && q.candidate_answer !== undefined;
-            const isCurrent = idx === activeQuestionIdx;
+      {/* Final Scoreboard Banner (If Completed) */}
+      {isCompleted && interview.overall_score !== null && (
+        <div className="bg-[#121214] border border-[#FAF8F5]/25 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-in fade-in duration-300 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
 
-            return (
-              <button
-                key={q.question_id}
-                onClick={() => handleSelectQuestion(idx)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 ${
-                  isCurrent
-                    ? 'bg-purple-600 border-purple-500 text-white shadow-md shadow-purple-600/20'
-                    : isAnswered
-                    ? 'bg-slate-900 border-slate-800 text-emerald-400 hover:border-slate-700'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {isAnswered && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                <span>Q{idx + 1}: {q.category.replace('_', ' ')}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Final Scoreboard Banner (If Completed) */}
-        {isCompleted && interview.overall_score !== null && (
-          <div className="bg-gradient-to-r from-purple-950/40 via-slate-900 to-indigo-950/40 border border-purple-500/30 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 uppercase tracking-wide">
-                  <Award className="w-4 h-4" /> Final Session Diagnostic
-                </div>
-                <h2 className="text-2xl font-black text-white">Interview Performance Scorecard</h2>
-                <p className="text-slate-300 text-sm max-w-2xl">{interview.summary_feedback}</p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#FAF8F5]/80 uppercase tracking-wider">
+                <Award className="w-4 h-4 text-[#FAF8F5]" /> Final Session Diagnostic
               </div>
-
-              <div className="flex items-center gap-4">
-                <div className="bg-slate-950/80 p-4 rounded-xl border border-purple-500/30 text-center min-w-[120px]">
-                  <p className="text-[11px] text-slate-400 uppercase font-semibold">Overall Score</p>
-                  <p className="text-3xl font-black text-emerald-400 font-mono mt-1">
-                    {interview.overall_score}%
-                  </p>
-                </div>
-                <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-center">
-                  <p className="text-[11px] text-slate-400 uppercase font-semibold">Technical Avg</p>
-                  <p className="text-xl font-bold text-indigo-400 font-mono mt-1">
-                    {interview.technical_score_avg}/10
-                  </p>
-                </div>
-                <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-center">
-                  <p className="text-[11px] text-slate-400 uppercase font-semibold">Communication</p>
-                  <p className="text-xl font-bold text-purple-400 font-mono mt-1">
-                    {interview.communication_score_avg}/10
-                  </p>
-                </div>
-              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif font-normal text-white">
+                Interview Performance Scorecard
+              </h2>
+              <p className="text-neutral-300 text-sm max-w-2xl leading-relaxed font-sans">{interview.summary_feedback}</p>
             </div>
 
-            {/* Strengths & Improvement Areas Chips */}
-            <div className="pt-3 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="font-semibold text-emerald-400 flex items-center gap-1.5 mb-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Key Strengths Observed:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {interview.strengths.map((s, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded bg-slate-950 text-slate-300 border border-slate-800">
-                      {s}
-                    </span>
-                  ))}
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-[#18181B] p-4 rounded-2xl border border-[#FAF8F5]/20 text-center min-w-[120px]">
+                <p className="text-[10px] text-[#FAF8F5]/70 uppercase font-mono tracking-wider">Overall Score</p>
+                <p className="text-3xl font-bold text-[#FAF8F5] font-mono mt-1">
+                  {interview.overall_score}%
+                </p>
               </div>
-
-              <div>
-                <span className="font-semibold text-amber-400 flex items-center gap-1.5 mb-1.5">
-                  <TrendingUp className="w-3.5 h-3.5" /> Recommended Focus Areas:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {interview.improvement_areas.map((imp, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded bg-slate-950 text-slate-300 border border-slate-800">
-                      {imp}
-                    </span>
-                  ))}
-                </div>
+              <div className="bg-[#18181B] p-4 rounded-2xl border border-[#FAF8F5]/20 text-center">
+                <p className="text-[10px] text-neutral-400 uppercase font-mono tracking-wider">Technical</p>
+                <p className="text-xl font-bold text-white font-mono mt-1">
+                  {interview.technical_score_avg}/10
+                </p>
+              </div>
+              <div className="bg-[#18181B] p-4 rounded-2xl border border-[#FAF8F5]/20 text-center">
+                <p className="text-[10px] text-neutral-400 uppercase font-mono tracking-wider">Communication</p>
+                <p className="text-xl font-bold text-white font-mono mt-1">
+                  {interview.communication_score_avg}/10
+                </p>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Active Question & Interactive Arena */}
-        {currentQ && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column: Question Prompt & Details */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-xl space-y-4">
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getCategoryColor(
-                      currentQ.category
-                    )}`}
-                  >
-                    <BrainCircuit className="w-3.5 h-3.5" />
-                    {currentQ.category.replace('_', ' ')}
+          {/* Strengths & Improvement Areas Chips */}
+          <div className="pt-4 border-t border-[#FAF8F5]/10 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs relative z-10">
+            <div>
+              <span className="font-mono text-[#FAF8F5]/80 flex items-center gap-1.5 mb-2 font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Key Strengths Observed:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {interview.strengths.map((s, i) => (
+                  <span key={i} className="px-2.5 py-1 rounded-lg bg-[#18181B] text-neutral-300 border border-[#FAF8F5]/15 font-mono text-[11px]">
+                    {s}
                   </span>
-                  <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-                    Difficulty: <strong className="text-purple-400">{currentQ.difficulty}</strong>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <span className="font-mono text-[#FAF8F5]/80 flex items-center gap-1.5 mb-2 font-medium">
+                <TrendingUp className="w-3.5 h-3.5 text-[#FAF8F5]" /> Recommended Focus Areas:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {interview.improvement_areas.map((imp, i) => (
+                  <span key={i} className="px-2.5 py-1 rounded-lg bg-[#18181B] text-neutral-300 border border-[#FAF8F5]/15 font-mono text-[11px]">
+                    {imp}
                   </span>
-                </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-                {currentQ.context_or_scenario && (
-                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 leading-relaxed">
-                    <strong className="text-slate-400 uppercase text-[10px] tracking-wider block mb-1">
-                      Context / Scenario:
-                    </strong>
-                    {currentQ.context_or_scenario}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-white leading-snug">
-                    {currentQ.question}
-                  </h3>
-                </div>
-
-                {currentQ.expected_concepts && currentQ.expected_concepts.length > 0 && (
-                  <div className="pt-3 border-t border-slate-800 space-y-1.5">
-                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                      Expected Focus Topics:
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {currentQ.expected_concepts.map((concept, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800 text-xs"
-                        >
-                          {concept}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+      {/* Active Question & Interactive Arena */}
+      {currentQ && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column: Question Prompt & Details */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl p-6 backdrop-blur-xl space-y-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
+                  <BrainCircuit className="w-3.5 h-3.5 text-[#FAF8F5]" />
+                  {currentQ.category.replace('_', ' ')}
+                </span>
+                <span className="text-xs text-[#FAF8F5]/70 font-mono uppercase tracking-wider">
+                  Difficulty: <strong className="text-white">{currentQ.difficulty}</strong>
+                </span>
               </div>
 
-              {/* STAR Framework Helper Box for Behavioral Questions */}
-              {currentQ.category === 'BEHAVIORAL_STAR' && (
-                <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 text-xs text-slate-300 space-y-2">
-                  <div className="flex items-center gap-2 text-amber-400 font-semibold">
-                    <HelpCircle className="w-4 h-4" /> STAR Framework Tip
+              {currentQ.context_or_scenario && (
+                <div className="p-3.5 rounded-2xl bg-[#18181B] border border-[#FAF8F5]/15 text-xs text-neutral-300 leading-relaxed font-sans">
+                  <strong className="text-[#FAF8F5]/80 uppercase font-mono text-[10px] tracking-wider block mb-1">
+                    Context / Scenario:
+                  </strong>
+                  {currentQ.context_or_scenario}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <h3 className="text-lg font-serif font-normal text-white leading-relaxed">
+                  {currentQ.question}
+                </h3>
+              </div>
+
+              {currentQ.expected_concepts && currentQ.expected_concepts.length > 0 && (
+                <div className="pt-3 border-t border-[#FAF8F5]/10 space-y-1.5">
+                  <p className="text-[10px] font-mono text-[#FAF8F5]/70 uppercase tracking-wider">
+                    Expected Focus Topics:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {currentQ.expected_concepts.map((concept, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded-md bg-[#18181B] text-neutral-300 border border-[#FAF8F5]/20 font-mono text-[11px]"
+                      >
+                        {concept}
+                      </span>
+                    ))}
                   </div>
-                  <ul className="space-y-1 text-slate-400 pl-4 list-disc">
-                    <li><strong>Situation:</strong> Briefly set the scene and context.</li>
-                    <li><strong>Task:</strong> What was your exact responsibility?</li>
-                    <li><strong>Action:</strong> What specific steps and tools did you use?</li>
-                    <li><strong>Result:</strong> What was the measurable positive outcome?</li>
-                  </ul>
                 </div>
               )}
             </div>
 
-            {/* Right Column: Candidate Answer Input & Real-Time Rubric Evaluation */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-xl space-y-4">
-                <form onSubmit={handleSubmitAnswer} className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Your Answer
-                    </label>
-                    <span className="text-xs text-slate-500 font-mono">
-                      {wordCount} words • {candidateAnswer.length} chars
-                    </span>
-                  </div>
-
-                  <textarea
-                    rows={6}
-                    required
-                    value={candidateAnswer}
-                    onChange={(e) => setCandidateAnswer(e.target.value)}
-                    placeholder="Type your structured technical answer or STAR explanation here..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-slate-200 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 leading-relaxed font-sans"
-                  />
-
-                  <div className="flex items-center justify-between pt-2">
-                    <p className="text-[11px] text-slate-500">
-                      Answer will be scored against Technical correctness, Depth, and Communication.
-                    </p>
-                    <button
-                      type="submit"
-                      disabled={submitting || !candidateAnswer.trim()}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-all shadow-md disabled:opacity-50 cursor-pointer"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      {submitting ? 'Evaluating Rubric...' : currentEval ? 'Re-evaluate Answer' : 'Submit Answer'}
-                    </button>
-                  </div>
-                </form>
+            {/* STAR Framework Helper Box for Behavioral Questions */}
+            {currentQ.category === 'BEHAVIORAL_STAR' && (
+              <div className="bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl p-5 text-xs text-neutral-300 space-y-2">
+                <div className="flex items-center gap-2 text-[#FAF8F5] font-mono text-xs font-medium">
+                  <HelpCircle className="w-4 h-4 text-[#FAF8F5]" /> STAR Framework Tip
+                </div>
+                <ul className="space-y-1 text-neutral-400 pl-4 list-disc font-sans text-xs">
+                  <li><strong className="text-white">Situation:</strong> Briefly set the scene and context.</li>
+                  <li><strong className="text-white">Task:</strong> What was your exact responsibility?</li>
+                  <li><strong className="text-white">Action:</strong> What specific steps and tools did you use?</li>
+                  <li><strong className="text-white">Result:</strong> What was the measurable positive outcome?</li>
+                </ul>
               </div>
+            )}
+          </div>
 
-              {/* Instant Rubric Evaluation Card */}
-              {currentEval && (
-                <div className="bg-slate-900/90 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-xl shadow-xl space-y-5 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-base font-bold text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      AI Rubric Evaluation
-                    </h4>
-                  </div>
+          {/* Right Column: Candidate Answer Input & Real-Time Rubric Evaluation */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl p-6 backdrop-blur-xl space-y-4">
+              <form onSubmit={handleSubmitAnswer} className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono text-[#FAF8F5]/70 uppercase tracking-wider">
+                    Your Response
+                  </label>
+                  <span className="text-xs text-neutral-500 font-mono">
+                    {wordCount} words • {candidateAnswer.length} chars
+                  </span>
+                </div>
 
-                  {/* 3 Scoring Dials */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
-                      <p className="text-[10px] text-slate-400 uppercase font-semibold">Technical</p>
-                      <p className="text-lg font-bold text-emerald-400 font-mono mt-0.5">
-                        {currentEval.technical_score}/10
-                      </p>
-                    </div>
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
-                      <p className="text-[10px] text-slate-400 uppercase font-semibold">Depth</p>
-                      <p className="text-lg font-bold text-indigo-400 font-mono mt-0.5">
-                        {currentEval.depth_score}/10
-                      </p>
-                    </div>
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
-                      <p className="text-[10px] text-slate-400 uppercase font-semibold">Structure</p>
-                      <p className="text-lg font-bold text-purple-400 font-mono mt-0.5">
-                        {currentEval.communication_score}/10
-                      </p>
-                    </div>
-                  </div>
+                <textarea
+                  rows={6}
+                  required
+                  value={candidateAnswer}
+                  onChange={(e) => setCandidateAnswer(e.target.value)}
+                  placeholder="Type your structured technical answer or STAR explanation here..."
+                  className="w-full bg-[#18181B] border border-[#FAF8F5]/20 rounded-2xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-[#FAF8F5] leading-relaxed font-sans"
+                />
 
-                  {/* Actionable Feedback */}
-                  <div className="p-3.5 rounded-xl bg-purple-500/5 border border-purple-500/20 text-xs text-slate-300 leading-relaxed">
-                    <strong className="text-purple-300 block mb-1">Feedback & Coaching:</strong>
-                    {currentEval.actionable_feedback}
-                  </div>
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-[11px] text-neutral-500 font-mono">
+                    Scored on Technical Accuracy, Depth & Communication.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={submitting || !candidateAnswer.trim()}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white font-semibold text-xs transition-all shadow-md shadow-[#FF6B6B]/25 disabled:opacity-50 cursor-pointer active:scale-95"
+                  >
+                    <Send className="w-3.5 h-3.5 text-white" />
+                    {submitting ? 'Evaluating Rubric...' : currentEval ? 'Re-evaluate Answer' : 'Submit Answer'}
+                  </button>
+                </div>
+              </form>
+            </div>
 
-                  {/* Strengths & Missing Points */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    {currentEval.key_strengths && currentEval.key_strengths.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="font-semibold text-emerald-400">Strengths:</span>
-                        <ul className="space-y-0.5 text-slate-400 pl-3 list-disc">
-                          {currentEval.key_strengths.map((s, i) => (
-                            <li key={i}>{s}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+            {/* Instant Rubric Evaluation Card */}
+            {currentEval && (
+              <div className="bg-[#121214] border border-[#FAF8F5]/25 rounded-3xl p-6 sm:p-7 backdrop-blur-xl shadow-xl space-y-5 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-base font-serif font-normal text-white flex items-center gap-2">
+                    <span className="p-1 rounded bg-[#FAF8F5]/10">
+                      <Sparkles className="w-3.5 h-3.5 text-[#FAF8F5]" />
+                    </span>
+                    AI Rubric Evaluation
+                  </h4>
+                </div>
 
-                    {currentEval.missing_concepts && currentEval.missing_concepts.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="font-semibold text-amber-400">Consider Mentioning:</span>
-                        <ul className="space-y-0.5 text-slate-400 pl-3 list-disc">
-                          {currentEval.missing_concepts.map((m, i) => (
-                            <li key={i}>{m}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Expandable Ideal Response */}
-                  <details className="bg-slate-950 rounded-xl p-3.5 border border-slate-800 text-xs text-slate-300">
-                    <summary className="font-semibold text-purple-400 cursor-pointer select-none">
-                      View Model Answer
-                    </summary>
-                    <p className="mt-2 text-slate-300 leading-relaxed whitespace-pre-line font-mono text-[11px]">
-                      {currentEval.ideal_sample_response}
+                {/* 3 Scoring Dials */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-[#18181B] p-3.5 rounded-2xl border border-[#FAF8F5]/15 text-center">
+                    <p className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider">Technical</p>
+                    <p className="text-lg font-bold text-[#FAF8F5] font-mono mt-0.5">
+                      {currentEval.technical_score}/10
                     </p>
-                  </details>
+                  </div>
+                  <div className="bg-[#18181B] p-3.5 rounded-2xl border border-[#FAF8F5]/15 text-center">
+                    <p className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider">Depth</p>
+                    <p className="text-lg font-bold text-[#FAF8F5] font-mono mt-0.5">
+                      {currentEval.depth_score}/10
+                    </p>
+                  </div>
+                  <div className="bg-[#18181B] p-3.5 rounded-2xl border border-[#FAF8F5]/15 text-center">
+                    <p className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider">Structure</p>
+                    <p className="text-lg font-bold text-[#FAF8F5] font-mono mt-0.5">
+                      {currentEval.communication_score}/10
+                    </p>
+                  </div>
+                </div>
 
-                  {/* Next Question Navigation */}
-                  {activeQuestionIdx < interview.total_questions - 1 && (
-                    <div className="pt-2 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleSelectQuestion(activeQuestionIdx + 1)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all cursor-pointer"
-                      >
-                        <span>Next Question (Q{activeQuestionIdx + 2})</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                {/* Actionable Feedback */}
+                <div className="p-4 rounded-2xl bg-[#18181B] border border-[#FAF8F5]/15 text-xs text-neutral-300 leading-relaxed">
+                  <strong className="text-[#FAF8F5]/80 block mb-1 font-mono uppercase text-[10px] tracking-wider">
+                    Feedback & Coaching:
+                  </strong>
+                  {currentEval.actionable_feedback}
+                </div>
+
+                {/* Strengths & Missing Points */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {currentEval.key_strengths && currentEval.key_strengths.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="font-mono text-emerald-400 text-xs font-medium">Strengths:</span>
+                      <ul className="space-y-0.5 text-neutral-400 pl-3 list-disc">
+                        {currentEval.key_strengths.map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {currentEval.missing_concepts && currentEval.missing_concepts.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="font-mono text-[#FAF8F5] text-xs font-medium">Consider Mentioning:</span>
+                      <ul className="space-y-0.5 text-neutral-400 pl-3 list-disc">
+                        {currentEval.missing_concepts.map((m, i) => (
+                          <li key={i}>{m}</li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </div>
-              )}
-            </div>
+
+                {/* Expandable Ideal Response */}
+                <details className="bg-[#18181B] rounded-2xl p-4 border border-[#FAF8F5]/15 text-xs text-neutral-300">
+                  <summary className="font-mono text-[#FAF8F5] text-xs font-medium cursor-pointer select-none hover:text-white transition-colors">
+                    View Ideal Model Answer
+                  </summary>
+                  <p className="mt-3 text-neutral-300 leading-relaxed whitespace-pre-line font-mono text-[11px]">
+                    {currentEval.ideal_sample_response}
+                  </p>
+                </details>
+
+                {/* Next Question Navigation */}
+                {activeQuestionIdx < interview.total_questions - 1 && (
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectQuestion(activeQuestionIdx + 1)}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white text-xs font-semibold transition-all shadow-md shadow-[#FF6B6B]/25 cursor-pointer active:scale-95"
+                    >
+                      <span>Next Question (Q{activeQuestionIdx + 2})</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

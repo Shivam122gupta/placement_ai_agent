@@ -12,6 +12,22 @@ CANDIDATE_MEMORY_COLLECTION = "candidate_memory"
 JOB_VECTORS_COLLECTION = "job_vectors"
 
 _qdrant_client: Optional[QdrantClient] = None
+_local_fallback_client: Optional[QdrantClient] = None
+
+
+def get_local_fallback_client() -> QdrantClient:
+    """Returns a local embedded / in-memory Qdrant client fallback."""
+    global _local_fallback_client
+    if _local_fallback_client is not None:
+        return _local_fallback_client
+    try:
+        storage_path = os.path.join(os.getcwd(), "storage", "qdrant_data")
+        os.makedirs(storage_path, exist_ok=True)
+        _local_fallback_client = QdrantClient(path=storage_path)
+    except Exception:
+        _local_fallback_client = QdrantClient(":memory:")
+    ensure_collections(_local_fallback_client)
+    return _local_fallback_client
 
 
 def get_qdrant_client() -> QdrantClient:
@@ -42,14 +58,10 @@ def get_qdrant_client() -> QdrantClient:
                 _qdrant_client = test_client
                 logger.info("Connected to local Qdrant server at %s", settings.QDRANT_URL)
             except Exception:
-                # Use local persistent storage directory for standalone embedded Qdrant
-                storage_path = os.path.join(os.getcwd(), "storage", "qdrant")
-                os.makedirs(storage_path, exist_ok=True)
-                _qdrant_client = QdrantClient(path=storage_path)
-                logger.info("Initialized local persistent Qdrant at %s", storage_path)
+                _qdrant_client = get_local_fallback_client()
     except Exception as e:
-        logger.warning("Falling back to in-memory Qdrant instance due to: %s", e)
-        _qdrant_client = QdrantClient(":memory:")
+        logger.warning("Falling back to local Qdrant instance due to: %s", e)
+        _qdrant_client = get_local_fallback_client()
 
     ensure_collections(_qdrant_client)
     return _qdrant_client

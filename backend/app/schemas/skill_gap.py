@@ -1,5 +1,5 @@
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import List, Optional, Any
+from pydantic import BaseModel, Field, model_validator
 
 
 class RoadmapMilestoneSchema(BaseModel):
@@ -17,6 +17,21 @@ class RoadmapGenerateRequest(BaseModel):
     target_role: Optional[str] = "Software Engineer"
     duration_type: str = Field(default="2_weeks", description="'1_week', '2_weeks', or '1_month'")
     custom_gap_skills: Optional[List[str]] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_request(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            dt = str(data.get("duration_type", "")).lower()
+            if "1" in dt and "week" in dt:
+                data["duration_type"] = "1_week"
+            elif "month" in dt:
+                data["duration_type"] = "1_month"
+            elif "2" in dt or "week" in dt:
+                data["duration_type"] = "2_weeks"
+            else:
+                data["duration_type"] = "2_weeks"
+        return data
 
 
 class SkillGapRoadmapResponse(BaseModel):

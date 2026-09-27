@@ -67,10 +67,10 @@ export const ResumeUploadZone: React.FC<Props> = ({ onUpload, isUploading }) => 
         onDragOver={handleDrag}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center rounded-3xl border-2 border-dashed p-8 transition cursor-pointer ${
+        className={`relative flex flex-col items-center justify-center rounded-3xl border border-dashed p-8 md:p-10 transition-all duration-300 cursor-pointer ${
           dragActive
-            ? 'border-brand-400 bg-brand-500/10 shadow-xl shadow-brand-500/10'
-            : 'border-gray-800 bg-[#111827]/70 hover:border-gray-700 hover:bg-[#111827]'
+            ? 'border-[#FAF8F5] bg-white/10 shadow-2xl shadow-white/10 scale-[1.01]'
+            : 'border-[#FAF8F5]/20 bg-[#121214] hover:border-[#FAF8F5]/40 hover:bg-white/[0.03] backdrop-blur-xl'
         }`}
       >
         <input
@@ -82,36 +82,36 @@ export const ResumeUploadZone: React.FC<Props> = ({ onUpload, isUploading }) => 
           disabled={isUploading}
         />
 
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-400 border border-brand-500/20 shadow-md">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-[#FAF8F5] border border-white/15 shadow-lg shadow-white/5">
           {isUploading ? (
-            <div className="h-6 w-6 animate-spin rounded-full border-3 border-brand-500 border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-[#FAF8F5]" />
           ) : (
-            <UploadCloud className="h-7 w-7" />
+            <UploadCloud className="h-7 w-7 text-[#FAF8F5]" />
           )}
         </div>
 
-        <div className="mt-4 text-center">
-          <h3 className="text-base font-bold text-white">
-            {isUploading ? 'Extracting Resume Intelligence...' : 'Upload your Resume'}
+        <div className="mt-5 text-center">
+          <h3 className="text-sm md:text-base font-semibold text-white">
+            {isUploading ? 'Extracting Resume Intelligence...' : 'Upload your Candidate Resume'}
           </h3>
-          <p className="mt-1 text-xs text-gray-400">
-            Drag and drop your file here, or <span className="font-semibold text-brand-400">browse</span>
+          <p className="mt-1.5 text-xs text-neutral-300">
+            Drag & drop PDF / DOCX here, or <span className="font-semibold text-[#FAF8F5] underline underline-offset-4">browse files</span>
           </p>
-          <div className="mt-3 flex items-center justify-center gap-4 text-[11px] text-gray-500">
-            <span>Supported: <strong>PDF, DOCX</strong></span>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-[10px] font-mono text-neutral-400">
+            <span className="rounded-md bg-white/10 px-2 py-0.5 border border-white/15 text-[#FAF8F5]">PDF, DOCX</span>
             <span>•</span>
-            <span>Max Size: <strong>10MB</strong></span>
+            <span className="rounded-md bg-white/10 px-2 py-0.5 border border-white/15 text-[#FAF8F5]">Max 10MB</span>
             <span>•</span>
-            <span className="flex items-center gap-1 text-emerald-400">
-              <Sparkles className="h-3 w-3" />
-              <span>Auto-Extraction</span>
+            <span className="flex items-center gap-1 text-white">
+              <Sparkles className="h-3 w-3 text-[#FAF8F5]" />
+              <span>Auto-Profile Sync</span>
             </span>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400">
+        <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 p-3.5 text-xs text-rose-400">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -119,3 +119,4 @@ export const ResumeUploadZone: React.FC<Props> = ({ onUpload, isUploading }) => 
     </div>
   );
 };
+

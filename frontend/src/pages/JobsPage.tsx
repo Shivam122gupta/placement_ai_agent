@@ -34,36 +34,36 @@ export const JobsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
+    <div className="space-y-8 max-w-7xl mx-auto pb-12 text-[#FAF8F5]">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#FAF8F5]/10 pb-6">
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-indigo-100 to-indigo-400">
-              Live Job Intelligence
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-serif font-normal text-white">
+              Job Intelligence
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
               Verified Pipeline
             </span>
           </div>
-          <p className="text-slate-400 text-sm mt-1">
-            Browse ingested internships and entry-level positions with real-time requirement parsing.
+          <p className="text-[#E8E2D6]/75 text-xs mt-1">
+            Browse ingested internships and developer positions with real-time requirement parsing.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsAnalyzerOpen(true)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium py-2.5 px-5 rounded-xl shadow-lg shadow-purple-600/20 transition-all duration-200 text-sm"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white font-semibold py-2 px-4 rounded-xl shadow-md shadow-[#FF6B6B]/25 transition-all text-xs cursor-pointer active:scale-95"
           >
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-3.5 w-3.5 text-white" />
             <span>Analyze Custom JD</span>
           </button>
 
           <button
             onClick={() => fetchJobs()}
             disabled={loading}
-            className="p-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 transition-colors disabled:opacity-50"
+            className="p-2 rounded-xl border border-[#FAF8F5]/20 bg-[#121214] hover:bg-[#FAF8F5]/10 text-[#FAF8F5] hover:text-white transition disabled:opacity-50 cursor-pointer"
             title="Refresh Listings"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -76,40 +76,40 @@ export const JobsPage: React.FC = () => {
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center space-x-3 text-red-400 text-sm">
-          <AlertCircle className="h-5 w-5 shrink-0" />
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center space-x-3 text-rose-300 text-xs">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Job Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3, 4, 5, 6].map((n) => (
             <div
               key={n}
-              className="h-64 rounded-2xl bg-slate-900/40 border border-slate-800/80 animate-pulse p-6"
+              className="h-64 rounded-3xl bg-[#121214] border border-[#FAF8F5]/15 animate-pulse p-6"
             />
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center max-w-lg mx-auto">
-          <div className="h-16 w-16 mx-auto rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-400 mb-4">
-            <Briefcase className="h-8 w-8" />
+        <div className="bg-[#121214] border border-[#FAF8F5]/15 rounded-3xl p-12 text-center max-w-lg mx-auto backdrop-blur-xl">
+          <div className="h-14 w-14 mx-auto rounded-2xl bg-[#FAF8F5]/10 border border-[#FAF8F5]/20 flex items-center justify-center text-[#FAF8F5] mb-4">
+            <Briefcase className="h-7 w-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-200">No Jobs Found</h3>
-          <p className="text-slate-400 text-sm mt-1 mb-6">
+          <h3 className="text-sm font-semibold text-white">No Jobs Found</h3>
+          <p className="text-[#E8E2D6]/75 text-xs mt-1 mb-5">
             Try tweaking your search keywords or location filters.
           </p>
           <button
             onClick={() => fetchJobs()}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-colors"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white font-semibold text-xs transition cursor-pointer shadow-md shadow-[#FF6B6B]/25 active:scale-95"
           >
             Reset Filters
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {jobs.map((job) => (
             <JobCard key={job.id} job={job} />
           ))}

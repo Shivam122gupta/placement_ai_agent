@@ -7,6 +7,15 @@ export interface Education {
   cgpa?: number;
 }
 
+export interface Experience {
+  id: string;
+  company: string;
+  role: string;
+  duration?: string;
+  location?: string;
+  highlights: string[];
+}
+
 export interface Skill {
   id: string;
   name: string;
@@ -36,15 +45,21 @@ export interface Profile {
   id: string;
   user_id: string;
   full_name: string;
+  headline?: string;
+  bio?: string;
   contact_email?: string;
   phone?: string;
   location?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
   target_roles: string[];
   preferred_locations: string[];
   experience_level: string;
   work_preference: string;
   employment_type: string;
   education: Education[];
+  experience: Experience[];
   skills: Skill[];
   projects: Project[];
   certifications: Certification[];

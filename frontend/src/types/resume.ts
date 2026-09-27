@@ -43,11 +43,13 @@ export interface ParsedCertification {
 
 export interface ParsedResumeData {
   full_name?: string;
+  headline?: string;
   contact_email?: string;
   phone?: string;
   location?: string;
   linkedin_url?: string;
   github_url?: string;
+  portfolio_url?: string;
   summary?: string;
   education: ParsedEducation[];
   skills: ParsedSkill[];
@@ -75,5 +77,6 @@ export interface ProfileSyncOptions {
   sync_education: boolean;
   sync_skills: boolean;
   sync_projects: boolean;
+  sync_experience: boolean;
   sync_certifications: boolean;
 }

@@ -4,13 +4,15 @@ import { ArrowLeft } from 'lucide-react';
 
 export const NotFoundPage: React.FC = () => {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <h1 className="text-6xl font-extrabold text-brand-500">404</h1>
-      <h2 className="mt-4 text-2xl font-bold text-white">Page Not Found</h2>
-      <p className="mt-2 text-sm text-gray-400">The career module or resource you are looking for does not exist.</p>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center text-center space-y-4">
+      <span className="text-8xl font-mono font-bold text-white/10 select-none drop-shadow-[0_0_25px_rgba(255,255,255,0.05)]">404</span>
+      <h2 className="text-3xl font-serif font-normal text-[#FAF8F5]">Page Not Found</h2>
+      <p className="text-sm text-neutral-400 max-w-sm font-sans">
+        The career intelligence module or resource you are looking for does not exist or has been relocated.
+      </p>
       <Link
         to="/dashboard"
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-xs font-semibold text-white shadow-lg hover:bg-brand-600 transition"
+        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white px-5 py-2.5 text-xs font-semibold transition shadow-lg shadow-[#FF6B6B]/25 active:scale-95"
       >
         <ArrowLeft className="h-4 w-4" />
         <span>Back to Dashboard</span>
@@ -18,3 +20,4 @@ export const NotFoundPage: React.FC = () => {
     </div>
   );
 };
+

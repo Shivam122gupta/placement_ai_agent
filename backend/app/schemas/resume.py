@@ -89,11 +89,13 @@ class ParsedCertification(BaseModel):
 
 class ParsedResumeSchema(BaseModel):
     full_name: Optional[str] = ""
+    headline: Optional[str] = None
     contact_email: Optional[str] = None
     phone: Optional[str] = None
     location: Optional[str] = None
     linkedin_url: Optional[str] = None
     github_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
     summary: Optional[str] = None
     education: List[ParsedEducation] = Field(default_factory=list)
     skills: List[ParsedSkill] = Field(default_factory=list)
@@ -144,4 +146,5 @@ class ProfileSyncRequest(BaseModel):
     sync_education: bool = True
     sync_skills: bool = True
     sync_projects: bool = True
+    sync_experience: bool = True
     sync_certifications: bool = True

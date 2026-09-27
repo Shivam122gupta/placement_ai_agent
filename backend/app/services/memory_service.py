@@ -21,9 +21,22 @@ logger = logging.getLogger("app.memory")
 
 class MemoryService:
     def __init__(self):
-        self.client = get_qdrant_client()
         self.embedder = get_embedding_provider()
         self.collection_name = CANDIDATE_MEMORY_COLLECTION
+
+    @property
+    def client(self):
+        return get_qdrant_client()
+
+    def _execute_with_fallback(self, func, *args, **kwargs):
+        """Executes a function against Qdrant, falling back to local client on error."""
+        try:
+            return func(self.client, *args, **kwargs)
+        except Exception as primary_err:
+            logger.warning("Primary Qdrant operation failed: %s. Attempting fallback to local instance...", primary_err)
+            from app.rag.qdrant_client import get_local_fallback_client
+            fallback_client = get_local_fallback_client()
+            return func(fallback_client, *args, **kwargs)
 
     def _generate_point_id(self, chunk_id: str) -> str:
         # Generate valid UUID string for Qdrant
@@ -43,11 +56,14 @@ class MemoryService:
             payload = chunk.to_payload()
             points.append(PointStruct(id=point_id, vector=vector, payload=payload))
 
-        self.client.upsert(
-            collection_name=self.collection_name,
-            points=points,
-            wait=True,
-        )
+        def _do_upsert(c):
+            return c.upsert(
+                collection_name=self.collection_name,
+                points=points,
+                wait=True,
+            )
+
+        self._execute_with_fallback(_do_upsert)
         logger.info("Successfully indexed %d chunks into %s", len(points), self.collection_name)
         return len(points)
 
@@ -64,15 +80,48 @@ class MemoryService:
                 FieldCondition(key="chunk_id", match=MatchValue(value=str(chunk_id)))
             )
 
-        self.client.delete(
-            collection_name=self.collection_name,
-            points_selector=models.FilterSelector(
-                filter=Filter(must=conditions)
-            ),
-            wait=True,
-        )
-        logger.info("Deleted memory vectors for user_id=%s, chunk_id=%s", user_id, chunk_id)
+        def _do_delete(c):
+            try:
+                c.delete(
+                    collection_name=self.collection_name,
+                    points_selector=models.FilterSelector(
+                        filter=Filter(must=conditions)
+                    ),
+                    wait=True,
+                )
+            except Exception:
+                c.delete(
+                    collection_name=self.collection_name,
+                    points_selector=Filter(must=conditions),
+                    wait=True,
+                )
+
+        try:
+            self._execute_with_fallback(_do_delete)
+            logger.info("Deleted memory vectors for user_id=%s, chunk_id=%s", user_id, chunk_id)
+        except Exception as e:
+            logger.warning("Notice on deleting vector memory for user %s: %s", user_id, e)
         return True
+
+    @classmethod
+    async def sync_resume_to_memory(cls, user_id: Any, resume_id: Any, parsed_data: Any) -> int:
+        """Indexes parsed resume data into vector memory directly."""
+        try:
+            p_dict = parsed_data.model_dump() if hasattr(parsed_data, "model_dump") else (parsed_data if isinstance(parsed_data, dict) else {})
+            resume_dict = {
+                "id": str(resume_id),
+                "parsed_data": p_dict,
+                "raw_text": "",
+            }
+            chunks = SectionAwareChunker.chunk_resume(resume_dict, user_id=str(user_id))
+            if chunks:
+                indexed = memory_service.index_chunks(chunks)
+                logger.info("Auto-synced %d resume chunks into vector memory for user %s", indexed, user_id)
+                return indexed
+            return 0
+        except Exception as e:
+            logger.warning("Error auto-syncing resume to memory for user %s: %s", user_id, e)
+            return 0
 
     def sync_candidate_memory(
         self,
@@ -162,23 +211,30 @@ class MemoryService:
 
         tenant_filter = Filter(must=filter_conditions)
 
-        if hasattr(self.client, "query_points"):
-            query_res = self.client.query_points(
-                collection_name=self.collection_name,
-                query=query_vector,
-                query_filter=tenant_filter,
-                limit=top_k,
-                score_threshold=score_threshold if score_threshold > 0.0 else None,
-            )
-            search_results = query_res.points
-        else:
-            search_results = self.client.search(
-                collection_name=self.collection_name,
-                query_vector=query_vector,
-                query_filter=tenant_filter,
-                limit=top_k,
-                score_threshold=score_threshold if score_threshold > 0.0 else None,
-            )
+        def _do_search(c):
+            if hasattr(c, "query_points"):
+                query_res = c.query_points(
+                    collection_name=self.collection_name,
+                    query=query_vector,
+                    query_filter=tenant_filter,
+                    limit=top_k,
+                    score_threshold=score_threshold if score_threshold > 0.0 else None,
+                )
+                return query_res.points
+            else:
+                return c.search(
+                    collection_name=self.collection_name,
+                    query_vector=query_vector,
+                    query_filter=tenant_filter,
+                    limit=top_k,
+                    score_threshold=score_threshold if score_threshold > 0.0 else None,
+                )
+
+        try:
+            search_results = self._execute_with_fallback(_do_search)
+        except Exception as e:
+            logger.error("Search execution failed across all clients: %s", e)
+            search_results = []
 
         results: List[MemorySearchResultItem] = []
         for r in search_results:
@@ -199,7 +255,6 @@ class MemoryService:
 
         return results
 
-
     def get_memory_stats(self, user_id: str) -> MemoryStatsResponse:
         """Retrieves vector statistics and doc_type breakdowns for a user."""
         user_id_str = str(user_id)
@@ -207,14 +262,16 @@ class MemoryService:
             must=[FieldCondition(key="user_id", match=MatchValue(value=user_id_str))]
         )
 
-        # Scroll all points for user to tally counts
         doc_counts: Dict[str, int] = {}
         total = 0
 
-        try:
+        def _do_scroll(c):
+            nonlocal total, doc_counts
+            doc_counts = {}
+            total = 0
             offset = None
             while True:
-                scroll_res, next_offset = self.client.scroll(
+                scroll_res, next_offset = c.scroll(
                     collection_name=self.collection_name,
                     scroll_filter=tenant_filter,
                     limit=100,
@@ -230,8 +287,12 @@ class MemoryService:
                 if next_offset is None:
                     break
                 offset = next_offset
+            return total, doc_counts
+
+        try:
+            self._execute_with_fallback(_do_scroll)
         except Exception as e:
-            logger.error("Error retrieving memory stats for user %s: %s", user_id, e)
+            logger.warning("Notice on retrieving memory stats for user %s: %s", user_id, e)
 
         return MemoryStatsResponse(
             user_id=user_id_str,

@@ -16,9 +16,8 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -77,26 +76,7 @@ storage/resumes/*
 !storage/resumes/.gitkeep
 backend/storage/resumes/*
 !backend/storage/resumes/.gitkeep
-
-# IDE & Editor Settings
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.idea/
-*.swp
-*.swo
-*~
-
-# Operating System Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
+storage/qdrant_data/
+backend/storage/qdrant_data/
 storage/resumes/
 plans/

@@ -31,6 +31,15 @@ class ProjectItem(BaseModel):
     role: Optional[str] = "Developer"
 
 
+class ExperienceItem(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    company: str
+    role: str
+    duration: Optional[str] = None
+    location: Optional[str] = None
+    highlights: List[str] = Field(default_factory=list)
+
+
 class CertificationItem(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
@@ -42,9 +51,14 @@ class CertificationItem(BaseModel):
 class ProfileDocument(Document):
     user_id: Indexed(PydanticObjectId, unique=True)
     full_name: str = ""
+    headline: Optional[str] = None
+    bio: Optional[str] = None
     contact_email: Optional[str] = None
     phone: Optional[str] = None
     location: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    github_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
     
     # Career Preferences
     target_roles: List[str] = Field(default_factory=list)
@@ -55,6 +69,7 @@ class ProfileDocument(Document):
     
     # Nested Sub-Entities
     education: List[EducationItem] = Field(default_factory=list)
+    experience: List[ExperienceItem] = Field(default_factory=list)
     skills: List[SkillItem] = Field(default_factory=list)
     projects: List[ProjectItem] = Field(default_factory=list)
     certifications: List[CertificationItem] = Field(default_factory=list)

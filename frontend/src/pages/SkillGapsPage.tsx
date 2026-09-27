@@ -97,25 +97,25 @@ export const SkillGapsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16">
+    <div className="max-w-7xl mx-auto space-y-8 pb-16 text-[#FAF8F5]">
       {/* Header */}
-      <div>
-        <div className="flex items-center space-x-2">
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-indigo-100 to-indigo-400">
-            Adaptive Skill Gap Roadmaps
+      <div className="border-b border-[#FAF8F5]/10 pb-6">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-serif font-normal text-white">
+            Skill Gap Roadmaps
           </h1>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
             Personalized Curriculum
           </span>
         </div>
-        <p className="text-slate-400 text-sm mt-1">
-          Bridge missing technical requirements with AI-crafted, time-budgeted milestone roadmaps.
+        <p className="text-[#E8E2D6]/75 text-xs mt-1">
+          Bridge missing technical requirements with AI-crafted, milestone-based preparation schedules.
         </p>
       </div>
 
       {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center space-x-3 text-red-400 text-sm">
-          <AlertCircle className="h-5 w-5 shrink-0" />
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center space-x-3 text-rose-300 text-xs">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -125,17 +125,17 @@ export const SkillGapsPage: React.FC = () => {
         {/* Left Column: Generator & Saved Roadmaps */}
         <div className="lg:col-span-4 space-y-6">
           {/* Generation Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center space-x-2.5">
-              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <Sparkles className="h-5 w-5" />
+          <div className="bg-[#121214] border border-[#FAF8F5]/15 rounded-3xl p-6 shadow-xl backdrop-blur-xl space-y-5">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-xl bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/20">
+                <Sparkles className="h-4 w-4 text-[#FAF8F5]" />
               </div>
-              <h2 className="text-lg font-bold text-slate-100">Create New Roadmap</h2>
+              <h2 className="text-sm font-semibold text-white">Create New Roadmap</h2>
             </div>
 
             <form onSubmit={handleGenerate} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-mono font-medium text-[#FAF8F5]/70 uppercase tracking-wider mb-1.5">
                   Target Role
                 </label>
                 <input
@@ -143,12 +143,12 @@ export const SkillGapsPage: React.FC = () => {
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                   placeholder="e.g. Backend Engineer, ML Specialist"
-                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-black/40 border border-[#FAF8F5]/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#FAF8F5]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-mono font-medium text-[#FAF8F5]/70 uppercase tracking-wider mb-1.5">
                   Time Budget / Duration
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -161,45 +161,45 @@ export const SkillGapsPage: React.FC = () => {
                       key={t.id}
                       type="button"
                       onClick={() => setDuration(t.id as any)}
-                      className={`py-2 px-1 rounded-xl text-center border transition-all ${
+                      className={`py-2 px-1 rounded-xl text-center border transition-all cursor-pointer ${
                         duration === t.id
-                          ? 'bg-indigo-600 border-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/20'
-                          : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] text-white font-semibold border-none shadow-md shadow-[#FF6B6B]/25 active:scale-95'
+                          : 'bg-black/30 border-[#FAF8F5]/15 text-neutral-400 hover:border-[#FAF8F5]/30'
                       }`}
                     >
                       <span className="block text-xs">{t.label}</span>
-                      <span className="text-[10px] opacity-75 font-normal">{t.sub}</span>
+                      <span className="text-[10px] opacity-75 font-mono">{t.sub}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Skills to Learn (Comma-separated)
+                <label className="block text-[10px] font-mono font-medium text-[#FAF8F5]/70 uppercase tracking-wider mb-1.5">
+                  Skills to Master (Comma-separated)
                 </label>
                 <textarea
                   rows={3}
                   value={customSkills}
                   onChange={(e) => setCustomSkills(e.target.value)}
                   placeholder="e.g. Docker, Redis, Kubernetes, PostgreSQL"
-                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-none font-mono"
+                  className="w-full bg-black/40 border border-[#FAF8F5]/15 rounded-xl p-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#FAF8F5] resize-none font-mono"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={generating}
-                className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-md shadow-[#FF6B6B]/25 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
               >
                 {generating ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     <span>Architecting Curriculum...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" />
+                    <Sparkles className="h-3.5 w-3.5 text-white" />
                     <span>Generate AI Roadmap</span>
                   </>
                 )}
@@ -208,20 +208,20 @@ export const SkillGapsPage: React.FC = () => {
           </div>
 
           {/* Saved Roadmaps List */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
-            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
-              <Layers className="h-4 w-4 text-indigo-400" />
+          <div className="bg-[#121214] border border-[#FAF8F5]/15 rounded-3xl p-6 shadow-xl backdrop-blur-xl space-y-3">
+            <h3 className="text-xs font-mono font-medium text-[#FAF8F5]/70 uppercase tracking-wider flex items-center gap-2">
+              <Layers className="h-3.5 w-3.5 text-[#FAF8F5]" />
               <span>Saved Roadmaps ({roadmaps.length})</span>
             </h3>
 
             {loading ? (
               <div className="space-y-2">
                 {[1, 2].map((n) => (
-                  <div key={n} className="h-16 rounded-xl bg-slate-950/60 animate-pulse" />
+                  <div key={n} className="h-16 rounded-xl bg-black/40 animate-pulse" />
                 ))}
               </div>
             ) : roadmaps.length === 0 ? (
-              <p className="text-xs text-slate-500 italic py-3 text-center">
+              <p className="text-xs text-neutral-500 font-mono italic py-3 text-center">
                 No roadmaps yet. Generate your first study plan above!
               </p>
             ) : (
@@ -232,13 +232,13 @@ export const SkillGapsPage: React.FC = () => {
                     onClick={() => setSelectedRoadmap(r)}
                     className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                       selectedRoadmap?.id === r.id
-                        ? 'bg-indigo-950/50 border-indigo-500 text-slate-100 shadow-md'
-                        : 'bg-slate-950 border-slate-800/80 text-slate-400 hover:border-slate-700'
+                        ? 'bg-[#FAF8F5]/15 border-[#FAF8F5]/40 text-white shadow-md'
+                        : 'bg-black/30 border-[#FAF8F5]/10 text-neutral-400 hover:border-[#FAF8F5]/25'
                     }`}
                   >
                     <div>
-                      <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{r.target_role}</h4>
-                      <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-1">
+                      <h4 className="text-xs font-semibold text-white line-clamp-1">{r.target_role}</h4>
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-400 mt-1">
                         <span className="capitalize">{r.duration_type.replace('_', ' ')}</span>
                         <span>•</span>
                         <span>{r.milestones.length} Milestones</span>
@@ -250,7 +250,7 @@ export const SkillGapsPage: React.FC = () => {
                         e.stopPropagation();
                         handleDeleteRoadmap(r.id);
                       }}
-                      className="text-slate-500 hover:text-red-400 p-1 rounded-lg transition-colors"
+                      className="text-neutral-500 hover:text-rose-400 p-1 rounded-lg transition-colors cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -266,17 +266,17 @@ export const SkillGapsPage: React.FC = () => {
           {selectedRoadmap ? (
             <div className="space-y-6">
               {/* Header Bar */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-[#121214] border border-[#FAF8F5]/15 rounded-3xl p-6 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 capitalize">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25 capitalize">
                       {selectedRoadmap.duration_type.replace('_', ' ')} Curriculum
                     </span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-[11px] font-mono text-neutral-400">
                       Created {new Date(selectedRoadmap.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-extrabold text-slate-100 mt-1">
+                  <h2 className="text-xl md:text-2xl font-normal text-white font-serif mt-1.5">
                     {selectedRoadmap.target_role}
                   </h2>
                 </div>
@@ -285,7 +285,7 @@ export const SkillGapsPage: React.FC = () => {
                   {selectedRoadmap.gap_skills.map((s, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-purple-950/60 text-purple-300 border border-purple-800/50"
+                      className="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/20"
                     >
                       {s}
                     </span>
@@ -300,12 +300,12 @@ export const SkillGapsPage: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-16 text-center space-y-4">
-              <div className="h-16 w-16 mx-auto rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                <Compass className="h-8 w-8" />
+            <div className="bg-[#121214] border border-[#FAF8F5]/15 rounded-3xl p-16 text-center space-y-4 backdrop-blur-xl">
+              <div className="h-14 w-14 mx-auto rounded-2xl bg-[#FAF8F5]/10 border border-[#FAF8F5]/20 flex items-center justify-center text-[#FAF8F5]">
+                <Compass className="h-7 w-7" />
               </div>
-              <h3 className="text-lg font-bold text-slate-200">No Roadmap Selected</h3>
-              <p className="text-sm text-slate-400 max-w-md mx-auto">
+              <h3 className="text-sm font-semibold text-white">No Roadmap Selected</h3>
+              <p className="text-xs text-[#E8E2D6]/75 max-w-md mx-auto">
                 Select an existing roadmap from the left panel or generate a new study plan for your dream role.
               </p>
             </div>

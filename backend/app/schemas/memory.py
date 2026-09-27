@@ -1,5 +1,5 @@
-from typing import List, Dict, Optional
-from pydantic import BaseModel, Field
+from typing import List, Dict, Optional, Any
+from pydantic import BaseModel, Field, model_validator
 
 
 class MemorySearchRequest(BaseModel):
@@ -22,6 +22,23 @@ class MemorySearchResultItem(BaseModel):
     score: float
     source_id: Optional[str] = None
     created_at: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_skills(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "skills" in data and isinstance(data["skills"], list):
+            norm = []
+            for s in data["skills"]:
+                if isinstance(s, dict):
+                    norm.append(s.get("name") or str(s))
+                elif hasattr(s, "name"):
+                    norm.append(getattr(s, "name"))
+                elif isinstance(s, str):
+                    norm.append(s)
+                elif s is not None:
+                    norm.append(str(s))
+            data["skills"] = norm
+        return data
 
 
 class MemorySearchResponse(BaseModel):

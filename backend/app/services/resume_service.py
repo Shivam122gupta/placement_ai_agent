@@ -86,6 +86,21 @@ class ResumeService:
             resume_doc.update_timestamp()
             await resume_doc.save()
 
+            # 6. Auto-Build and Populate Candidate Profile immediately (Zero Manual Typing)
+            try:
+                await ProfileService.sync_full_from_parsed_resume(user_id=user_id, parsed=parsed_data)
+                logger.info(f"Auto-populated candidate profile for user {user_id} from resume {resume_doc.id}")
+            except Exception as sync_err:
+                logger.warning(f"Auto-profile population warning for user {user_id}: {sync_err}")
+
+            # 7. Auto-Ingest into Qdrant Vector Semantic Memory for RAG & Copilot
+            try:
+                from app.services.memory_service import MemoryService
+                await MemoryService.sync_resume_to_memory(user_id=user_id, resume_id=resume_doc.id, parsed_data=parsed_data)
+                logger.info(f"Auto-synced semantic vector memory for user {user_id}")
+            except Exception as mem_err:
+                logger.warning(f"Auto-vector memory sync warning for user {user_id}: {mem_err}")
+
             return cls._to_resume_response(resume_doc, parsed_data)
 
         except Exception as e:
@@ -164,7 +179,7 @@ class ResumeService:
 
         # 1. Sync Personal Info
         if sync_req.sync_personal:
-            if parsed.full_name and not profile.full_name:
+            if parsed.full_name:
                 profile.full_name = parsed.full_name
             if parsed.contact_email and not profile.contact_email:
                 profile.contact_email = parsed.contact_email
@@ -172,6 +187,14 @@ class ResumeService:
                 profile.location = parsed.location
             if parsed.phone and not profile.phone:
                 profile.phone = parsed.phone
+            if parsed.headline:
+                profile.headline = parsed.headline
+            if parsed.summary:
+                profile.bio = parsed.summary
+            if parsed.linkedin_url:
+                profile.linkedin_url = parsed.linkedin_url
+            if parsed.github_url:
+                profile.github_url = parsed.github_url
 
         # 2. Sync Skills (Deduplicated)
         if sync_req.sync_skills and parsed.skills:
@@ -203,7 +226,25 @@ class ResumeService:
                     )
                     existing_edu_degrees.add(edu.degree.lower())
 
-        # 4. Sync Projects
+        # 4. Sync Experience
+        if sync_req.sync_experience and parsed.experience:
+            from app.models.profile import ExperienceItem
+            existing_exp = {(e.company.lower().strip(), e.role.lower().strip()) for e in profile.experience}
+            for exp in parsed.experience:
+                key = (exp.company.lower().strip(), exp.role.lower().strip())
+                if key not in existing_exp:
+                    profile.experience.append(
+                        ExperienceItem(
+                            company=exp.company,
+                            role=exp.role,
+                            duration=exp.duration,
+                            location=exp.location,
+                            highlights=exp.highlights,
+                        )
+                    )
+                    existing_exp.add(key)
+
+        # 5. Sync Projects
         if sync_req.sync_projects and parsed.projects:
             existing_proj_names = {p.name.lower() for p in profile.projects}
             for proj in parsed.projects:
@@ -220,7 +261,7 @@ class ResumeService:
                     )
                     existing_proj_names.add(proj.name.lower())
 
-        # 5. Sync Certifications
+        # 6. Sync Certifications
         if sync_req.sync_certifications and parsed.certifications:
             existing_cert_names = {c.name.lower() for c in profile.certifications}
             for cert in parsed.certifications:
