@@ -81,7 +81,7 @@ class Settings(BaseSettings):
     SMTP_TLS: bool = True
     EMAILS_FROM_EMAIL: str = "noreply@hirxora.ai"
     EMAILS_FROM_NAME: str = "Hirxora Career AI"
-    FRONTEND_URL: str = "http://localhost:5173"
+    FRONTEND_URL: str = "https://hirxora.vercel.app"
 
 
 settings = Settings()
