@@ -10,10 +10,14 @@ from app.core.security import (
     decode_refresh_token,
 )
 from app.core.exceptions import AuthenticationError, ConflictError, ResourceNotFoundError
+import logging
 from app.models.user import UserDocument
 from app.models.profile import ProfileDocument
 from app.schemas.auth import UserRegisterRequest, UserLoginRequest, TokenResponse, UserResponse
 from app.core.config import settings
+from app.services.email_service import EmailService
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -42,6 +46,12 @@ class AuthService:
             contact_email=req.email.lower(),
         )
         await profile.insert()
+
+        # Send verification email asynchronously
+        try:
+            await EmailService.send_verification_email(user.email, user.verification_token, req.full_name)
+        except Exception as e:
+            logger.error(f"Failed to dispatch verification email during registration to {user.email}: {e}", exc_info=True)
 
         # 4. Generate JWT tokens
         access_token = create_access_token(subject=str(user.id))
@@ -130,7 +140,13 @@ class AuthService:
         user.reset_password_expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         user.update_timestamp()
         await user.save()
-        return "If the email is registered, a password reset link has been generated."
+
+        try:
+            await EmailService.send_password_reset_email(user.email, reset_token)
+        except Exception as e:
+            logger.error(f"Failed to dispatch password reset email to {user.email}: {e}", exc_info=True)
+
+        return "If the email is registered, a password reset link has been sent to your email."
 
     @staticmethod
     async def reset_password(token: str, new_password: str) -> bool:
@@ -159,3 +175,16 @@ class AuthService:
         user.update_timestamp()
         await user.save()
         return True
+
+    @staticmethod
+    async def resend_verification(user: UserDocument) -> str:
+        if user.is_verified:
+            return "Email is already verified."
+
+        if not user.verification_token:
+            user.verification_token = str(uuid.uuid4())
+            user.update_timestamp()
+            await user.save()
+
+        await EmailService.send_verification_email(user.email, user.verification_token)
+        return "Verification email sent successfully."

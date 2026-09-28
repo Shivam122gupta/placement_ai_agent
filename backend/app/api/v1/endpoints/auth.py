@@ -73,6 +73,16 @@ async def verify_email(req: VerifyEmailRequest):
     )
 
 
+@router.post("/resend-verification", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
+async def resend_verification(current_user: UserDocument = Depends(get_current_active_user)):
+    msg = await AuthService.resend_verification(current_user)
+    return StandardResponse(
+        success=True,
+        message=msg,
+        data=MessageResponse(message=msg)
+    )
+
+
 @router.post("/forgot-password", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
 async def forgot_password(req: ForgotPasswordRequest):
     msg = await AuthService.request_password_reset(req.email)

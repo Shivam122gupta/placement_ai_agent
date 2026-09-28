@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useId } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Slot } from "@radix-ui/react-slot";
 import * as LabelPrimitive from "@radix-ui/react-label";
@@ -9,6 +9,7 @@ import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Typewriter } from "@/components/ui/typewriter-text";
 import { useAuth } from "@/context/AuthContext";
+import { authService } from "@/services/authService";
 
 const labelVariants = cva(
   "text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/80"
@@ -92,10 +93,11 @@ Input.displayName = "Input";
 
 export interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  rightLabel?: React.ReactNode;
 }
 
 export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, label, ...props }, ref) => {
+  ({ className, label, rightLabel, ...props }, ref) => {
     const id = useId();
     const [showPassword, setShowPassword] = useState(false);
 
@@ -103,7 +105,10 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
 
     return (
       <div className="grid w-full items-center gap-1.5">
-        {label && <Label htmlFor={id}>{label}</Label>}
+        <div className="flex items-center justify-between">
+          {label && <Label htmlFor={id}>{label}</Label>}
+          {rightLabel}
+        </div>
         <div className="relative">
           <Input
             id={id}
@@ -131,7 +136,13 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
 );
 PasswordInput.displayName = "PasswordInput";
 
-function SignInForm({ onSuccess }: { onSuccess?: () => void }) {
+function SignInForm({
+  onSuccess,
+  onForgotPassword,
+}: {
+  onSuccess?: () => void;
+  onForgotPassword: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -163,9 +174,13 @@ function SignInForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
-        <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/20 shadow-lg shadow-[#FF6B6B]/30 flex items-center justify-center text-white font-serif font-bold text-xl">
-          H
-        </div>
+        <Link to="/" title="Back to Landing Page" className="transition transform hover:scale-105 cursor-pointer">
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora"
+            className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg shadow-[#FF6B6B]/25 mb-1"
+          />
+        </Link>
         <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#FAF8F5]">
           Welcome back
         </h1>
@@ -199,6 +214,15 @@ function SignInForm({ onSuccess }: { onSuccess?: () => void }) {
         <PasswordInput
           name="password"
           label="Password"
+          rightLabel={
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-[11px] font-sans font-medium text-[#FF7E67] hover:text-[#FFA07A] hover:underline cursor-pointer transition"
+            >
+              Forgot password?
+            </button>
+          }
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -247,9 +271,13 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
-        <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/20 shadow-lg shadow-[#FF6B6B]/30 flex items-center justify-center text-white font-serif font-bold text-xl">
-          H
-        </div>
+        <Link to="/" title="Back to Landing Page" className="transition transform hover:scale-105 cursor-pointer">
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora"
+            className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg shadow-[#FF6B6B]/25 mb-1"
+          />
+        </Link>
         <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#FAF8F5]">
           Create an account
         </h1>
@@ -274,7 +302,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Alex Gupta"
+            placeholder="Alex Mercer"
             required
             autoComplete="name"
           />
@@ -307,6 +335,89 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
         <Button type="submit" disabled={isSubmitting} className="mt-2 w-full cursor-pointer">
           {isSubmitting ? "Creating Account..." : "Get Started with Hirxora"}
         </Button>
+      </div>
+    </form>
+  );
+}
+
+function ForgotPasswordForm({ onBackToSignIn }: { onBackToSignIn: () => void }) {
+  const [email, setEmail] = useState("");
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setStatusMsg(null);
+    setIsSubmitting(true);
+    try {
+      const msg = await authService.forgotPassword(email);
+      setStatusMsg(msg || "Password reset link has been dispatched to your email.");
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message || "Failed to send reset link. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleForgotPassword} className="flex flex-col gap-6">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <Link to="/" title="Back to Landing Page" className="transition transform hover:scale-105 cursor-pointer">
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora"
+            className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg shadow-[#FF6B6B]/25 mb-1"
+          />
+        </Link>
+        <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#FAF8F5]">
+          Reset Password
+        </h1>
+        <p className="text-xs sm:text-sm text-[#E8E2D6]/80">
+          Enter your registered email to receive a password reset link
+        </p>
+      </div>
+
+      {statusMsg && (
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 text-xs text-emerald-300 leading-relaxed">
+          {statusMsg}
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-300">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        <div className="grid gap-1.5">
+          <Label htmlFor="forgot-email">Registered Email</Label>
+          <Input
+            id="forgot-email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="candidate@university.edu"
+            required
+            autoComplete="email"
+          />
+        </div>
+
+        <Button type="submit" disabled={isSubmitting} className="mt-2 w-full cursor-pointer">
+          {isSubmitting ? "Sending Reset Link..." : "Send Reset Link"}
+        </Button>
+
+        <button
+          type="button"
+          onClick={onBackToSignIn}
+          className="text-center text-xs font-mono text-neutral-400 hover:text-white pt-2 cursor-pointer transition"
+        >
+          ← Back to Sign in
+        </button>
       </div>
     </form>
   );
@@ -436,12 +547,12 @@ function FourCornerSnakeBeams() {
 }
 
 function AuthFormContainer({
-  isSignIn,
-  onToggle,
+  mode,
+  onSetMode,
   onSuccess,
 }: {
-  isSignIn: boolean;
-  onToggle: () => void;
+  mode: "signin" | "signup" | "forgot";
+  onSetMode: (m: "signin" | "signup" | "forgot") => void;
   onSuccess?: () => void;
 }) {
   return (
@@ -457,22 +568,29 @@ function AuthFormContainer({
 
       {/* Main Glassmorphic Auth Card */}
       <div className="relative z-10 grid w-full gap-4 p-6 sm:p-8 rounded-[24px] border border-[#FAF8F5]/20 bg-[#121214]/95 backdrop-blur-3xl shadow-2xl shadow-black/60">
-        {isSignIn ? (
-          <SignInForm onSuccess={onSuccess} />
-        ) : (
-          <SignUpForm onSuccess={onSuccess} />
+        {mode === "signin" && (
+          <SignInForm
+            onSuccess={onSuccess}
+            onForgotPassword={() => onSetMode("forgot")}
+          />
+        )}
+        {mode === "signup" && <SignUpForm onSuccess={onSuccess} />}
+        {mode === "forgot" && (
+          <ForgotPasswordForm onBackToSignIn={() => onSetMode("signin")} />
         )}
 
-        <div className="text-center text-xs text-[#FAF8F5]/60 pt-2 border-t border-[#FAF8F5]/10">
-          {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button
-            type="button"
-            onClick={onToggle}
-            className="font-semibold text-[#FF7E67] hover:text-[#FFA07A] hover:underline pl-1 cursor-pointer transition-colors"
-          >
-            {isSignIn ? "Sign up" : "Sign in"}
-          </button>
-        </div>
+        {mode !== "forgot" && (
+          <div className="text-center text-xs text-[#FAF8F5]/60 pt-2 border-t border-[#FAF8F5]/10">
+            {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => onSetMode(mode === "signin" ? "signup" : "signin")}
+              className="font-semibold text-[#FF7E67] hover:text-[#FFA07A] hover:underline pl-1 cursor-pointer transition-colors"
+            >
+              {mode === "signin" ? "Sign up" : "Sign in"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -490,7 +608,7 @@ export interface AuthContentProps {
 }
 
 export interface AuthUIProps {
-  initialMode?: "signin" | "signup";
+  initialMode?: "signin" | "signup" | "forgot";
   signInContent?: AuthContentProps;
   signUpContent?: AuthContentProps;
   onSuccess?: () => void;
@@ -524,8 +642,7 @@ export function AuthUI({
   signUpContent = {},
   onSuccess,
 }: AuthUIProps) {
-  const [isSignIn, setIsSignIn] = useState(initialMode === "signin");
-  const toggleForm = () => setIsSignIn((prev) => !prev);
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(initialMode);
 
   const finalSignInContent = {
     image: { ...defaultSignInContent.image, ...signInContent.image },
@@ -536,7 +653,7 @@ export function AuthUI({
     quote: { ...defaultSignUpContent.quote, ...signUpContent.quote },
   };
 
-  const currentContent = isSignIn ? finalSignInContent : finalSignUpContent;
+  const currentContent = mode === "signup" ? finalSignUpContent : finalSignInContent;
 
   return (
     <div className="w-full min-h-screen bg-[#080607] text-[#FAF8F5] md:grid md:grid-cols-2 relative overflow-hidden selection:bg-[#FAF8F5] selection:text-black">
@@ -553,8 +670,8 @@ export function AuthUI({
       {/* Left Form Area */}
       <div className="flex min-h-screen items-center justify-center p-4 sm:p-8 z-10">
         <AuthFormContainer
-          isSignIn={isSignIn}
-          onToggle={toggleForm}
+          mode={mode}
+          onSetMode={setMode}
           onSuccess={onSuccess}
         />
       </div>

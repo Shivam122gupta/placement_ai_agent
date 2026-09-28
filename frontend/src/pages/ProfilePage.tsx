@@ -14,13 +14,20 @@ import {
   Building2,
   ExternalLink,
   RefreshCw,
+  Mail,
+  ShieldCheck,
+  AlertTriangle,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/authService';
 
 export const ProfilePage: React.FC = () => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [autoSyncing, setAutoSyncing] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Form states
@@ -98,6 +105,19 @@ export const ProfilePage: React.FC = () => {
       alert(msg);
     } finally {
       setAutoSyncing(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendingEmail(true);
+    try {
+      const msg = await authService.resendVerification();
+      setSuccessMsg(`✉️ ${msg}`);
+      setTimeout(() => setSuccessMsg(null), 5000);
+    } catch (err: any) {
+      alert(err.response?.data?.error?.message || 'Failed to resend verification email.');
+    } finally {
+      setResendingEmail(false);
     }
   };
 
@@ -282,6 +302,49 @@ export const ProfilePage: React.FC = () => {
         <div className="flex items-center gap-3 rounded-2xl bg-[#FAF8F5]/10 border border-[#FAF8F5]/30 p-4 text-xs text-[#FAF8F5] shadow-xl">
           <CheckCircle className="h-4 w-4 shrink-0 text-[#FAF8F5]" />
           <span>{successMsg}</span>
+        </div>
+      )}
+
+      {/* Account & Email Verification Status Strip */}
+      {user && (
+        <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 backdrop-blur-xl ${
+          user.is_verified
+            ? 'bg-emerald-500/[0.06] border-emerald-500/25'
+            : 'bg-amber-500/[0.08] border-amber-500/30'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-xl ${user.is_verified ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-300'}`}>
+              {user.is_verified ? <ShieldCheck className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-white">{user.email}</span>
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-medium ${
+                  user.is_verified
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                }`}>
+                  {user.is_verified ? 'Verified Account' : 'Unverified Email'}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#E8E2D6]/80 mt-0.5">
+                {user.is_verified
+                  ? 'Your account security is verified. Real-time grounding and notifications are enabled.'
+                  : 'Please verify your email address to enable official job application delivery and interview invites.'}
+              </p>
+            </div>
+          </div>
+
+          {!user.is_verified && (
+            <button
+              onClick={handleResendVerification}
+              disabled={resendingEmail}
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 px-3.5 py-1.5 text-xs font-medium text-amber-200 transition cursor-pointer self-start sm:self-auto disabled:opacity-50"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>{resendingEmail ? 'Sending...' : 'Resend Verification Email'}</span>
+            </button>
+          )}
         </div>
       )}
 

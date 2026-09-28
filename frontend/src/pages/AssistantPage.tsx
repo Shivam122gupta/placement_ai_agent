@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Sparkles,
   Send,
-  Bot,
   User,
   AlertCircle,
   RotateCcw,
@@ -119,9 +117,11 @@ export const AssistantPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl px-6 py-4 shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25 shadow-lg shadow-white/5">
-            <Sparkles className="h-4 w-4 text-[#FAF8F5]" />
-          </div>
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora Copilot"
+            className="w-10 h-10 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20"
+          />
           <div>
             <h1 className="text-sm md:text-base font-serif font-normal text-white flex items-center gap-2">
               <span>Autonomous Career Copilot</span>
@@ -150,13 +150,17 @@ export const AssistantPage: React.FC = () => {
             className={`flex items-start gap-3.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div
-              className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 border ${
+              className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 overflow-hidden border ${
                 msg.role === 'user'
                   ? 'bg-[#FAF8F5] text-black border-white shadow-md shadow-white/10'
-                  : 'bg-[#18181B] border-[#FAF8F5]/20 text-[#FAF8F5]'
+                  : 'bg-[#18181B] border-white/20'
               }`}
             >
-              {msg.role === 'user' ? <User className="h-3.5 w-3.5 text-black" /> : <Bot className="h-3.5 w-3.5 text-[#FAF8F5]" />}
+              {msg.role === 'user' ? (
+                <User className="h-3.5 w-3.5 text-black" />
+              ) : (
+                <img src="/hirxora-logo-2.jpg" alt="Hirxora" className="w-full h-full object-cover" />
+              )}
             </div>
 
             <div className={`max-w-2xl space-y-2 ${msg.role === 'user' ? 'items-end' : ''}`}>

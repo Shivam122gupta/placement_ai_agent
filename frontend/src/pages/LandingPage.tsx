@@ -224,7 +224,7 @@ export const LandingPage: React.FC = () => {
         logo={
           <div className="flex items-center gap-3">
             <img
-              src="/hirxora-logo-1.jpg"
+              src="/hirxora-logo-2.jpg"
               alt="Hirxora"
               className="h-9 w-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20"
             />
@@ -415,9 +415,11 @@ export const LandingPage: React.FC = () => {
 
               {/* AI Thoughtful Response Bubble */}
               <div className="flex items-start gap-3 justify-start">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF6B6B] to-[#FA7268] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#FF6B6B]/30 text-xs font-serif font-bold">
-                  ✦
-                </div>
+                <img
+                  src="/hirxora-logo-2.jpg"
+                  alt="Hirxora Copilot"
+                  className="w-8 h-8 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 shrink-0"
+                />
                 <div className="max-w-2xl bg-[#18181B] border border-[#FAF8F5]/15 backdrop-blur-xl rounded-2xl rounded-tl-sm p-5 text-xs sm:text-sm text-[#FAF8F5] space-y-3.5 shadow-xl">
                   <div className="flex items-center gap-2 text-xs text-[#FAF8F5] font-medium font-mono">
                     <span>Hirxora Copilot</span>
@@ -667,9 +669,11 @@ export const LandingPage: React.FC = () => {
         className="pb-28 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center"
       >
         <div className="bg-gradient-to-tr from-[#18181B] via-[#121214] to-[#080607] border border-[#FAF8F5]/25 rounded-3xl p-8 sm:p-12 shadow-2xl shadow-black/60 backdrop-blur-2xl space-y-6 relative overflow-hidden">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] border border-white/25 shadow-xl shadow-[#FF6B6B]/30 flex items-center justify-center text-white font-serif font-bold text-2xl mx-auto">
-            H
-          </div>
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora"
+            className="w-16 h-16 rounded-2xl object-cover border border-white/25 shadow-2xl shadow-[#FF6B6B]/25 mx-auto"
+          />
 
           <div className="space-y-2.5 max-w-xl mx-auto">
             <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#FAF8F5]">
@@ -695,9 +699,11 @@ export const LandingPage: React.FC = () => {
       {/* Minimalist Soft Dark Footer */}
       <footer className="border-t border-[#FAF8F5]/10 bg-[#080607] backdrop-blur-md py-8 px-6 text-center text-xs text-[#FAF8F5]/50 space-y-3">
         <div className="flex items-center justify-center gap-2.5 text-[#FAF8F5] font-serif text-sm">
-          <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-[#FF6B6B] to-[#FA7268] flex items-center justify-center text-white font-bold text-[10px]">
-            H
-          </div>
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora"
+            className="w-5 h-5 rounded-md object-cover border border-white/20 shadow-sm"
+          />
           <span>Hirxora</span>
         </div>
         <p className="font-sans text-[#FAF8F5]/60">© 2026 Hirxora • Autonomous Career & Placement Copilot.</p>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, UserCircle, Bell, CheckCircle2, Briefcase, Calendar, Info } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { notificationService } from '../../services/notificationService';
 import { InAppNotification } from '../../types/notification';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
   const [showDrawer, setShowDrawer] = useState<boolean>(false);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +62,14 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/');
+    }
+  };
+
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const getNotifIcon = (type: string) => {
@@ -81,7 +90,7 @@ export const Navbar: React.FC = () => {
       <div className="flex items-center gap-4">
         <Link to="/dashboard" className="flex items-center gap-3 group">
           <img
-            src="/hirxora-logo-1.jpg"
+            src="/hirxora-logo-2.jpg"
             alt="Hirxora"
             className="w-9 h-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 group-hover:scale-105 transition"
           />
@@ -184,7 +193,7 @@ export const Navbar: React.FC = () => {
               <span className="font-medium truncate max-w-[140px]">{user.email}</span>
             </Link>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-neutral-400 hover:bg-[#FAF8F5]/10 hover:text-white border border-transparent hover:border-[#FAF8F5]/20 transition cursor-pointer"
               title="Logout"
             >

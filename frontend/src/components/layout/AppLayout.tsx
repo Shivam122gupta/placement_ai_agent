@@ -11,7 +11,12 @@ export const AppLayout: React.FC = () => {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#080607]">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#FAF8F5]/20 border-t-[#FAF8F5]" />
+          <img
+            src="/hirxora-logo-2.jpg"
+            alt="Hirxora"
+            className="w-12 h-12 rounded-2xl object-cover border border-white/20 shadow-lg shadow-[#FF6B6B]/20 animate-pulse"
+          />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#FAF8F5]/20 border-t-[#FAF8F5]" />
           <p className="text-xs font-mono text-[#FAF8F5]">Initializing Hirxora Platform...</p>
         </div>
       </div>

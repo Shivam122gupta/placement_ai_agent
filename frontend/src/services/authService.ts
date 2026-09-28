@@ -40,4 +40,24 @@ export const authService = {
     });
     return response.data.message;
   },
+
+  async resetPassword(token: string, newPassword: string): Promise<string> {
+    const response = await apiClient.post<StandardResponse<{ message: string }>>('/auth/reset-password', {
+      token,
+      new_password: newPassword,
+    });
+    return response.data.message;
+  },
+
+  async verifyEmail(token: string): Promise<string> {
+    const response = await apiClient.post<StandardResponse<{ message: string }>>('/auth/verify-email', {
+      token,
+    });
+    return response.data.message;
+  },
+
+  async resendVerification(): Promise<string> {
+    const response = await apiClient.post<StandardResponse<{ message: string }>>('/auth/resend-verification');
+    return response.data.message;
+  },
 };

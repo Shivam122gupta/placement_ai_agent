@@ -71,5 +71,17 @@ class Settings(BaseSettings):
     JOB_SEARCH_PROVIDER: str = "mock"
     JOB_SEARCH_API_KEY: str = ""
 
+    # 9. Email & SMTP / Resend Settings
+    EMAIL_PROVIDER: str = "auto"  # "auto", "resend", "smtp", "brevo"
+    RESEND_API_KEY: str = ""
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_TLS: bool = True
+    EMAILS_FROM_EMAIL: str = "noreply@hirxora.ai"
+    EMAILS_FROM_NAME: str = "Hirxora Career AI"
+    FRONTEND_URL: str = "http://localhost:5173"
+
 
 settings = Settings()
