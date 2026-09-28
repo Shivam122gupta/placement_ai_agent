@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { AnimatedHero } from '@/components/ui/animated-hero-section-1';
@@ -697,7 +697,7 @@ export const LandingPage: React.FC = () => {
       </motion.section>
 
       {/* Minimalist Soft Dark Footer */}
-      <footer className="border-t border-[#FAF8F5]/10 bg-[#080607] backdrop-blur-md py-8 px-6 text-center text-xs text-[#FAF8F5]/50 space-y-3">
+      <footer className="border-t border-[#FAF8F5]/10 bg-[#080607] backdrop-blur-md py-8 px-6 text-center text-xs text-[#FAF8F5]/50 space-y-4">
         <div className="flex items-center justify-center gap-2.5 text-[#FAF8F5] font-serif text-sm">
           <img
             src="/hirxora-logo-2.jpg"
@@ -706,7 +706,20 @@ export const LandingPage: React.FC = () => {
           />
           <span>Hirxora</span>
         </div>
-        <p className="font-sans text-[#FAF8F5]/60">© 2026 Hirxora • Autonomous Career & Placement Copilot.</p>
+        <div className="flex items-center justify-center gap-6 text-xs text-[#FAF8F5]/60 font-sans">
+          <Link to="/privacy" className="hover:text-white transition">
+            Privacy Policy
+          </Link>
+          <span>•</span>
+          <Link to="/terms" className="hover:text-white transition">
+            Terms of Service
+          </Link>
+          <span>•</span>
+          <Link to="/login" className="hover:text-white transition">
+            Sign In
+          </Link>
+        </div>
+        <p className="font-sans text-[#FAF8F5]/40 text-[11px]">© 2026 Hirxora • Autonomous Career & Placement Copilot. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -1,0 +1,25 @@
+# Hirxora Robots.txt
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /forgot-password
+Allow: /privacy
+Allow: /terms
+
+# Disallow private user portals, auth callbacks & API routes from indexing
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /resumes/
+Disallow: /jobs/
+Disallow: /skill-gaps
+Disallow: /assistant
+Disallow: /memory
+Disallow: /interviews/
+Disallow: /applications
+Disallow: /settings
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /api/
+
+Sitemap: https://hirxora.ai/sitemap.xml
