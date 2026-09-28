@@ -57,7 +57,13 @@ class EmailService:
             if not api_key:
                 return False
             
-            from_addr = settings.SMTP_USER if (not settings.EMAILS_FROM_EMAIL or settings.EMAILS_FROM_EMAIL == "noreply@hirxora.ai") else settings.EMAILS_FROM_EMAIL
+            # Sender email must be a valid email (not smtp-brevo.com login identifier)
+            from_addr = settings.EMAILS_FROM_EMAIL
+            if not from_addr or from_addr == "noreply@hirxora.ai":
+                if settings.SMTP_USER and "@smtp-brevo.com" not in settings.SMTP_USER:
+                    from_addr = settings.SMTP_USER
+                else:
+                    from_addr = settings.EMAILS_FROM_EMAIL or "noreply@hirxora.ai"
             url = "https://api.brevo.com/v3/smtp/email"
             headers = {
                 "api-key": api_key,
