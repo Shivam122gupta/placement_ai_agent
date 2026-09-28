@@ -99,8 +99,8 @@ class EmailService:
             return await EmailService._send_resend_email(to_email, subject, html_body, text_body)
 
         # 2. Brevo HTTPS API (Port 443 - Bypasses Render firewall blocks on port 587)
-        if "brevo" in settings.SMTP_HOST.lower() or settings.EMAIL_PROVIDER in ("brevo", "auto"):
-            if settings.SMTP_PASSWORD:
+        if settings.BREVO_API_KEY or "brevo" in settings.SMTP_HOST.lower() or settings.EMAIL_PROVIDER in ("brevo", "auto"):
+            if settings.BREVO_API_KEY or settings.SMTP_PASSWORD:
                 success = await EmailService._send_brevo_api_email(to_email, subject, html_body, text_body)
                 if success:
                     return True
