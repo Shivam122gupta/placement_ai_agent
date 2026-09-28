@@ -50,16 +50,60 @@ class EmailService:
             return False
 
     @staticmethod
+    async def _send_brevo_api_email(to_email: str, subject: str, html_body: str, text_body: str) -> bool:
+        import httpx
+        try:
+            api_key = (settings.SMTP_PASSWORD or "").strip()
+            if not api_key:
+                return False
+            
+            from_addr = settings.SMTP_USER if (not settings.EMAILS_FROM_EMAIL or settings.EMAILS_FROM_EMAIL == "noreply@hirxora.ai") else settings.EMAILS_FROM_EMAIL
+            url = "https://api.brevo.com/v3/smtp/email"
+            headers = {
+                "api-key": api_key,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            payload = {
+                "sender": {
+                    "name": settings.EMAILS_FROM_NAME,
+                    "email": from_addr
+                },
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "htmlContent": html_body,
+                "textContent": text_body
+            }
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                res = await client.post(url, json=payload, headers=headers)
+                if res.status_code in (200, 201, 202):
+                    logger.info(f"✅ Email successfully sent to {to_email} via Brevo HTTP API (ID: {res.json().get('messageId')})")
+                    return True
+                else:
+                    logger.warning(f"⚠️ Brevo API returned {res.status_code}: {res.text}. Trying SMTP fallback...")
+                    return False
+        except Exception as e:
+            logger.warning(f"⚠️ Brevo API request failed: {e}. Trying SMTP fallback...")
+            return False
+
+    @staticmethod
     async def _dispatch_email(to_email: str, subject: str, html_body: str, text_body: str) -> bool:
         # 1. Resend API
         if settings.EMAIL_PROVIDER == "resend" or (settings.EMAIL_PROVIDER == "auto" and EmailService._is_resend_configured()):
             return await EmailService._send_resend_email(to_email, subject, html_body, text_body)
 
-        # 2. SMTP (Brevo / Gmail / Custom SMTP)
+        # 2. Brevo HTTPS API (Port 443 - Bypasses Render firewall blocks on port 587)
+        if "brevo" in settings.SMTP_HOST.lower() or settings.EMAIL_PROVIDER in ("brevo", "auto"):
+            if settings.SMTP_PASSWORD:
+                success = await EmailService._send_brevo_api_email(to_email, subject, html_body, text_body)
+                if success:
+                    return True
+
+        # 3. Direct SMTP (Fallback)
         if EmailService._is_smtp_configured():
             return await EmailService._send_smtp_email(to_email, subject, html_body, text_body)
 
-        # 3. Dev Simulation Fallback
+        # 4. Dev Simulation Fallback
         logger.info("=" * 60)
         logger.info(f"📧 [DEV EMAIL SIMULATION] To: {to_email} | Subject: {subject}")
         logger.info("=" * 60)
