@@ -174,7 +174,7 @@ class AuthService:
     async def verify_email(token: str) -> bool:
         user = await UserDocument.find_one(UserDocument.verification_token == token)
         if not user:
-            raise AuthenticationError("Invalid email verification token", code="INVALID_VERIFICATION_TOKEN")
+            raise AuthenticationError("This verification link is invalid or has already been used. If your email is already verified, you can sign in directly.", code="INVALID_VERIFICATION_TOKEN")
 
         user.is_verified = True
         user.verification_token = None
