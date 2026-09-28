@@ -47,7 +47,7 @@ export const DashboardPage: React.FC = () => {
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5]/10 border border-[#FAF8F5]/25 px-3.5 py-1 text-xs font-mono font-medium text-[#FAF8F5]">
             <span className="h-2 w-2 rounded-full bg-[#FAF8F5] animate-ping" />
-            <span>Autonomous Career Intelligence Active</span>
+            <span>AI Placement & Career Assistant Active</span>
           </div>
 
           <h1 className="mt-5 text-3xl md:text-5xl font-normal tracking-tight text-[#FAF8F5] font-serif">
@@ -55,7 +55,7 @@ export const DashboardPage: React.FC = () => {
           </h1>
 
           <p className="mt-3 text-sm md:text-base text-[#E8E2D6] font-normal leading-relaxed max-w-2xl">
-            Your personalized AI career workspace is synchronized. Real-time RAG memory is active across your resumes, portfolio projects, and targeted job opportunities.
+            Your all-in-one career command center. Optimize your resume for ATS, find matching job openings, bridge your skill gaps, and practice AI mock interviews to land your dream role.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3.5">
@@ -64,7 +64,7 @@ export const DashboardPage: React.FC = () => {
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#FF5252] hover:to-[#F26B5B] px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-[#FF6B6B]/25 transition-all cursor-pointer active:scale-95"
             >
               <FileText className="h-4 w-4 text-white" />
-              <span>Upload / Sync Resume</span>
+              <span>Upload & Scan Resume</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             
@@ -73,7 +73,7 @@ export const DashboardPage: React.FC = () => {
               className="inline-flex items-center gap-2 rounded-xl bg-[#FF6B6B]/10 px-5 py-2.5 text-xs font-medium text-[#FFA07A] hover:bg-[#FF6B6B]/20 hover:text-white border border-[#FF6B6B]/25 hover:border-[#FF6B6B]/50 transition-all cursor-pointer"
             >
               <Briefcase className="h-4 w-4 text-[#FFA07A]" />
-              <span>Discover Matched Jobs</span>
+              <span>Find Matching Jobs</span>
             </Link>
 
             <Link
@@ -81,7 +81,7 @@ export const DashboardPage: React.FC = () => {
               className="inline-flex items-center gap-2 rounded-xl bg-[#FF6B6B]/10 px-5 py-2.5 text-xs font-medium text-[#FFA07A] hover:bg-[#FF6B6B]/20 hover:text-white border border-[#FF6B6B]/25 hover:border-[#FF6B6B]/50 transition-all cursor-pointer"
             >
               <Bot className="h-4 w-4 text-[#FFA07A]" />
-              <span>Ask AI Copilot</span>
+              <span>Ask Career AI Copilot</span>
             </Link>
           </div>
         </div>
@@ -92,12 +92,12 @@ export const DashboardPage: React.FC = () => {
         {/* Profile Completion */}
         <div className="rounded-2xl border border-[#FAF8F5]/15 bg-[#121214] p-5 shadow-lg backdrop-blur-md hover:border-[#FAF8F5]/35 transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">Profile Readiness</span>
+            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">Profile Strength</span>
             <span className="text-xs font-mono font-bold text-[#FAF8F5] bg-[#FAF8F5]/15 px-2 py-0.5 rounded-md border border-[#FAF8F5]/25">{completionScore}%</span>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-white font-mono">{completionScore}%</span>
-            <span className="text-xs text-neutral-500 font-mono">completed</span>
+            <span className="text-xs text-neutral-400 font-mono">profile completed</span>
           </div>
           <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
             <div
@@ -110,16 +110,16 @@ export const DashboardPage: React.FC = () => {
         {/* Skills Tagged */}
         <div className="rounded-2xl border border-[#FAF8F5]/15 bg-[#121214] p-5 shadow-lg backdrop-blur-md hover:border-[#FAF8F5]/35 transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">Verified Skills</span>
+            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">Your Verified Skills</span>
             <div className="p-1 rounded-md bg-[#FAF8F5]/10 border border-[#FAF8F5]/20">
               <Layers className="h-3.5 w-3.5 text-[#FAF8F5]" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-white font-mono">{profile?.skills?.length || 0}</span>
-            <span className="text-xs text-neutral-500 font-mono">skills cataloged</span>
+            <span className="text-xs text-neutral-400 font-mono">skills detected</span>
           </div>
-          <p className="mt-2 text-[10px] text-neutral-400 font-mono">Normalized taxonomy active</p>
+          <p className="mt-2 text-[10px] text-neutral-400 font-mono">Extracted from your resume & profile</p>
         </div>
 
         {/* Projects */}
@@ -132,15 +132,15 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-white font-mono">{profile?.projects?.length || 0}</span>
-            <span className="text-xs text-neutral-500 font-mono">indexed projects</span>
+            <span className="text-xs text-neutral-400 font-mono">projects indexed</span>
           </div>
-          <p className="mt-2 text-[10px] text-neutral-400 font-mono">Semantic RAG vector grounding</p>
+          <p className="mt-2 text-[10px] text-neutral-400 font-mono">Used to personalize AI interviews & jobs</p>
         </div>
 
         {/* Target Roles */}
         <div className="rounded-2xl border border-[#FAF8F5]/15 bg-[#121214] p-5 shadow-lg backdrop-blur-md hover:border-[#FAF8F5]/35 transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">Target Track</span>
+            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">Target Career Track</span>
             <div className="p-1 rounded-md bg-[#FAF8F5]/10 border border-[#FAF8F5]/20">
               <Briefcase className="h-3.5 w-3.5 text-[#FAF8F5]" />
             </div>
@@ -149,17 +149,17 @@ export const DashboardPage: React.FC = () => {
             <span className="text-base font-semibold text-white truncate block">
               {profile?.target_roles?.[0] || 'Software Developer'}
             </span>
-            <span className="text-xs font-mono text-neutral-400 mt-0.5 block">{profile?.experience_level || '0-1 years'}</span>
+            <span className="text-xs font-mono text-neutral-400 mt-0.5 block">Exp Level: {profile?.experience_level || '0-1 years'}</span>
           </div>
-          <p className="mt-2 text-[10px] text-neutral-500 font-mono">Discovery filter enabled</p>
+          <p className="mt-2 text-[10px] text-neutral-500 font-mono">Job recommendations tailored to this role</p>
         </div>
       </div>
 
       {/* Career Modules Grid */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-serif font-normal text-white">Autonomous Career Pipeline</h2>
-          <span className="text-xs font-mono text-[#FAF8F5]/70">9 Full-Stack Modules</span>
+          <h2 className="text-lg font-serif font-normal text-white">Placement Preparation Tools</h2>
+          <span className="text-xs font-mono text-[#FAF8F5]/70">6 Step-by-Step AI Modules</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -174,14 +174,14 @@ export const DashboardPage: React.FC = () => {
               </div>
               <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-[#FAF8F5] group-hover:translate-x-1 transition" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">1. Resume Intelligence</h3>
+            <h3 className="mt-4 text-base font-semibold text-white">1. Resume Intelligence & ATS Scanner</h3>
             <p className="mt-1.5 text-xs text-[#E8E2D6]/75 leading-relaxed">
-              Upload PDF or DOCX resumes. AI extracts structured skills, projects, and auto-syncs to your candidate profile.
+              Upload your resume in PDF or DOCX format. Our AI extracts your skills, scores ATS compliance, and gives instant fix suggestions.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono text-[#FAF8F5] border border-[#FAF8F5]/20">
                 <CheckCircle2 className="h-3 w-3 text-[#FAF8F5]" />
-                Zero Hallucination
+                Instant ATS Scoring
               </span>
             </div>
           </Link>
@@ -199,12 +199,12 @@ export const DashboardPage: React.FC = () => {
             </div>
             <h3 className="mt-4 text-base font-semibold text-white">2. Job Discovery & JD Analyzer</h3>
             <p className="mt-1.5 text-xs text-[#E8E2D6]/75 leading-relaxed">
-              Discover real-time verified internships & jobs. Deconstruct job postings into required vs preferred skills.
+              Explore verified job openings matching your profile, or paste any Job Description to extract essential requirements and required skills.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono text-[#FAF8F5] border border-[#FAF8F5]/20">
                 <Sparkles className="h-3 w-3 text-[#FAF8F5]" />
-                AI JD Extraction
+                Job Matching & Extraction
               </span>
             </div>
           </Link>
@@ -220,14 +220,14 @@ export const DashboardPage: React.FC = () => {
               </div>
               <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-[#FAF8F5] group-hover:translate-x-1 transition" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">3. Match Score & Study Roadmap</h3>
+            <h3 className="mt-4 text-base font-semibold text-white">3. Skill Gap Analysis & Study Plan</h3>
             <p className="mt-1.5 text-xs text-[#E8E2D6]/75 leading-relaxed">
-              Hybrid deterministic & semantic matching algorithms pinpoint skill gaps and create custom 2-week learning roadmaps.
+              Compare your profile against any job description. Find missing skills and generate a personalized 2-week step-by-step study roadmap.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono text-[#FAF8F5] border border-[#FAF8F5]/20">
                 <TrendingUp className="h-3 w-3 text-[#FAF8F5]" />
-                70/30 Hybrid Algorithm
+                Personalized 14-Day Roadmap
               </span>
             </div>
           </Link>
@@ -243,14 +243,14 @@ export const DashboardPage: React.FC = () => {
               </div>
               <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-[#FAF8F5] group-hover:translate-x-1 transition" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">4. Mock Interview Arena</h3>
+            <h3 className="mt-4 text-base font-semibold text-white">4. AI Mock Interview Practice</h3>
             <p className="mt-1.5 text-xs text-[#E8E2D6]/75 leading-relaxed">
-              Practice real-time technical & HR mock interviews. Receive rubric evaluations and question-by-question scoring.
+              Practice realistic technical, system design, and HR interviews. Receive instant feedback, sample ideal answers, and performance scores.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono text-[#FAF8F5] border border-[#FAF8F5]/20">
                 <Bot className="h-3 w-3 text-[#FAF8F5]" />
-                AI Examiner
+                Real-Time AI Interviewer
               </span>
             </div>
           </Link>
@@ -266,14 +266,14 @@ export const DashboardPage: React.FC = () => {
               </div>
               <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-[#FAF8F5] group-hover:translate-x-1 transition" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">5. Semantic Memory (RAG)</h3>
+            <h3 className="mt-4 text-base font-semibold text-white">5. Career Memory & Project Base</h3>
             <p className="mt-1.5 text-xs text-[#E8E2D6]/75 leading-relaxed">
-              Explore your vectorized candidate knowledge base. Perform natural-language searches over your projects & notes.
+              Search and manage your indexed projects, technical experiences, and interview notes to power personalized AI suggestions across the app.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono text-[#FAF8F5] border border-[#FAF8F5]/20">
                 <Database className="h-3 w-3 text-[#FAF8F5]" />
-                Qdrant Cloud 384-d
+                Indexed Career Knowledge
               </span>
             </div>
           </Link>
@@ -289,14 +289,14 @@ export const DashboardPage: React.FC = () => {
               </div>
               <ChevronRight className="h-4 w-4 text-neutral-500 group-hover:text-[#FAF8F5] group-hover:translate-x-1 transition" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">6. Application Tracker</h3>
+            <h3 className="mt-4 text-base font-semibold text-white">6. Job Application Tracker</h3>
             <p className="mt-1.5 text-xs text-[#E8E2D6]/75 leading-relaxed">
-              Track job submissions, interview stages, offer letters, and automatic calendar reminders across your pipeline.
+              Track and organize all your job submissions, interview stages, follow-ups, and offer letters in an easy-to-use visual pipeline board.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-md bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono text-[#FAF8F5] border border-[#FAF8F5]/20">
                 <Send className="h-3 w-3 text-[#FAF8F5]" />
-                Pipeline Kanban
+                Interactive Pipeline Board
               </span>
             </div>
           </Link>
