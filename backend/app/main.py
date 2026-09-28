@@ -97,7 +97,7 @@ async def root_redirect():
     return RedirectResponse(url="/docs")
 
 
-@app.get("/health", tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD", "POST", "OPTIONS"], tags=["Health"])
 async def root_health():
     return {
         "status": "healthy",
