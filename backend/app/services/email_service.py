@@ -53,7 +53,7 @@ class EmailService:
     async def _send_brevo_api_email(to_email: str, subject: str, html_body: str, text_body: str) -> bool:
         import httpx
         try:
-            api_key = (settings.SMTP_PASSWORD or "").strip()
+            api_key = (settings.BREVO_API_KEY or settings.SMTP_PASSWORD or "").strip()
             if not api_key:
                 return False
             

@@ -73,6 +73,7 @@ class Settings(BaseSettings):
 
     # 9. Email & SMTP / Resend Settings
     EMAIL_PROVIDER: str = "auto"  # "auto", "resend", "smtp", "brevo"
+    BREVO_API_KEY: str = ""
     RESEND_API_KEY: str = ""
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587
