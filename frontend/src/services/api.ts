@@ -5,7 +5,8 @@ const getBaseApiUrl = (): string => {
   if (!envUrl) {
     return '/api/v1';
   }
-  const clean = envUrl.trim().replace(/\/+$/, '');
+  let clean = envUrl.trim().replace(/\/+$/, '');
+  clean = clean.replace(/\/docs\/?$/, '');
   if (clean.endsWith('/api/v1')) {
     return clean;
   }
