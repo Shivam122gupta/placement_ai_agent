@@ -2,10 +2,18 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
+from app.core.sanitizer import sanitize_text
+
+
 class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, description="Password must be at least 8 characters long")
     full_name: Optional[str] = Field(default="", max_length=100)
+
+    @field_validator("full_name")
+    @classmethod
+    def sanitize_name(cls, v: Optional[str]) -> str:
+        return sanitize_text(v or "")
 
     @field_validator("password")
     @classmethod
@@ -47,6 +55,7 @@ class VerifyEmailRequest(BaseModel):
 class UserResponse(BaseModel):
     id: str
     email: str
+    role: str = "user"
     is_active: bool
     is_verified: bool
     created_at: str

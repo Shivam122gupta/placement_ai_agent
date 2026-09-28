@@ -14,10 +14,17 @@ from app.services.auth_service import AuthService
 from app.api.deps import get_current_active_user
 from app.models.user import UserDocument
 
+from app.core.rate_limit import rate_limit
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=StandardResponse[dict], status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=StandardResponse[dict],
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit(requests_limit=5, window_seconds=60, key_prefix="auth_reg"))],
+)
 async def register(req: UserRegisterRequest):
     user, tokens = await AuthService.register(req)
     return StandardResponse(
@@ -30,7 +37,12 @@ async def register(req: UserRegisterRequest):
     )
 
 
-@router.post("/login", response_model=StandardResponse[dict], status_code=status.HTTP_200_OK)
+@router.post(
+    "/login",
+    response_model=StandardResponse[dict],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(requests_limit=10, window_seconds=60, key_prefix="auth_login"))],
+)
 async def login(req: UserLoginRequest):
     user, tokens = await AuthService.login(req)
     return StandardResponse(
@@ -73,7 +85,12 @@ async def verify_email(req: VerifyEmailRequest):
     )
 
 
-@router.post("/resend-verification", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
+@router.post(
+    "/resend-verification",
+    response_model=StandardResponse[MessageResponse],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(requests_limit=3, window_seconds=60, key_prefix="auth_resend"))],
+)
 async def resend_verification(current_user: UserDocument = Depends(get_current_active_user)):
     msg = await AuthService.resend_verification(current_user)
     return StandardResponse(
@@ -83,7 +100,12 @@ async def resend_verification(current_user: UserDocument = Depends(get_current_a
     )
 
 
-@router.post("/forgot-password", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
+@router.post(
+    "/forgot-password",
+    response_model=StandardResponse[MessageResponse],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(requests_limit=5, window_seconds=60, key_prefix="auth_forgot"))],
+)
 async def forgot_password(req: ForgotPasswordRequest):
     msg = await AuthService.request_password_reset(req.email)
     return StandardResponse(
@@ -93,7 +115,12 @@ async def forgot_password(req: ForgotPasswordRequest):
     )
 
 
-@router.post("/reset-password", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
+@router.post(
+    "/reset-password",
+    response_model=StandardResponse[MessageResponse],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(requests_limit=5, window_seconds=60, key_prefix="auth_reset"))],
+)
 async def reset_password(req: ResetPasswordRequest):
     await AuthService.reset_password(req.token, req.new_password)
     return StandardResponse(
@@ -111,6 +138,7 @@ async def get_me(current_user: UserDocument = Depends(get_current_active_user)):
         data=UserResponse(
             id=str(current_user.id),
             email=current_user.email,
+            role=getattr(current_user, "role", "user"),
             is_active=current_user.is_active,
             is_verified=current_user.is_verified,
             created_at=current_user.created_at.isoformat(),

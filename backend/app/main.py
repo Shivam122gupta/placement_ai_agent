@@ -50,9 +50,9 @@ app = FastAPI(
 
 # ----------------- Middlewares -----------------
 
-# 1. Request ID & Timing Middleware
+# 1. Request ID, Timing & Security Headers Middleware
 @app.middleware("http")
-async def add_request_metadata_and_timing(request: Request, call_next):
+async def add_security_headers_and_timing(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     request.state.request_id = request_id
     start_time = time.time()
@@ -62,6 +62,13 @@ async def add_request_metadata_and_timing(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time-Seconds"] = f"{process_time:.4f}"
+    
+    # HTTP Security Headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     return response
 
 # 2. CORS Middleware

@@ -9,6 +9,7 @@ class UserDocument(Document):
     hashed_password: str
     is_active: bool = True
     is_verified: bool = False
+    role: str = "user"  # "user", "admin"
     verification_token: Optional[str] = None
     reset_password_token: Optional[str] = None
     reset_password_expires_at: Optional[datetime] = None

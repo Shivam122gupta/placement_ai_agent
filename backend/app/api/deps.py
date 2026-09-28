@@ -40,3 +40,9 @@ async def get_current_active_user(current_user: UserDocument = Depends(get_curre
     if not current_user.is_active:
         raise PermissionDeniedError("Your account is currently inactive. Please contact support.", code="ACCOUNT_INACTIVE")
     return current_user
+
+
+async def get_current_admin_user(current_user: UserDocument = Depends(get_current_active_user)) -> UserDocument:
+    if getattr(current_user, "role", "user") != "admin":
+        raise PermissionDeniedError("Administrator privileges are required to access this resource.", code="ADMIN_REQUIRED")
+    return current_user

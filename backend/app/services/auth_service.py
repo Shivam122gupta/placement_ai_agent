@@ -60,6 +60,7 @@ class AuthService:
         user_resp = UserResponse(
             id=str(user.id),
             email=user.email,
+            role=getattr(user, "role", "user"),
             is_active=user.is_active,
             is_verified=user.is_verified,
             created_at=user.created_at.isoformat(),
@@ -90,6 +91,7 @@ class AuthService:
         user_resp = UserResponse(
             id=str(user.id),
             email=user.email,
+            role=getattr(user, "role", "user"),
             is_active=user.is_active,
             is_verified=user.is_verified,
             created_at=user.created_at.isoformat(),
