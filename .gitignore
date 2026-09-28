@@ -52,6 +52,7 @@ coverage.xml
 .dmypy.json
 dmypy.json
 .ruff_cache/
+*.tsbuildinfo
 
 # Node & Frontend
 node_modules/
