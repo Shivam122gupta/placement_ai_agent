@@ -1,6 +1,18 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+const getBaseApiUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) {
+    return '/api/v1';
+  }
+  const clean = envUrl.trim().replace(/\/+$/, '');
+  if (clean.endsWith('/api/v1')) {
+    return clean;
+  }
+  return `${clean}/api/v1`;
+};
+
+const API_BASE_URL = getBaseApiUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

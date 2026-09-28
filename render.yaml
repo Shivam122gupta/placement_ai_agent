@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: hirxora-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: MONGODB_URL
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: ai_placement_db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "https://hirxora.ai,http://localhost:5173"
+      - key: FRONTEND_URL
+        sync: false
+      - key: LLM_PROVIDER
+        value: "groq"
+      - key: GROQ_MODEL
+        value: "llama-3.3-70b-versatile"
