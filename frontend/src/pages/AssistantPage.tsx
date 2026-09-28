@@ -153,37 +153,37 @@ export const AssistantPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto h-[calc(100vh-8rem)] flex flex-col space-y-4 pb-4 text-[#FAF8F5]">
+    <div className="max-w-5xl mx-auto h-[calc(100dvh-11rem)] lg:h-[calc(100vh-8rem)] flex flex-col space-y-3 sm:space-y-4 pb-2 sm:pb-4 text-[#FAF8F5]">
       {/* Header */}
-      <div className="flex items-center justify-between bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl px-6 py-4 shadow-xl backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between bg-[#121214] border border-[#FAF8F5]/20 rounded-2xl sm:rounded-3xl px-4 py-3 sm:px-6 sm:py-4 shadow-xl backdrop-blur-xl">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <img
             src="/hirxora-logo-2.jpg"
             alt="Hirxora Copilot"
-            className="w-10 h-10 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 shrink-0"
           />
           <div>
-            <h1 className="text-sm md:text-base font-serif font-normal text-white flex items-center gap-2">
+            <h1 className="text-xs sm:text-base font-serif font-normal text-white flex items-center gap-1.5 sm:gap-2">
               <span>Career Copilot Assistant</span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
+              <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
                 AI Active
               </span>
             </h1>
-            <p className="text-xs text-neutral-400 font-sans">Personalized career guidance and placement assistant</p>
+            <p className="text-[10px] sm:text-xs text-neutral-400 font-sans line-clamp-1">Personalized career guidance and placement assistant</p>
           </div>
         </div>
 
         <button
           onClick={() => window.location.reload()}
-          className="p-2 rounded-xl border border-[#FAF8F5]/20 hover:bg-[#FAF8F5]/10 text-neutral-400 hover:text-white transition cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-xl border border-[#FAF8F5]/20 hover:bg-[#FAF8F5]/10 text-neutral-400 hover:text-white transition cursor-pointer"
           title="New Session"
         >
-          <RotateCcw className="h-4 w-4" />
+          <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
       </div>
 
       {/* Messages Canvas */}
-      <div className="flex-1 bg-[#121214]/90 border border-[#FAF8F5]/15 rounded-3xl p-6 overflow-y-auto space-y-5 shadow-inner backdrop-blur-xl">
+      <div className="flex-1 bg-[#121214]/90 border border-[#FAF8F5]/15 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 shadow-inner backdrop-blur-xl">
         {messages.map((msg) => (
           <div
             key={msg.id}

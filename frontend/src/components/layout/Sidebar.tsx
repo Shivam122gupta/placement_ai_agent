@@ -11,9 +11,10 @@ import {
   Bot,
   Database,
   Settings,
+  X,
 } from 'lucide-react';
 
-const navItems = [
+export const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Candidate Profile', path: '/profile', icon: User },
   { name: 'Resume Intelligence', path: '/resumes', icon: FileText, badge: 'AI Parse' },
@@ -25,18 +26,33 @@ const navItems = [
   { name: 'Applications Tracker', path: '/applications', icon: Send, badge: 'Pipeline' },
 ];
 
-export const Sidebar: React.FC = () => {
-  return (
-    <aside className="w-64 flex-shrink-0 border-r border-[#FAF8F5]/10 bg-[#080607]/95 backdrop-blur-2xl flex flex-col justify-between p-4 min-h-[calc(100vh-4rem)]">
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose }) => {
+  const content = (
+    <div className="flex flex-col justify-between h-full p-4">
       <div className="space-y-1.5">
         <div className="px-3 py-2 flex items-center justify-between">
           <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">
             Navigation
           </span>
-          <span className="flex items-center gap-1 text-[10px] text-neutral-400 font-mono">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FAF8F5] animate-pulse" />
-            Live
-          </span>
+          {onClose ? (
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition"
+              aria-label="Close menu"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : (
+            <span className="flex items-center gap-1 text-[10px] text-neutral-400 font-mono">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#FAF8F5] animate-pulse" />
+              Live
+            </span>
+          )}
         </div>
 
         {navItems.map((item) => {
@@ -45,6 +61,7 @@ export const Sidebar: React.FC = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={() => onClose && onClose()}
               className={({ isActive }) =>
                 `group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
                   isActive
@@ -88,6 +105,7 @@ export const Sidebar: React.FC = () => {
 
         <NavLink
           to="/profile"
+          onClick={() => onClose && onClose()}
           className={({ isActive }) =>
             `flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition ${
               isActive ? 'bg-[#FAF8F5]/15 text-white font-semibold' : 'text-neutral-400 hover:bg-white/[0.03] hover:text-[#FAF8F5]'
@@ -98,6 +116,30 @@ export const Sidebar: React.FC = () => {
           <span>Settings & Profile</span>
         </NavLink>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden lg:flex w-64 flex-shrink-0 border-r border-[#FAF8F5]/10 bg-[#080607]/95 backdrop-blur-2xl flex-col min-h-[calc(100vh-4rem)] sticky top-16">
+        {content}
+      </aside>
+
+      {/* Mobile Slide-Over Drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in"
+            onClick={onClose}
+          />
+          {/* Drawer Sheet */}
+          <div className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-[#080607] border-r border-[#FAF8F5]/20 shadow-2xl z-50 animate-in slide-in-from-left duration-300 overflow-y-auto">
+            {content}
+          </div>
+        </div>
+      )}
+    </>
   );
 };

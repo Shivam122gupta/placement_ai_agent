@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
+import { MobileBottomNav } from './MobileBottomNav';
+import { PwaInstallPrompt } from '../common/PwaInstallPrompt';
 import { useAuth } from '../../context/AuthContext';
 
 export const AppLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -25,7 +28,10 @@ export const AppLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#080607] flex flex-col text-[#FAF8F5] selection:bg-[#FAF8F5] selection:text-black">
-      <Navbar />
+      <Navbar
+        onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+        isMobileMenuOpen={mobileMenuOpen}
+      />
       <div className="flex flex-1 relative">
         {/* Subtle background ambient warm white glow */}
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -33,13 +39,21 @@ export const AppLayout: React.FC = () => {
           <div className="absolute top-1/2 left-1/3 h-96 w-96 rounded-full bg-white/[0.015] blur-[160px]" />
         </div>
 
-        {isAuthenticated && <Sidebar />}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 relative z-10">
+        {isAuthenticated && (
+          <Sidebar
+            mobileOpen={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+          />
+        )}
+        <main className="flex-1 overflow-y-auto p-3 xs:p-4 sm:p-6 md:p-8 pb-24 lg:pb-8 relative z-10">
           <div className="mx-auto max-w-6xl">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {isAuthenticated && <MobileBottomNav />}
+      <PwaInstallPrompt />
     </div>
   );
 };

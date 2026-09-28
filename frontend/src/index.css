@@ -88,3 +88,22 @@
   border-color: rgba(250, 248, 245, 0.3);
   box-shadow: 0 0 15px -3px rgba(250, 248, 245, 0.12);
 }
+
+/* Mobile & PWA Safe Area Utilities */
+.safe-area-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.safe-area-top {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

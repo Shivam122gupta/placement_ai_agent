@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, UserCircle, Bell, CheckCircle2, Briefcase, Calendar, Info } from 'lucide-react';
+import { LogOut, UserCircle, Bell, CheckCircle2, Briefcase, Calendar, Info, Menu, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { notificationService } from '../../services/notificationService';
 import { InAppNotification } from '../../types/notification';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  onToggleMobileMenu?: () => void;
+  isMobileMenuOpen?: boolean;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenuOpen = false }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
@@ -86,26 +91,37 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#FAF8F5]/10 bg-[#080607]/90 px-6 backdrop-blur-xl">
-      <div className="flex items-center gap-4">
-        <Link to="/dashboard" className="flex items-center gap-3 group">
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#FAF8F5]/10 bg-[#080607]/90 px-3 sm:px-6 backdrop-blur-xl">
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Mobile Hamburger Menu Toggle */}
+        {user && onToggleMobileMenu && (
+          <button
+            onClick={onToggleMobileMenu}
+            className="lg:hidden p-2 rounded-xl bg-white/[0.03] hover:bg-[#FAF8F5]/10 text-neutral-300 hover:text-white border border-[#FAF8F5]/15 transition cursor-pointer"
+            aria-label="Toggle navigation menu"
+          >
+            {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        )}
+
+        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 sm:gap-3 group">
           <img
             src="/hirxora-logo-2.jpg"
             alt="Hirxora"
-            className="w-9 h-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 group-hover:scale-105 transition"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 group-hover:scale-105 transition shrink-0"
           />
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-normal tracking-tight text-[#FAF8F5] font-serif">Hirxora</span>
-            <span className="rounded-full bg-[#FAF8F5]/10 px-2 py-0.5 text-[10px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/25">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-lg sm:text-xl font-normal tracking-tight text-[#FAF8F5] font-serif">Hirxora</span>
+            <span className="rounded-full bg-[#FAF8F5]/10 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/25">
               Copilot
             </span>
           </div>
         </Link>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {user ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Notification Bell Dropdown */}
             <div className="relative" ref={drawerRef}>
               <button
@@ -123,7 +139,7 @@ export const Navbar: React.FC = () => {
 
               {/* Dropdown Menu */}
               {showDrawer && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#121214] border border-[#FAF8F5]/20 shadow-2xl shadow-black/80 p-4 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+                <div className="absolute right-0 mt-2 w-72 sm:w-96 rounded-2xl bg-[#121214] border border-[#FAF8F5]/20 shadow-2xl shadow-black/80 p-4 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-3">
                   <div className="flex items-center justify-between border-b border-[#FAF8F5]/10 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-white text-sm">Notifications</span>
@@ -187,31 +203,32 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/profile"
-              className="flex items-center gap-2 rounded-xl bg-white/[0.03] px-3.5 py-1.5 text-xs text-[#FAF8F5] hover:bg-[#FAF8F5]/10 hover:text-white border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-white/[0.03] px-2.5 sm:px-3.5 py-1.5 text-xs text-[#FAF8F5] hover:bg-[#FAF8F5]/10 hover:text-white border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition"
             >
-              <UserCircle className="h-4 w-4 text-[#FAF8F5]" />
-              <span className="font-medium truncate max-w-[140px]">{user.email}</span>
+              <UserCircle className="h-4 w-4 text-[#FAF8F5] shrink-0" />
+              <span className="font-medium truncate max-w-[80px] xs:max-w-[120px] sm:max-w-[160px]">{user.email}</span>
             </Link>
+            
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs text-neutral-400 hover:bg-[#FAF8F5]/10 hover:text-white border border-transparent hover:border-[#FAF8F5]/20 transition cursor-pointer"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 py-1.5 text-xs text-neutral-400 hover:bg-[#FAF8F5]/10 hover:text-white border border-transparent hover:border-[#FAF8F5]/20 transition cursor-pointer"
               title="Logout"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>Logout</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/login"
-              className="rounded-xl px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white transition"
+              className="rounded-xl px-3 sm:px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white transition"
             >
               Sign In
             </Link>
             <Link
               to="/register"
-              className="rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE0] px-4 py-2 text-xs font-semibold text-black shadow-md shadow-white/20 transition"
+              className="rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE0] px-3 sm:px-4 py-2 text-xs font-semibold text-black shadow-md shadow-white/20 transition"
             >
               Get Started
             </Link>

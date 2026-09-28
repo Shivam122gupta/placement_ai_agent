@@ -1,0 +1,48 @@
+{
+  "name": "Hirxora — Autonomous Career & Placement Copilot",
+  "short_name": "Hirxora",
+  "description": "AI-powered career command center for resume ATS scoring, job matching, skill gap roadmaps, and mock interview practice.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090708",
+  "theme_color": "#090708",
+  "categories": ["productivity", "education", "business"],
+  "icons": [
+    {
+      "src": "/hirxora-logo-2.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/hirxora-logo-2.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View career stats and metrics"
+    },
+    {
+      "name": "AI Career Copilot",
+      "url": "/assistant",
+      "description": "Chat with AI career advisor"
+    },
+    {
+      "name": "Job Discovery",
+      "url": "/jobs",
+      "description": "Find matching job openings"
+    },
+    {
+      "name": "Resume Scanner",
+      "url": "/resumes",
+      "description": "Upload and scan resume for ATS"
+    }
+  ]
+}

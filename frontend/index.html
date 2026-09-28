@@ -3,9 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/jpeg" href="/hirxora-logo-2.jpg" />
-    <link rel="apple-touch-icon" href="/hirxora-logo-2.jpg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/hirxora-logo-2.jpg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <meta name="theme-color" content="#090708" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Hirxora" />
+    <meta name="application-name" content="Hirxora" />
+    <meta name="msapplication-TileColor" content="#090708" />
     <title>Hirxora — Autonomous Career & Placement Copilot</title>
     <meta name="description" content="Hirxora is an autonomous AI career copilot empowering students and job seekers with instant resume parsing, ATS scoring, JD matching, skill gap roadmaps, and realistic mock interview simulations." />
     <link rel="canonical" href="https://hirxora.ai/" />
@@ -33,5 +40,14 @@
   <body class="bg-[#090708] text-[#FFF0EE] font-sans antialiased min-h-screen selection:bg-[#FF6B6B] selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('Hirxora PWA ServiceWorker registered with scope:', reg.scope))
+            .catch((err) => console.warn('Hirxora PWA ServiceWorker registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
