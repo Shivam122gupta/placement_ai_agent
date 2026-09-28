@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { agentService } from '../services/agentService';
 import { AgentChatMessage, PendingConfirmation } from '../types/agent';
-import { ToolExecutionPill } from '../components/agent/ToolExecutionPill';
 import { ActionConfirmationCard } from '../components/agent/ActionConfirmationCard';
 
 export const AssistantPage: React.FC = () => {
@@ -16,7 +15,7 @@ export const AssistantPage: React.FC = () => {
       id: 'welcome_msg',
       role: 'assistant',
       content:
-        "👋 Hello! I am **Hirxora AI Career Copilot**.\n\nI can inspect your active profile, search live tech jobs & internships, evaluate your match score with deterministic evidence, diagnose skill gaps, and generate customized 2-week study plans.\n\nHow can I assist your placement preparation today?",
+        "👋 Hello! I am your Hirxora AI Career Copilot.\n\nI can review your profile, search matching jobs and internships, check your match score, identify skill gaps, and create customized 2-week study roadmaps.\n\nHow can I help you with your career and placement preparation today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -35,6 +34,47 @@ export const AssistantPage: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  const renderCleanContent = (text: string) => {
+    if (!text) return null;
+    
+    // Split into lines and clean up any stray raw markdown artifacts
+    const lines = text.split('\n');
+    return (
+      <div className="space-y-1.5">
+        {lines.map((line, idx) => {
+          let cleaned = line.trim();
+          if (!cleaned) return <div key={idx} className="h-1.5" />;
+          
+          // Clean leading markdown headers (### Header -> Header)
+          if (cleaned.startsWith('#')) {
+            cleaned = cleaned.replace(/^#+\s*/, '');
+            return (
+              <p key={idx} className="font-semibold text-[#FAF8F5] text-sm pt-1">
+                {cleaned.replace(/\*\*/g, '')}
+              </p>
+            );
+          }
+
+          // Bullet point handling
+          const isBullet = cleaned.startsWith('- ') || cleaned.startsWith('• ') || cleaned.startsWith('* ');
+          if (isBullet) {
+            const bulletText = cleaned.replace(/^[-•*]\s*/, '').replace(/\*\*/g, '');
+            return (
+              <div key={idx} className="flex items-start gap-2 pl-2">
+                <span className="text-[#FAF8F5]/60 mt-1">•</span>
+                <span>{bulletText}</span>
+              </div>
+            );
+          }
+
+          // Plain text line with asterisks removed
+          const plainText = cleaned.replace(/\*\*/g, '').replace(/\*/g, '');
+          return <p key={idx}>{plainText}</p>;
+        })}
+      </div>
+    );
+  };
 
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend || input).trim();
@@ -124,12 +164,12 @@ export const AssistantPage: React.FC = () => {
           />
           <div>
             <h1 className="text-sm md:text-base font-serif font-normal text-white flex items-center gap-2">
-              <span>Autonomous Career Copilot</span>
+              <span>Career Copilot Assistant</span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#FAF8F5]/10 text-[#FAF8F5] border border-[#FAF8F5]/25">
-                ReAct + Grounded Tools
+                AI Active
               </span>
             </h1>
-            <p className="text-xs text-neutral-400 font-sans">Multi-step autonomous reasoning with safety guardrails</p>
+            <p className="text-xs text-neutral-400 font-sans">Personalized career guidance and placement assistant</p>
           </div>
         </div>
 
@@ -164,24 +204,15 @@ export const AssistantPage: React.FC = () => {
             </div>
 
             <div className={`max-w-2xl space-y-2 ${msg.role === 'user' ? 'items-end' : ''}`}>
-              {/* Tool Execution Badges */}
-              {msg.tool_audits && msg.tool_audits.length > 0 && (
-                <div className="flex flex-wrap items-center mb-2">
-                  {msg.tool_audits.map((audit, aIdx) => (
-                    <ToolExecutionPill key={aIdx} audit={audit} />
-                  ))}
-                </div>
-              )}
-
               {/* Message Bubble */}
               <div
                 className={`p-4 rounded-2xl text-xs md:text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-[#FAF8F5] text-black font-medium shadow-md shadow-white/10'
-                    : 'bg-[#18181B] border border-[#FAF8F5]/15 text-neutral-200 whitespace-pre-wrap shadow-sm font-sans'
+                    : 'bg-[#18181B] border border-[#FAF8F5]/15 text-neutral-200 shadow-sm font-sans'
                 }`}
               >
-                {msg.content}
+                {msg.role === 'user' ? msg.content : renderCleanContent(msg.content)}
               </div>
 
               {/* Action Confirmation Card if pending */}
@@ -205,7 +236,7 @@ export const AssistantPage: React.FC = () => {
               <div className="w-1.5 h-1.5 rounded-full bg-[#FAF8F5] animate-bounce" style={{ animationDelay: '150ms' }} />
               <div className="w-1.5 h-1.5 rounded-full bg-[#FAF8F5] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span className="font-mono text-[#FAF8F5]/80">Agent is planning and reasoning over tools...</span>
+            <span className="font-sans text-[#FAF8F5]/80">AI Assistant is thinking...</span>
           </div>
         )}
 

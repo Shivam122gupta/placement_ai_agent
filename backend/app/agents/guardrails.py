@@ -40,9 +40,21 @@ class SafetyGuardrails:
 
     @staticmethod
     def sanitize_output(text: str) -> str:
-        """Sanitizes output against prompt leaks or raw token dump."""
+        """Sanitizes output against prompt leaks, raw token dump, and ugly raw markdown syntax."""
         if not text:
             return ""
-        # Strip system prompt leakage markers if any
         sanitized = text.replace("SYSTEM_PROMPT:", "").strip()
-        return sanitized
+        # Remove bold asterisks (e.g. **word** -> word)
+        sanitized = sanitized.replace("**", "")
+        # Remove markdown heading hashes at line starts (e.g. ### Title -> Title)
+        lines = []
+        for line in sanitized.split("\n"):
+            stripped = line.lstrip()
+            if stripped.startswith("#"):
+                # Remove leading hashes and space
+                line = stripped.lstrip("#").strip()
+            # Replace bullet asterisks (* item -> - item)
+            elif stripped.startswith("* "):
+                line = "- " + stripped[2:]
+            lines.append(line)
+        return "\n".join(lines).strip()

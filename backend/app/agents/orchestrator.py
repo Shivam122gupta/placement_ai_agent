@@ -21,7 +21,7 @@ class LLMPlanStep(BaseModel):
     action_type: str = Field(..., description="'CALL_TOOL' or 'FINAL_RESPONSE'")
     tool_name: Optional[str] = Field(default=None, description="Name of tool to execute")
     tool_params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Parameters dictionary")
-    final_answer: Optional[str] = Field(default=None, description="Complete, helpful markdown response to the user")
+    final_answer: Optional[str] = Field(default=None, description="Complete, natural, and helpful plain response to the user")
     thought: Optional[str] = Field(default=None, description="Internal reasoning step")
 
 
@@ -44,7 +44,7 @@ class AgentOrchestrator:
 
         tools_prompt_spec = tool_registry.get_tools_description_prompt()
         system_prompt = (
-            "You are the AI Placement Agent — an elite career copilot and placement advisor.\n"
+            "You are the Hirxora AI Career Copilot — a friendly, expert, and articulate career and placement advisor.\n"
             "Your goal is to actively assist students and candidates by analyzing their profiles, finding target jobs, "
             "evaluating match fit, bridging skill gaps with study roadmaps, and guiding career applications.\n\n"
             "AVAILABLE TOOLS:\n"
@@ -53,8 +53,14 @@ class AgentOrchestrator:
             "1. Plan your steps carefully. If you need information, call the appropriate tool.\n"
             "2. When calling a tool, specify action_type='CALL_TOOL', tool_name, and valid tool_params.\n"
             "3. Once you have gathered sufficient information to answer the candidate completely, specify action_type='FINAL_RESPONSE' "
-            "and provide a structured, encouraging, and detailed markdown response in final_answer.\n"
-            "4. NEVER fabricate facts or imagine tool outputs. Base all advice strictly on returned data."
+            "and provide a clear, conversational, and beautifully formatted response in final_answer.\n"
+            "4. IMPORTANT FORMATTING RULES FOR final_answer:\n"
+            "   - Write in natural, easy-to-read human text.\n"
+            "   - DO NOT overuse markdown asterisks (no **bold** stars or *italic* stars).\n"
+            "   - DO NOT use markdown heading hashes (no ### or ## headers).\n"
+            "   - DO NOT mention raw internal tool names (like 'get_candidate_profile', 'search_jobs', etc.). Talk like a human career counselor.\n"
+            "   - Use clean paragraphs, standard numbers (1., 2., 3.), or clean hyphens (-) for lists.\n"
+            "5. NEVER fabricate facts or imagine tool outputs. Base all advice strictly on returned data."
         )
 
         start_time = time.time()
