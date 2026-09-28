@@ -48,9 +48,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from app.core.rate_limiter import RateLimiterMiddleware
+
 # ----------------- Middlewares -----------------
 
-# 1. Request ID, Timing & Security Headers Middleware
+# 1. Sliding-Window Rate Limiting & DoS Protection Middleware
+app.add_middleware(RateLimiterMiddleware)
+
+# 2. Request ID, Timing & Hardened Security Headers Middleware
 @app.middleware("http")
 async def add_security_headers_and_timing(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
@@ -63,15 +68,18 @@ async def add_security_headers_and_timing(request: Request, call_next):
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time-Seconds"] = f"{process_time:.4f}"
     
-    # HTTP Security Headers
+    # Production-Grade HTTP Security Headers
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     return response
 
-# 2. CORS Middleware
+# 3. CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

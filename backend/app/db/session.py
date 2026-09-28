@@ -39,11 +39,15 @@ async def init_db(mongodb_url: str = None, db_name: str = None):
     
     logger.info(f"Connecting to MongoDB database: {database_name}...")
     
-    # Motor client options with SSL certifi support and production-grade timeouts
+    # Motor client options with SSL certifi support, connection pooling, and production-grade timeouts
     client_kwargs = {
         "serverSelectionTimeoutMS": 20000,
         "connectTimeoutMS": 20000,
         "socketTimeoutMS": 30000,
+        "maxPoolSize": 50,
+        "minPoolSize": 5,
+        "maxIdleTimeMS": 30000,
+        "waitQueueTimeoutMS": 5000,
     }
     if "mongodb+srv://" in url or "ssl=true" in url.lower():
         client_kwargs["tlsCAFile"] = certifi.where()
