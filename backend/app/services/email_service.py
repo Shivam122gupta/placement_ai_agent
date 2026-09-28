@@ -148,9 +148,10 @@ class EmailService:
     @staticmethod
     def _send_smtp_sync(to_email: str, subject: str, html_body: str, text_body: str) -> bool:
         try:
+            from_addr = settings.SMTP_USER if (not settings.EMAILS_FROM_EMAIL or settings.EMAILS_FROM_EMAIL == "noreply@hirxora.ai") else settings.EMAILS_FROM_EMAIL
             msg = MIMEMultipart("alternative")
             msg["Subject"] = subject
-            msg["From"] = f"{settings.EMAILS_FROM_NAME} <{settings.EMAILS_FROM_EMAIL}>"
+            msg["From"] = f"{settings.EMAILS_FROM_NAME} <{from_addr}>"
             msg["To"] = to_email
 
             part1 = MIMEText(text_body, "plain", "utf-8")
@@ -162,13 +163,13 @@ class EmailService:
                 context = ssl.create_default_context()
                 with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context, timeout=20) as server:
                     server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                    server.sendmail(settings.EMAILS_FROM_EMAIL, to_email, msg.as_string())
+                    server.sendmail(from_addr, to_email, msg.as_string())
             else:
                 with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
                     if settings.SMTP_TLS:
                         server.starttls()
                     server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                    server.sendmail(settings.EMAILS_FROM_EMAIL, to_email, msg.as_string())
+                    server.sendmail(from_addr, to_email, msg.as_string())
 
             logger.info(f"✅ Email successfully dispatched to {to_email} via SMTP ({settings.SMTP_HOST})")
             return True
