@@ -73,7 +73,7 @@ def _get_redis():
         return _redis_client
     except Exception as e:
         _redis_available = False
-        logger.warning("Token blacklist: Redis unavailable (%s). Using in-memory fallback.", e)
+        logger.info("Token blacklist: Redis not configured — using in-memory fallback. (Reason: %s)", e)
         return None
 
 
