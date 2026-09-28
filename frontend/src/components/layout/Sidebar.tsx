@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   User,
@@ -10,9 +10,11 @@ import {
   Send,
   Bot,
   Database,
-  Settings,
   X,
+  LogOut,
+  UserCircle,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -32,89 +34,105 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    if (onClose) onClose();
+    try {
+      await logout();
+    } finally {
+      navigate('/');
+    }
+  };
+
   const content = (
-    <div className="flex flex-col justify-between h-full p-4">
+    <div className="flex flex-col justify-between h-full p-4 overflow-y-auto">
       <div className="space-y-1.5">
+        {/* Header inside sidebar */}
         <div className="px-3 py-2 flex items-center justify-between">
-          <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">
-            Navigation
-          </span>
-          {onClose ? (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-[#FAF8F5]/70">
+              Hirxora Hub
+            </span>
+            <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Online
+            </span>
+          </div>
+
+          {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition"
+              className="lg:hidden p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
               aria-label="Close menu"
             >
               <X className="h-4 w-4" />
             </button>
-          ) : (
-            <span className="flex items-center gap-1 text-[10px] text-neutral-400 font-mono">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#FAF8F5] animate-pulse" />
-              Live
-            </span>
           )}
         </div>
 
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={() => onClose && onClose()}
-              className={({ isActive }) =>
-                `group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'bg-[#FAF8F5]/15 text-[#FAF8F5] border border-[#FAF8F5]/30 shadow-[0_0_20px_rgba(250,248,245,0.08)] font-semibold'
-                    : 'text-neutral-400 hover:bg-white/[0.04] hover:text-[#FAF8F5] border border-transparent'
-                }`
-              }
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-neutral-300 group-hover:text-[#FAF8F5] group-hover:border-[#FAF8F5]/30 transition">
-                  <Icon className="h-3.5 w-3.5" />
+        {/* Nav Links */}
+        <div className="space-y-1 pt-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => onClose && onClose()}
+                className={({ isActive }) =>
+                  `group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'bg-[#FAF8F5]/15 text-[#FAF8F5] border border-[#FAF8F5]/30 shadow-[0_0_20px_rgba(250,248,245,0.08)] font-semibold'
+                      : 'text-neutral-400 hover:bg-white/[0.04] hover:text-[#FAF8F5] border border-transparent'
+                  }`
+                }
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-neutral-300 group-hover:text-[#FAF8F5] group-hover:border-[#FAF8F5]/30 transition shrink-0">
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="tracking-tight truncate">{item.name}</span>
                 </div>
-                <span className="tracking-tight">{item.name}</span>
-              </div>
-              {item.badge && (
-                <span className="rounded-md bg-[#FAF8F5]/10 px-1.5 py-0.5 text-[9px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/20">
-                  {item.badge}
-                </span>
-              )}
-            </NavLink>
-          );
-        })}
+                {item.badge && (
+                  <span className="rounded-md bg-[#FAF8F5]/10 px-1.5 py-0.5 text-[9px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/20 shrink-0">
+                    {item.badge}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="pt-4 border-t border-[#FAF8F5]/10 space-y-2">
-        <div className="p-3.5 rounded-2xl bg-[#121214] border border-[#FAF8F5]/10 shadow-sm">
-          <div className="flex items-center gap-2.5">
-            <img
-              src="/hirxora-logo-2.jpg"
-              alt="Hirxora Copilot"
-              className="w-7 h-7 rounded-lg object-cover border border-white/20 shadow-sm shrink-0"
-            />
-            <div>
-              <div className="text-xs font-semibold text-[#FAF8F5] leading-tight">AI Copilot Ready</div>
-              <p className="text-[10px] text-[#E8E2D6]/70 leading-tight mt-0.5">
-                RAG & Reasoning Grounded
-              </p>
+      {/* Bottom User Profile & Logout Section */}
+      <div className="pt-4 border-t border-[#FAF8F5]/10 space-y-2.5 mt-4">
+        {/* User Card */}
+        {user && (
+          <NavLink
+            to="/profile"
+            onClick={() => onClose && onClose()}
+            className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-[#121214] border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/40 transition group"
+          >
+            <div className="h-8 w-8 rounded-xl bg-[#FAF8F5]/10 border border-[#FAF8F5]/20 flex items-center justify-center text-[#FAF8F5] shrink-0">
+              <UserCircle className="h-5 w-5" />
             </div>
-          </div>
-        </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-white truncate group-hover:text-[#FAF8F5]">{user.email}</p>
+              <span className="text-[10px] text-neutral-400 font-mono">View Profile & Settings</span>
+            </div>
+          </NavLink>
+        )}
 
-        <NavLink
-          to="/profile"
-          onClick={() => onClose && onClose()}
-          className={({ isActive }) =>
-            `flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition ${
-              isActive ? 'bg-[#FAF8F5]/15 text-white font-semibold' : 'text-neutral-400 hover:bg-white/[0.03] hover:text-[#FAF8F5]'
-            }`
-          }
+        {/* Clear, Prominent Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 px-3 py-2.5 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-sm"
         >
-          <Settings className="h-3.5 w-3.5 text-[#FAF8F5]/70" />
-          <span>Settings & Profile</span>
-        </NavLink>
+          <LogOut className="h-3.5 w-3.5" />
+          <span>Log Out Account</span>
+        </button>
       </div>
     </div>
   );
@@ -131,7 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose })
         <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
             onClick={onClose}
           />
           {/* Drawer Sheet */}

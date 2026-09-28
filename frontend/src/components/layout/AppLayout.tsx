@@ -52,7 +52,7 @@ export const AppLayout: React.FC = () => {
         </main>
       </div>
 
-      {isAuthenticated && <MobileBottomNav />}
+      {isAuthenticated && <MobileBottomNav onOpenMenu={() => setMobileMenuOpen(true)} />}
       <PwaInstallPrompt />
     </div>
   );

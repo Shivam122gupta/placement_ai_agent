@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, UserCircle, Bell, CheckCircle2, Briefcase, Calendar, Info, Menu, X } from 'lucide-react';
+import { LogOut, UserCircle, Bell, CheckCircle2, Briefcase, Calendar, Info, Menu, X, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { notificationService } from '../../services/notificationService';
 import { InAppNotification } from '../../types/notification';
@@ -14,29 +14,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
-  const [showDrawer, setShowDrawer] = useState<boolean>(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
+  const [showNotifDrawer, setShowNotifDrawer] = useState<boolean>(false);
+  const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000); // 30s poll
+      const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
   }, [user]);
 
-  // Click outside to close notification drawer
+  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
-        setShowDrawer(false);
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifDrawer(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
       }
     };
-    if (showDrawer) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showDrawer]);
+  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -68,6 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
   };
 
   const handleLogout = async () => {
+    setShowUserMenu(false);
     try {
       await logout();
     } finally {
@@ -91,41 +95,42 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#FAF8F5]/10 bg-[#080607]/90 px-3 sm:px-6 backdrop-blur-xl">
-      <div className="flex items-center gap-2 sm:gap-4">
-        {/* Mobile Hamburger Menu Toggle */}
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#FAF8F5]/10 bg-[#080607]/95 px-3 sm:px-6 backdrop-blur-xl">
+      {/* Left side: Hamburger + Brand */}
+      <div className="flex items-center gap-2 sm:gap-3">
         {user && onToggleMobileMenu && (
           <button
             onClick={onToggleMobileMenu}
-            className="lg:hidden p-2 rounded-xl bg-white/[0.03] hover:bg-[#FAF8F5]/10 text-neutral-300 hover:text-white border border-[#FAF8F5]/15 transition cursor-pointer"
+            className="lg:hidden p-2 rounded-xl bg-white/[0.04] hover:bg-[#FAF8F5]/10 text-neutral-300 hover:text-white border border-[#FAF8F5]/15 transition cursor-pointer shrink-0"
             aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         )}
 
-        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 sm:gap-3 group">
+        <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 sm:gap-2.5 group">
           <img
             src="/hirxora-logo-2.jpg"
             alt="Hirxora"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 group-hover:scale-105 transition shrink-0"
+            className="w-8 h-8 rounded-xl object-cover border border-white/20 shadow-md shadow-[#FF6B6B]/20 group-hover:scale-105 transition shrink-0"
           />
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-lg sm:text-xl font-normal tracking-tight text-[#FAF8F5] font-serif">Hirxora</span>
-            <span className="rounded-full bg-[#FAF8F5]/10 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/25">
-              Copilot
+            <span className="hidden xs:inline-block rounded-full bg-[#FAF8F5]/10 px-1.5 py-0.5 text-[9px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/25">
+              AI Copilot
             </span>
           </div>
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      {/* Right side: Notifications + User Dropdown + Logout */}
+      <div className="flex items-center gap-2 sm:gap-3">
         {user ? (
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            {/* Notification Bell Dropdown */}
-            <div className="relative" ref={drawerRef}>
+          <div className="flex items-center gap-2">
+            {/* Notification Bell */}
+            <div className="relative" ref={notifRef}>
               <button
-                onClick={() => setShowDrawer(!showDrawer)}
+                onClick={() => setShowNotifDrawer(!showNotifDrawer)}
                 className="relative p-2 rounded-xl bg-white/[0.03] hover:bg-[#FAF8F5]/10 text-neutral-300 hover:text-white border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition cursor-pointer"
                 title="Notifications"
               >
@@ -137,8 +142,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
                 )}
               </button>
 
-              {/* Dropdown Menu */}
-              {showDrawer && (
+              {/* Notification Drawer Dropdown */}
+              {showNotifDrawer && (
                 <div className="absolute right-0 mt-2 w-72 sm:w-96 rounded-2xl bg-[#121214] border border-[#FAF8F5]/20 shadow-2xl shadow-black/80 p-4 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-3">
                   <div className="flex items-center justify-between border-b border-[#FAF8F5]/10 pb-3">
                     <div className="flex items-center gap-2">
@@ -159,7 +164,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
                     )}
                   </div>
 
-                  {/* List of notifications */}
                   <div className="max-h-80 overflow-y-auto space-y-2.5 pr-1">
                     {notifications.length === 0 ? (
                       <div className="py-8 text-center text-neutral-500 text-xs font-mono">
@@ -201,21 +205,55 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
               )}
             </div>
 
-            <Link
-              to="/profile"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-white/[0.03] px-2.5 sm:px-3.5 py-1.5 text-xs text-[#FAF8F5] hover:bg-[#FAF8F5]/10 hover:text-white border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition"
-            >
-              <UserCircle className="h-4 w-4 text-[#FAF8F5] shrink-0" />
-              <span className="font-medium truncate max-w-[80px] xs:max-w-[120px] sm:max-w-[160px]">{user.email}</span>
-            </Link>
-            
+            {/* User Profile & Logout Popover Dropdown */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 rounded-xl bg-white/[0.03] hover:bg-[#FAF8F5]/10 px-2.5 sm:px-3 py-1.5 text-xs text-[#FAF8F5] border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition cursor-pointer"
+                title="Account Menu"
+              >
+                <UserCircle className="h-4 w-4 text-[#FAF8F5] shrink-0" />
+                <span className="hidden sm:inline font-medium truncate max-w-[120px]">{user.email}</span>
+                <ChevronDown className="h-3 w-3 text-neutral-400" />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#121214] border border-[#FAF8F5]/20 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-2">
+                  <div className="p-2.5 rounded-xl bg-[#18181B] border border-[#FAF8F5]/10">
+                    <p className="text-xs font-semibold text-white truncate">{user.email}</p>
+                    <span className="text-[10px] text-emerald-400 font-mono">Logged in & Active</span>
+                  </div>
+
+                  <Link
+                    to="/profile"
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-neutral-300 hover:text-white hover:bg-white/[0.04] rounded-xl transition"
+                  >
+                    <UserCircle className="h-4 w-4 text-[#FAF8F5]" />
+                    <span>Candidate Profile & Settings</span>
+                  </Link>
+
+                  <div className="pt-2 border-t border-[#FAF8F5]/10">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition cursor-pointer font-medium"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Direct Instant Logout Button on Desktop */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 py-1.5 text-xs text-neutral-400 hover:bg-[#FAF8F5]/10 hover:text-white border border-transparent hover:border-[#FAF8F5]/20 transition cursor-pointer"
-              title="Logout"
+              className="hidden md:flex items-center gap-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 px-3 py-1.5 text-xs font-medium transition cursor-pointer active:scale-95"
+              title="Log Out"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Logout</span>
+              <span>Log Out</span>
             </button>
           </div>
         ) : (
@@ -228,7 +266,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
             </Link>
             <Link
               to="/register"
-              className="rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE0] px-3 sm:px-4 py-2 text-xs font-semibold text-black shadow-md shadow-white/20 transition"
+              className="rounded-xl bg-[#FAF8F5] hover:bg-[#F2ECE0] px-3.5 sm:px-4 py-2 text-xs font-semibold text-black shadow-md shadow-white/20 transition"
             >
               Get Started
             </Link>

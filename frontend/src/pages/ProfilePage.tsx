@@ -17,12 +17,15 @@ import {
   Mail,
   ShieldCheck,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -787,6 +790,27 @@ export const ProfilePage: React.FC = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Account Actions & Logout Card */}
+      <div className="rounded-2xl sm:rounded-3xl border border-[#FAF8F5]/15 bg-[#121214] p-5 sm:p-7 shadow-xl space-y-4">
+        <h3 className="text-sm font-semibold text-white">Account Management</h3>
+        <p className="text-xs text-neutral-400">
+          Currently signed in as <strong className="text-white">{user?.email}</strong>.
+        </p>
+        <button
+          onClick={async () => {
+            try {
+              await logout();
+            } finally {
+              navigate('/');
+            }
+          }}
+          className="inline-flex items-center gap-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 px-5 py-2.5 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-sm"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Log Out of Hirxora</span>
+        </button>
       </div>
     </div>
   );
