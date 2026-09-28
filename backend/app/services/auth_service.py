@@ -154,7 +154,11 @@ class AuthService:
         if not user or not user.reset_password_expires_at:
             raise AuthenticationError("Invalid or expired password reset token", code="INVALID_RESET_TOKEN")
 
-        if datetime.now(timezone.utc) > user.reset_password_expires_at:
+        expires_at = user.reset_password_expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+        if datetime.now(timezone.utc) > expires_at:
             raise AuthenticationError("Password reset token has expired", code="EXPIRED_RESET_TOKEN")
 
         user.hashed_password = get_password_hash(new_password)
