@@ -39,6 +39,10 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class LogoutRequest(BaseModel):
+    refresh_token: Optional[str] = None  # Client should send this so it can be blacklisted
+
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 

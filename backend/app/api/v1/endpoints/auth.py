@@ -4,6 +4,7 @@ from app.schemas.auth import (
     UserLoginRequest,
     TokenResponse,
     RefreshTokenRequest,
+    LogoutRequest,
     ForgotPasswordRequest,
     ResetPasswordRequest,
     VerifyEmailRequest,
@@ -66,8 +67,13 @@ async def refresh_tokens(req: RefreshTokenRequest):
 
 
 @router.post("/logout", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
-async def logout(current_user: UserDocument = Depends(get_current_active_user)):
-    # In stateless JWT, clients discard tokens. For server-side revocation, blacklisting in Redis is handled in Phase 10.
+async def logout(
+    req: LogoutRequest,
+    current_user: UserDocument = Depends(get_current_active_user),
+):
+    # Server-side token revocation: blacklist the refresh token so it cannot be reused.
+    if req.refresh_token:
+        await AuthService.logout(req.refresh_token)
     return StandardResponse(
         success=True,
         message="Logged out successfully",

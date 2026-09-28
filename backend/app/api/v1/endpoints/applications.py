@@ -55,8 +55,8 @@ async def create_application(
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(ve))
     except Exception as e:
-        logger.error("Failed to create application: %s", e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        logger.error("Failed to create application: %s", e, exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An internal error occurred. Please try again.")
 
 
 @router.get("", response_model=List[ApplicationResponse], summary="List tracked job applications")
@@ -116,8 +116,8 @@ async def update_application(
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
     except Exception as e:
-        logger.error("Failed to update application: %s", e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        logger.error("Failed to update application: %s", e, exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An internal error occurred. Please try again.")
 
 
 @router.delete("/{application_id}", summary="Delete an application record")

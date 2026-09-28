@@ -86,7 +86,13 @@ async def init_db(mongodb_url: str = None, db_name: str = None):
             last_err = err
             logger.warning(f"MongoDB connection attempt {attempt}/{max_retries} failed: {err}")
 
-    # Fallback to in-memory mock only if external connection completely fails after retries
+    # Fallback to in-memory mock only for non-production environments
+    if settings.ENVIRONMENT == "production":
+        raise RuntimeError(
+            f"FATAL: Cannot connect to MongoDB in production after {max_retries} attempts. "
+            f"Last error: {last_err}. Check MONGODB_URL environment variable on Render."
+        )
+
     logger.warning(
         f"Could not connect to external MongoDB after {max_retries} attempts ({last_err}). "
         "Falling back to local in-memory mock MongoDB for testing."

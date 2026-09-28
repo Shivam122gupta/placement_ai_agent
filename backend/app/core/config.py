@@ -14,8 +14,8 @@ class Settings(BaseSettings):
 
     # 1. Project & Environment
     PROJECT_NAME: str = "AI Placement Agent"
-    ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    ENVIRONMENT: str = "production"  # Default to production — always override for local dev
+    DEBUG: bool = False              # Default to False — explicitly set True only in local dev
     API_V1_STR: str = "/api/v1"
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5173",

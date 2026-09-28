@@ -26,8 +26,10 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
+    const refreshToken = localStorage.getItem('refresh_token');
     try {
-      await apiClient.post('/auth/logout');
+      // Send refresh_token so backend can blacklist it (server-side revocation)
+      await apiClient.post('/auth/logout', { refresh_token: refreshToken });
     } finally {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');

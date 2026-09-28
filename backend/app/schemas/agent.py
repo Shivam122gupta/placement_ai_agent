@@ -4,7 +4,7 @@ from app.agents.state import ToolCallAudit, PendingConfirmation
 
 
 class AgentChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, description="Candidate prompt or question")
+    message: str = Field(..., min_length=1, max_length=4000, description="Candidate prompt or question")
     session_id: Optional[str] = None
 
 

@@ -10,6 +10,7 @@ from app.core.security import (
     decode_refresh_token,
 )
 from app.core.exceptions import AuthenticationError, ConflictError, ResourceNotFoundError
+from app.core.token_blacklist import blacklist_token, is_blacklisted
 import logging
 from app.models.user import UserDocument
 from app.models.profile import ProfileDocument
@@ -106,6 +107,10 @@ class AuthService:
 
     @staticmethod
     async def refresh_tokens(refresh_token: str) -> TokenResponse:
+        # 0. Blacklist check — reject revoked tokens immediately
+        if is_blacklisted(refresh_token):
+            raise AuthenticationError("Refresh token has been revoked. Please login again.", code="TOKEN_REVOKED")
+
         try:
             payload = decode_refresh_token(refresh_token)
             if payload.get("type") != "refresh":
@@ -113,12 +118,22 @@ class AuthService:
             user_id = payload.get("sub")
             if not user_id:
                 raise AuthenticationError("Invalid token payload", code="INVALID_TOKEN")
+        except AuthenticationError:
+            raise
         except Exception:
             raise AuthenticationError("Refresh token is expired or invalid", code="REFRESH_TOKEN_INVALID")
 
         user = await UserDocument.get(PydanticObjectId(user_id))
         if not user or not user.is_active:
             raise AuthenticationError("User not found or inactive", code="USER_INACTIVE")
+
+        # Rotate: blacklist the old refresh token so it can't be reused
+        try:
+            exp = payload.get("exp", 0)
+            remaining_ttl = max(1, int(exp - datetime.now(timezone.utc).timestamp()))
+        except Exception:
+            remaining_ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400
+        blacklist_token(refresh_token, remaining_ttl)
 
         new_access_token = create_access_token(subject=str(user.id))
         new_refresh_token = create_refresh_token(subject=str(user.id))
@@ -131,7 +146,26 @@ class AuthService:
         )
 
     @staticmethod
+    async def logout(refresh_token: str) -> None:
+        """
+        Revokes the provided refresh token so it cannot be used again,
+        even if it hasn't expired yet (server-side session invalidation).
+        """
+        if not refresh_token:
+            return
+        try:
+            payload = decode_refresh_token(refresh_token)
+            exp = payload.get("exp", 0)
+            remaining_ttl = max(1, int(exp - datetime.now(timezone.utc).timestamp()))
+        except Exception:
+            # Token may be expired/invalid — still blacklist for safety
+            remaining_ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400
+        blacklist_token(refresh_token, remaining_ttl)
+        logger.info("Refresh token revoked on logout (ttl=%ds)", remaining_ttl)
+
+    @staticmethod
     async def request_password_reset(email: str) -> str:
+
         user = await UserDocument.find_one(UserDocument.email == email.lower())
         if not user:
             # We still return success to prevent email enumeration attacks
