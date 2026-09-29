@@ -81,3 +81,4 @@ storage/qdrant_data/
 backend/storage/qdrant_data/
 storage/resumes/
 plans/
+admin-panel/

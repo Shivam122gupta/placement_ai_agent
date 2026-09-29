@@ -12,12 +12,14 @@ from app.api.v1.endpoints import (
     interviews,
     applications,
     notifications,
+    admin,
 )
 
 api_v1_router = APIRouter()
 
 api_v1_router.include_router(health.router)
 api_v1_router.include_router(auth.router)
+api_v1_router.include_router(admin.router)
 api_v1_router.include_router(profile.router)
 api_v1_router.include_router(resumes.router)
 api_v1_router.include_router(jobs.router)

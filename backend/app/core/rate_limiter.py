@@ -112,8 +112,8 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         path = request.url.path
 
-        # Ignore static assets, docs, and health checks from strict rate limits
-        if path.startswith("/docs") or path.startswith("/openapi") or path.startswith("/redoc") or path == "/health" or path == "/":
+        # Ignore OPTIONS preflight, static assets, docs, and health checks from strict rate limits
+        if request.method == "OPTIONS" or path.startswith("/docs") or path.startswith("/openapi") or path.startswith("/redoc") or path == "/health" or path == "/":
             return await call_next(request)
 
         # In testing environment or unit tests, allow high throughput

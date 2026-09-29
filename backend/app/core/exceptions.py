@@ -58,7 +58,7 @@ class ConflictError(AppException):
 class ValidationError(AppException):
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None, code: str = "VALIDATION_ERROR"):
         super().__init__(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422),
             code=code,
             message=message,
             details=details,

@@ -18,6 +18,8 @@ from app.schemas.auth import UserRegisterRequest, UserLoginRequest, TokenRespons
 from app.core.config import settings
 from app.services.email_service import EmailService
 
+from app.services.admin_ws_service import admin_ws_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,12 +32,16 @@ class AuthService:
             raise ConflictError(f"User with email '{req.email}' already exists", code="EMAIL_ALREADY_EXISTS")
 
         # 2. Hash password & create user
+        now = datetime.now(timezone.utc)
         hashed_password = get_password_hash(req.password)
         user = UserDocument(
             email=req.email.lower(),
             hashed_password=hashed_password,
             is_active=True,
             is_verified=False,
+            is_online=True,
+            last_login_at=now,
+            last_active_at=now,
             verification_token=str(uuid.uuid4()),
         )
         await user.insert()
@@ -53,6 +59,17 @@ class AuthService:
             await EmailService.send_verification_email(user.email, user.verification_token, req.full_name)
         except Exception as e:
             logger.error(f"Failed to dispatch verification email during registration to {user.email}: {e}", exc_info=True)
+
+        # Broadcast WebSocket event to Admin Panel
+        try:
+            await admin_ws_manager.broadcast("USER_REGISTERED", {
+                "user_id": str(user.id),
+                "email": user.email,
+                "full_name": req.full_name or "",
+                "timestamp": now.isoformat()
+            })
+        except Exception as err:
+            logger.warning(f"Failed to broadcast USER_REGISTERED event: {err}")
 
         # 4. Generate JWT tokens
         access_token = create_access_token(subject=str(user.id))
@@ -85,6 +102,25 @@ class AuthService:
 
         if not user.is_active:
             raise AuthenticationError("Your account has been deactivated. Please contact support.", code="ACCOUNT_INACTIVE")
+
+        # Update user status & timestamps
+        now = datetime.now(timezone.utc)
+        user.is_online = True
+        user.last_login_at = now
+        user.last_active_at = now
+        user.update_timestamp()
+        await user.save()
+
+        # Broadcast WebSocket event to Admin Panel
+        try:
+            await admin_ws_manager.broadcast("USER_LOGIN", {
+                "user_id": str(user.id),
+                "email": user.email,
+                "role": user.role,
+                "timestamp": now.isoformat()
+            })
+        except Exception as err:
+            logger.warning(f"Failed to broadcast USER_LOGIN event: {err}")
 
         access_token = create_access_token(subject=str(user.id))
         refresh_token = create_refresh_token(subject=str(user.id))
@@ -149,16 +185,34 @@ class AuthService:
     async def logout(refresh_token: str) -> None:
         """
         Revokes the provided refresh token so it cannot be used again,
-        even if it hasn't expired yet (server-side session invalidation).
+        and marks user as offline in database.
         """
         if not refresh_token:
             return
         try:
             payload = decode_refresh_token(refresh_token)
+            user_id = payload.get("sub")
             exp = payload.get("exp", 0)
             remaining_ttl = max(1, int(exp - datetime.now(timezone.utc).timestamp()))
+
+            if user_id:
+                user = await UserDocument.get(PydanticObjectId(user_id))
+                if user:
+                    now = datetime.now(timezone.utc)
+                    user.is_online = False
+                    user.last_logout_at = now
+                    user.update_timestamp()
+                    await user.save()
+
+                    try:
+                        await admin_ws_manager.broadcast("USER_LOGOUT", {
+                            "user_id": str(user.id),
+                            "email": user.email,
+                            "timestamp": now.isoformat()
+                        })
+                    except Exception as err:
+                        logger.warning(f"Failed to broadcast USER_LOGOUT event: {err}")
         except Exception:
-            # Token may be expired/invalid — still blacklist for safety
             remaining_ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400
         blacklist_token(refresh_token, remaining_ttl)
         logger.info("Refresh token revoked on logout (ttl=%ds)", remaining_ttl)

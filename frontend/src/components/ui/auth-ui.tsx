@@ -250,6 +250,13 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+
+    // Client-side validation before hitting the API
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await register(email, password, fullName);
@@ -259,9 +266,13 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
         navigate("/dashboard");
       }
     } catch (err: any) {
+      const responseData = err.response?.data;
+      const validationErrors = responseData?.error?.details?.validation_errors;
       const msg =
-        err.response?.data?.error?.message ||
-        "Registration failed. Email may already be in use.";
+        responseData?.error?.message === "Request payload validation failed" && validationErrors?.length
+          ? validationErrors.map((e: any) => e.message).join(", ")
+          : responseData?.error?.message ||
+            "Registration failed. Email may already be in use.";
       setError(msg);
     } finally {
       setIsSubmitting(false);

@@ -10,6 +10,11 @@ class UserDocument(Document):
     is_active: bool = True
     is_verified: bool = False
     role: str = "user"  # "user", "admin"
+    is_online: bool = False
+    last_login_at: Optional[datetime] = None
+    last_logout_at: Optional[datetime] = None
+    last_active_at: Optional[datetime] = None
+    signup_ip: Optional[str] = None
     verification_token: Optional[str] = None
     reset_password_token: Optional[str] = None
     reset_password_expires_at: Optional[datetime] = None
@@ -22,6 +27,7 @@ class UserDocument(Document):
         indexes = [
             "email",
             "created_at",
+            "is_online",
         ]
 
     def update_timestamp(self):
