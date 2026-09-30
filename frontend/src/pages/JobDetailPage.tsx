@@ -17,6 +17,7 @@ import { matchingService } from '../services/matchingService';
 import { Job } from '../types/job';
 import { JobMatch } from '../types/matching';
 import { MatchBreakdownCard } from '../components/matching/MatchBreakdownCard';
+import { SEO } from '../components/common/SEO';
 
 export const JobDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -81,6 +82,10 @@ export const JobDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16 text-[#FAF8F5]">
+      <SEO
+        title={job ? `${job.title} at ${job.company} — Hirxora` : "Job Opportunity Detail — Hirxora"}
+        description="Detailed job requirements, candidate ATS fit score, and skill gap breakdown for target tech roles."
+      />
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/jobs')}

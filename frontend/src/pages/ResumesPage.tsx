@@ -4,6 +4,7 @@ import { resumeService } from '../services/resumeService';
 import { ResumeItem } from '../types/resume';
 import { ResumeUploadZone } from '../components/resume/ResumeUploadZone';
 import { FileText, Download, Trash2, ArrowRight, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { SEO } from '../components/common/SEO';
 
 export const ResumesPage: React.FC = () => {
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
@@ -59,6 +60,10 @@ export const ResumesPage: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12 text-[#FAF8F5]">
+      <SEO
+        title="Resume Intelligence — Hirxora"
+        description="Upload PDF/DOCX resumes for instant LLM parsing, ATS scoring, and semantic RAG memory vectorization."
+      />
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-[#FAF8F5]/10 pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-serif font-normal tracking-tight text-white">Resume Intelligence</h1>

@@ -14,6 +14,7 @@ import {
 
 import { applicationService } from '../services/applicationService';
 import { Application, ApplicationCreate, PipelineStats, ApplicationStatus } from '../types/application';
+import { SEO } from '../components/common/SEO';
 
 const STAGES: { id: ApplicationStatus; label: string; dotColor: string; badgeBg: string }[] = [
   { id: 'SAVED', label: 'Saved', dotColor: 'bg-neutral-500', badgeBg: 'bg-neutral-500/10 text-neutral-300 border-neutral-500/20' },
@@ -127,6 +128,10 @@ export const ApplicationsPage: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-16">
+      <SEO
+        title="Applications Tracker — Hirxora"
+        description="Track your job applications, interview stages, offer statuses, and upcoming follow-ups."
+      />
       {/* Header Banner */}
       <div className="relative rounded-3xl p-6 sm:p-8 bg-[#121214] border border-[#FAF8F5]/15 backdrop-blur-xl shadow-2xl overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />

@@ -10,6 +10,7 @@ import {
 import { skillGapService } from '../services/skillGapService';
 import { SkillGapRoadmap, RoadmapGenerateRequest } from '../types/skillGap';
 import { RoadmapTimeline } from '../components/skillGap/RoadmapTimeline';
+import { SEO } from '../components/common/SEO';
 
 export const SkillGapsPage: React.FC = () => {
   const location = useLocation();
@@ -98,6 +99,10 @@ export const SkillGapsPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-16 text-[#FAF8F5]">
+      <SEO
+        title="Skill Gap Analysis & Roadmaps — Hirxora"
+        description="Identify skill gaps between your profile and target job descriptions with custom AI learning roadmaps."
+      />
       {/* Header */}
       <div className="border-b border-[#FAF8F5]/10 pb-6">
         <div className="flex items-center gap-3">

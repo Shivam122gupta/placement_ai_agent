@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEO } from '../components/common/SEO';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -40,6 +41,10 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-12 text-[#FAF8F5] max-w-full">
+      <SEO
+        title="Dashboard — Hirxora Career Intelligence"
+        description="Overview of candidate readiness, resume ATS score, active job matches, skill gaps, and mock interview analytics."
+      />
       {/* Editorial Welcome Hero */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#FAF8F5]/20 bg-[#121214]/90 p-5 sm:p-7 md:p-10 shadow-2xl backdrop-blur-xl">
         <div className="absolute top-0 right-0 -mt-8 -mr-8 h-64 w-64 rounded-full bg-white/[0.02] blur-3xl pointer-events-none" />

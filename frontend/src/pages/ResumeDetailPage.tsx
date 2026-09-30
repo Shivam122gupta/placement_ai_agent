@@ -5,6 +5,7 @@ import { ResumeItem, ProfileSyncOptions } from '../types/resume';
 import { ResumeParsedViewer } from '../components/resume/ResumeParsedViewer';
 import { ProfileSyncModal } from '../components/resume/ProfileSyncModal';
 import { ArrowLeft, Download, CheckCircle, Sparkles, Trash2 } from 'lucide-react';
+import { SEO } from '../components/common/SEO';
 
 export const ResumeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -73,6 +74,10 @@ export const ResumeDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12 text-[#FAF8F5]">
+      <SEO
+        title={resume ? `Resume: ${resume.filename} — Hirxora` : "Resume Detail — Hirxora"}
+        description="Detailed LLM extraction, ATS score breakdown, matched skills, and candidate recommendations."
+      />
       {/* Top action bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#FAF8F5]/10 pb-5">
         <div className="flex items-center gap-3">

@@ -1,15 +1,19 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft, Lock, Database, Eye, FileText } from 'lucide-react';
+import { SEO } from '../components/common/SEO';
 
 export const PrivacyPolicyPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = 'Privacy Policy — Hirxora Career AI';
   }, []);
 
   return (
     <div className="min-h-screen bg-[#080607] text-[#FAF8F5] selection:bg-[#FF6B6B] selection:text-white">
+      <SEO
+        title="Privacy Policy — Hirxora"
+        description="Read Hirxora's privacy policy, data encryption standards, and user data rights."
+      />
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#FF6B6B]/[0.04] blur-[160px]" />

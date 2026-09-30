@@ -5,6 +5,7 @@ import { Job, JobSearchFilters } from '../types/job';
 import { JobSearchFiltersBar } from '../components/jobs/JobSearchFilters';
 import { JobCard } from '../components/jobs/JobCard';
 import { JDAnalyzerModal } from '../components/jobs/JDAnalyzerModal';
+import { SEO } from '../components/common/SEO';
 
 export const JobsPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -35,6 +36,10 @@ export const JobsPage: React.FC = () => {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12 text-[#FAF8F5]">
+      <SEO
+        title="Job Discovery & Intelligence — Hirxora"
+        description="Explore curated tech jobs and internships with automated skill matching and requirement analysis."
+      />
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#FAF8F5]/10 pb-6">
         <div>

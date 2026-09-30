@@ -87,21 +87,41 @@ class JobService:
             limit=search_query.limit or 20,
         )
 
-        results = []
+        if not raw_jobs:
+            return []
+
+        # 1. Compute dedup hashes upfront
+        hashes_map = {}
         for raw in raw_jobs:
-            dedup_hash = cls.compute_dedup_hash(
+            h = cls.compute_dedup_hash(
                 company=raw.company,
                 title=raw.title,
                 location=raw.location,
                 source_url=raw.source_url,
             )
+            hashes_map[h] = raw
 
-            # Check if job already exists
-            existing_job = await JobDocument.find_one(JobDocument.dedup_hash == dedup_hash)
-            if existing_job:
-                existing_job.update_verification_timestamp()
-                await existing_job.save()
-                results.append(cls._to_job_response(existing_job))
+        all_hashes = list(hashes_map.keys())
+
+        # 2. Batch query all existing jobs in 1 database round trip
+        existing_jobs = await JobDocument.find({"dedup_hash": {"$in": all_hashes}}).to_list()
+        existing_map = {j.dedup_hash: j for j in existing_jobs}
+
+        now = datetime.now(timezone.utc)
+
+        # 3. Bulk update verification timestamps for existing jobs in 1 database round trip
+        if existing_jobs:
+            existing_ids = [j.id for j in existing_jobs]
+            await JobDocument.find({"_id": {"$in": existing_ids}}).update({"$set": {"last_verified_at": now}})
+
+        results = []
+        new_jobs_to_insert: List[JobDocument] = []
+
+        for h, raw in hashes_map.items():
+            if h in existing_map:
+                e_job = existing_map[h]
+                e_job.last_verified_at = now
+                results.append(cls._to_job_response(e_job))
                 continue
 
             # Parse JD requirements if not provided
@@ -120,9 +140,9 @@ class JobService:
                     role_summary=raw.description_raw[:200] + "..." if len(raw.description_raw) > 200 else raw.description_raw,
                 )
 
-            # Save new job document
-            posted_date = datetime.fromisoformat(raw.posted_at) if raw.posted_at else datetime.now(timezone.utc)
+            posted_date = datetime.fromisoformat(raw.posted_at) if raw.posted_at else now
             new_job = JobDocument(
+                id=PydanticObjectId(),
                 title=raw.title,
                 company=raw.company,
                 location=raw.location,
@@ -130,12 +150,19 @@ class JobService:
                 description_raw=raw.description_raw,
                 source=raw.source,
                 source_url=raw.source_url,
-                dedup_hash=dedup_hash,
+                dedup_hash=h,
                 requirements=requirements,
                 posted_at=posted_date,
+                discovered_at=now,
+                last_verified_at=now,
             )
-            await new_job.insert()
-            results.append(cls._to_job_response(new_job))
+            new_jobs_to_insert.append(new_job)
+
+        # 4. Bulk insert new jobs in 1 database round trip
+        if new_jobs_to_insert:
+            await JobDocument.insert_many(new_jobs_to_insert)
+            for j in new_jobs_to_insert:
+                results.append(cls._to_job_response(j))
 
         return results
 

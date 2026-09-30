@@ -16,6 +16,7 @@ import {
 
 import { interviewService } from '../services/interviewService';
 import { MockInterview, InterviewQuestion, AnswerEvaluation } from '../types/interview';
+import { SEO } from '../components/common/SEO';
 
 export const MockInterviewArenaPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -151,6 +152,10 @@ export const MockInterviewArenaPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 text-[#FAF8F5]">
+      <SEO
+        title={interview ? `Mock Interview: ${interview.target_role} — Hirxora` : "Live Mock Interview — Hirxora"}
+        description="Simulate real-time technical & behavioral interviews with instant AI scoring and detailed feedback."
+      />
       {/* Top Navigation & Status Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#121214] border border-[#FAF8F5]/20 rounded-2xl p-4 sm:p-5 backdrop-blur-xl">
         <div className="flex items-center gap-4">

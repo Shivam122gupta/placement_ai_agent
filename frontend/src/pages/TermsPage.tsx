@@ -1,15 +1,19 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, ArrowLeft, CheckCircle2, AlertCircle, Scale } from 'lucide-react';
+import { SEO } from '../components/common/SEO';
 
 export const TermsPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = 'Terms of Service — Hirxora Career AI';
   }, []);
 
   return (
     <div className="min-h-screen bg-[#080607] text-[#FAF8F5] selection:bg-[#FF6B6B] selection:text-white">
+      <SEO
+        title="Terms of Service — Hirxora"
+        description="Read Hirxora's terms of service, acceptable usage terms, and service conditions."
+      />
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-[#FF6B6B]/[0.04] blur-[160px]" />

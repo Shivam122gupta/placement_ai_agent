@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import { memoryService } from '../services/memoryService';
+import { SEO } from '../components/common/SEO';
 import {
   MemorySearchResultItem,
   MemoryStatsResponse,
@@ -180,6 +181,10 @@ export const MemoryExplorerPage: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-16 text-[#FAF8F5]">
+      <SEO
+        title="Semantic Memory Explorer — Hirxora"
+        description="Inspect your Qdrant vector memory embeddings, knowledge chunks, and candidate context used by the AI copilot."
+      />
       {/* Header & Qdrant Status */}
       <div className="bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />

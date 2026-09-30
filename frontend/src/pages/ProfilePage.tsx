@@ -22,6 +22,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+import { SEO } from '../components/common/SEO';
 
 export const ProfilePage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -271,6 +272,10 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12 text-[#FAF8F5]">
+      <SEO
+        title="Candidate Profile & Settings — Hirxora"
+        description="Manage your candidate details, target roles, experience, projects, skills, and career preferences."
+      />
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-[#FAF8F5]/10 pb-6">
         <div>

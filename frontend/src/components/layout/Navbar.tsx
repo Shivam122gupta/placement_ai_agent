@@ -133,6 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
                 onClick={() => setShowNotifDrawer(!showNotifDrawer)}
                 className="relative p-2 rounded-xl bg-white/[0.03] hover:bg-[#FAF8F5]/10 text-neutral-300 hover:text-white border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition cursor-pointer"
                 title="Notifications"
+                aria-label="View notifications"
               >
                 <Bell className="w-4 h-4 text-[#FAF8F5]" />
                 {unreadCount > 0 && (
@@ -211,6 +212,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu, isMobileMenu
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 rounded-xl bg-white/[0.03] hover:bg-[#FAF8F5]/10 px-2.5 sm:px-3 py-1.5 text-xs text-[#FAF8F5] border border-[#FAF8F5]/15 hover:border-[#FAF8F5]/35 transition cursor-pointer"
                 title="Account Menu"
+                aria-label="Open user account menu"
               >
                 <UserCircle className="h-4 w-4 text-[#FAF8F5] shrink-0" />
                 <span className="hidden sm:inline font-medium truncate max-w-[120px]">{user.email}</span>

@@ -16,8 +16,32 @@ export const ResumeParsedViewer: React.FC<Props> = ({ parsedData }) => {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-xl font-bold text-white">{parsedData.full_name || 'Extracted Candidate Profile'}</h2>
-            <p className="mt-1 text-xs text-gray-400">
-              {parsedData.contact_email} {parsedData.phone ? `• ${parsedData.phone}` : ''} {parsedData.location ? `• ${parsedData.location}` : ''}
+            <p className="mt-1 text-xs text-gray-400 flex flex-wrap items-center gap-2">
+              {parsedData.contact_email && (
+                <a
+                  href={`mailto:${parsedData.contact_email}`}
+                  className="text-[#FF7E67] hover:underline transition"
+                >
+                  {parsedData.contact_email}
+                </a>
+              )}
+              {parsedData.phone && (
+                <>
+                  <span>•</span>
+                  <a
+                    href={`tel:${parsedData.phone.replace(/[^+\d]/g, '')}`}
+                    className="text-[#FF7E67] hover:underline transition"
+                  >
+                    {parsedData.phone}
+                  </a>
+                </>
+              )}
+              {parsedData.location && (
+                <>
+                  <span>•</span>
+                  <span>{parsedData.location}</span>
+                </>
+              )}
             </p>
           </div>
           {parsedData.summary && (

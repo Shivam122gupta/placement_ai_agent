@@ -8,6 +8,7 @@ import {
 import { agentService } from '../services/agentService';
 import { AgentChatMessage, PendingConfirmation } from '../types/agent';
 import { ActionConfirmationCard } from '../components/agent/ActionConfirmationCard';
+import { SEO } from '../components/common/SEO';
 
 export const AssistantPage: React.FC = () => {
   const [messages, setMessages] = useState<AgentChatMessage[]>([
@@ -154,6 +155,10 @@ export const AssistantPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto h-[calc(100dvh-11rem)] lg:h-[calc(100vh-8rem)] flex flex-col space-y-3 sm:space-y-4 pb-2 sm:pb-4 text-[#FAF8F5]">
+      <SEO
+        title="AI Career Copilot — Hirxora"
+        description="Interactive AI career assistant for instant guidance on resume optimization, interview prep, and placement strategy."
+      />
       {/* Header */}
       <div className="flex items-center justify-between bg-[#121214] border border-[#FAF8F5]/20 rounded-2xl sm:rounded-3xl px-4 py-3 sm:px-6 sm:py-4 shadow-xl backdrop-blur-xl">
         <div className="flex items-center gap-2.5 sm:gap-3">

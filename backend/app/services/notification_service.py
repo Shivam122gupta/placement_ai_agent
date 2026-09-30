@@ -59,18 +59,14 @@ class NotificationService:
         return None
 
     async def mark_all_as_read(self, user_id: str) -> int:
-        """Marks all unread notifications as read for the user."""
+        """Marks all unread notifications as read for the user in a single atomic bulk operation."""
         p_user_id = PydanticObjectId(user_id)
-        unread_docs = await NotificationDocument.find(
+        result = await NotificationDocument.find(
             NotificationDocument.user_id == p_user_id,
             NotificationDocument.is_read == False,
-        ).to_list()
+        ).update({"$set": {"is_read": True}})
 
-        for doc in unread_docs:
-            doc.is_read = True
-            await doc.save()
-
-        return len(unread_docs)
+        return result.modified_count if result else 0
 
 
 notification_service = NotificationService()

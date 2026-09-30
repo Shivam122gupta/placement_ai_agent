@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { SEO } from '../components/common/SEO';
 import { AnimatedHero } from '@/components/ui/animated-hero-section-1';
 import { Button } from '@/components/ui/button';
 import {
@@ -210,6 +211,10 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#080607] text-[#FAF8F5] font-sans selection:bg-[#FF6B6B] selection:text-white relative overflow-x-hidden antialiased">
+      <SEO
+        title="Hirxora — Autonomous Career & Placement Copilot"
+        description="Land your dream tech offers faster with autonomous resume intelligence, personalized learning roadmaps, and AI mock interview arenas."
+      />
       {/* Flowing Ambient Glowing Snake Beams on Margins */}
       <AmbientSnakeBeams />
 

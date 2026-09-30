@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { interviewService } from '../services/interviewService';
 import { MockInterviewSummaryItem, GenerateInterviewRequest } from '../types/interview';
+import { SEO } from '../components/common/SEO';
 
 export const InterviewsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -81,6 +82,10 @@ export const InterviewsPage: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-16 text-[#FAF8F5]">
+      <SEO
+        title="Mock Interview Arena — Hirxora"
+        description="Prepare for tech interviews with voice/text AI interviewers tailored to your target company and role."
+      />
       {/* Header & Stats Banner */}
       <div className="bg-[#121214] border border-[#FAF8F5]/20 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />

@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { KeyRound, CheckCircle2, AlertCircle, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { authService } from '@/services/authService';
+import { SEO } from '@/components/common/SEO';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -52,6 +53,10 @@ export const ResetPasswordPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#080607] text-[#FAF8F5] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden selection:bg-[#FF6B6B] selection:text-white">
+      <SEO
+        title="Reset Password — Hirxora"
+        description="Set a new password for your Hirxora account."
+      />
       {/* Ambient background glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute top-1/4 left-1/3 h-96 w-96 rounded-full bg-[#FF6B6B]/[0.05] blur-[160px]" />

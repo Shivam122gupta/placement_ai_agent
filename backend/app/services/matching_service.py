@@ -383,9 +383,23 @@ class MatchingService:
             return []
 
         jobs = await JobDocument.find_all().limit(20).to_list()
+        if not jobs:
+            return []
+
+        job_ids = [j.id for j in jobs]
+        existing_matches = await JobMatchDocument.find(
+            JobMatchDocument.user_id == user_id,
+            {"job_id": {"$in": job_ids}},
+        ).to_list()
+
+        match_map = {m.job_id: cls._to_match_response(m) for m in existing_matches}
+
         results = []
         for job in jobs:
-            match_res = await cls.get_match_by_job(user_id, job.id)
+            match_res = match_map.get(job.id)
+            if not match_res:
+                match_res = await cls.match_candidate_to_job(user_id, job.id)
+
             results.append({
                 "job_id": str(job.id),
                 "title": job.title,

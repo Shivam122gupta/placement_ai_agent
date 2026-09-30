@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exceptions import AppException
 from app.core.rate_limiter import RateLimiterMiddleware
+from app.core.compression import CompressionMiddleware
 from app.core.error_handlers import (
     app_exception_handler,
     http_exception_handler,
@@ -53,7 +54,10 @@ app = FastAPI(
 
 # ----------------- Middlewares -----------------
 
-# 1. Sliding-Window Rate Limiting & DoS Protection
+# 1. HTTP Response Compression (Brotli primary, Gzip fallback, >= 512B threshold)
+app.add_middleware(CompressionMiddleware, minimum_size=512, gzip_level=6, brotli_quality=4)
+
+# 2. Sliding-Window Rate Limiting & DoS Protection
 app.add_middleware(RateLimiterMiddleware)
 
 # 2. Request ID, Timing & Security Headers

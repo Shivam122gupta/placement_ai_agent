@@ -117,13 +117,22 @@ class ResumeService:
             ResumeDocument.user_id == user_id
         ).sort("-created_at").to_list()
 
+        if not resumes:
+            return []
+
+        resume_ids = [r.id for r in resumes]
+        all_versions = await ResumeVersionDocument.find(
+            {"resume_id": {"$in": resume_ids}}
+        ).sort("-version_number").to_list()
+
+        latest_versions: dict = {}
+        for v in all_versions:
+            if v.resume_id not in latest_versions:
+                latest_versions[v.resume_id] = v
+
         results = []
         for r in resumes:
-            # Fetch latest parsed version
-            latest_version = await ResumeVersionDocument.find_one(
-                ResumeVersionDocument.resume_id == r.id,
-                sort=[("version_number", -1)],
-            )
+            latest_version = latest_versions.get(r.id)
             parsed = latest_version.parsed_data if latest_version else None
             results.append(cls._to_resume_response(r, parsed))
         return results
