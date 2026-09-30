@@ -1,5 +1,9 @@
 import gzip
-import brotli
+try:
+    import brotli
+except ImportError:
+    brotli = None
+
 from typing import Optional, List, Tuple
 from starlette.types import ASGIApp, Scope, Receive, Send, Message
 
@@ -41,7 +45,7 @@ class CompressionMiddleware:
     """
     Production-grade HTTP response compression middleware for FastAPI/Starlette.
     - Prefers Brotli ('br') where supported by client Accept-Encoding header.
-    - Falls back to Gzip ('gzip') if Brotli is not advertised.
+    - Falls back to Gzip ('gzip') if Brotli is not advertised or installed.
     - Enforces a minimum response size threshold (default 512 bytes).
     - Prevents double-compression on already-compressed media/binary types.
     - Appends 'Vary: Accept-Encoding' for CDN & cache safety.
@@ -72,7 +76,7 @@ class CompressionMiddleware:
                 break
 
         encoding = None
-        if "br" in accept_encoding:
+        if "br" in accept_encoding and brotli is not None:
             encoding = "br"
         elif "gzip" in accept_encoding:
             encoding = "gzip"
@@ -183,9 +187,10 @@ class CompressionResponder:
                 return
 
             # Compress body using negotiated encoding
-            if self.encoding == "br":
+            if self.encoding == "br" and brotli is not None:
                 compressed_body = brotli.compress(raw_body, quality=self.brotli_quality)
             else:
+                self.encoding = "gzip"
                 compressed_body = gzip.compress(raw_body, compresslevel=self.gzip_level)
 
             # Update headers with Content-Encoding and Content-Length
