@@ -27,7 +27,7 @@ class AuthService:
     @staticmethod
     async def register(req: UserRegisterRequest) -> Tuple[UserResponse, TokenResponse]:
         # 1. Check if user already exists
-        existing_user = await UserDocument.find_one(UserDocument.email == req.email.lower())
+        existing_user = await UserDocument.find_one({"email": req.email.lower()})
         if existing_user:
             raise ConflictError(f"User with email '{req.email}' already exists", code="EMAIL_ALREADY_EXISTS")
 
@@ -93,7 +93,7 @@ class AuthService:
 
     @staticmethod
     async def login(req: UserLoginRequest) -> Tuple[UserResponse, TokenResponse]:
-        user = await UserDocument.find_one(UserDocument.email == req.email.lower())
+        user = await UserDocument.find_one({"email": req.email.lower()})
         if not user:
             raise AuthenticationError("Invalid email or password", code="INVALID_CREDENTIALS")
 
@@ -220,7 +220,7 @@ class AuthService:
     @staticmethod
     async def request_password_reset(email: str) -> str:
 
-        user = await UserDocument.find_one(UserDocument.email == email.lower())
+        user = await UserDocument.find_one({"email": email.lower()})
         if not user:
             # We still return success to prevent email enumeration attacks
             return "If the email is registered, a password reset link has been generated."
@@ -240,7 +240,7 @@ class AuthService:
 
     @staticmethod
     async def reset_password(token: str, new_password: str) -> bool:
-        user = await UserDocument.find_one(UserDocument.reset_password_token == token)
+        user = await UserDocument.find_one({"reset_password_token": token})
         if not user or not user.reset_password_expires_at:
             raise AuthenticationError("Invalid or expired password reset token", code="INVALID_RESET_TOKEN")
 
@@ -260,7 +260,7 @@ class AuthService:
 
     @staticmethod
     async def verify_email(token: str) -> bool:
-        user = await UserDocument.find_one(UserDocument.verification_token == token)
+        user = await UserDocument.find_one({"verification_token": token})
         if not user:
             raise AuthenticationError("This verification link is invalid or has already been used. If your email is already verified, you can sign in directly.", code="INVALID_VERIFICATION_TOKEN")
 
