@@ -1,17 +1,37 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Lock, Mail, ArrowRight, AlertCircle, ShieldAlert } from 'lucide-react';
 import { setAuthToken, BASE_URL } from '../services/api';
+
+const MAX_FAILED_ATTEMPTS = 5;
+const COOLDOWN_SECONDS = 30;
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [cooldown, setCooldown] = useState(0);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const isIdleLogout = searchParams.get('reason') === 'idle_timeout';
+
+  useEffect(() => {
+    let timer: any;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown > 0) return;
+
     setLoading(true);
     setError(null);
 
@@ -27,6 +47,14 @@ export const Login: React.FC = () => {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        const nextFailed = failedAttempts + 1;
+        setFailedAttempts(nextFailed);
+
+        if (nextFailed >= MAX_FAILED_ATTEMPTS) {
+          setCooldown(COOLDOWN_SECONDS);
+          setFailedAttempts(0);
+          throw new Error(`Too many failed login attempts. Security cooldown active for ${COOLDOWN_SECONDS} seconds.`);
+        }
         throw new Error(data.message || data.detail || 'Login failed');
       }
 
@@ -34,6 +62,7 @@ export const Login: React.FC = () => {
         throw new Error('Access denied. Administrator privileges are required.');
       }
 
+      setFailedAttempts(0);
       setAuthToken(data.data.tokens.access_token);
       navigate('/');
     } catch (err: any) {
@@ -59,6 +88,13 @@ export const Login: React.FC = () => {
           <h2 className="text-3xl font-serif font-bold text-[#F4F3EE] tracking-tight">HireXora</h2>
           <p className="text-xs font-bold uppercase tracking-wider text-[#DA7756] mt-1 font-mono">Admin Command Center</p>
         </div>
+
+        {isIdleLogout && !error && (
+          <div className="mb-6 p-4 rounded-2xl bg-[#D9A752]/15 border border-[#D9A752]/30 text-[#D9A752] flex items-center space-x-3 text-xs font-bold">
+            <ShieldAlert className="w-5 h-5 shrink-0 text-[#D9A752]" />
+            <span>Session expired due to 15 minutes of inactivity. Please re-authenticate.</span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 p-4 rounded-2xl bg-[#DA7756]/15 border border-[#DA7756]/30 text-[#DA7756] flex items-start space-x-3 text-xs font-bold">
@@ -104,10 +140,12 @@ export const Login: React.FC = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || cooldown > 0}
             className="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-[#DA7756] to-[#C86443] text-white font-bold shadow-lg shadow-[#DA7756]/30 hover:shadow-[#DA7756]/50 hover:scale-[1.02] transition-all flex items-center justify-center space-x-2 text-xs uppercase tracking-wider disabled:opacity-50 border border-[#E88A6A]/40 font-mono"
           >
-            {loading ? (
+            {cooldown > 0 ? (
+              <span>Security Cooldown ({cooldown}s)</span>
+            ) : loading ? (
               <span>Authenticating Admin...</span>
             ) : (
               <>

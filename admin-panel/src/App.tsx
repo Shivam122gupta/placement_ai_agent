@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -8,21 +8,44 @@ import { Dashboard } from './pages/Dashboard';
 import { UsersPage } from './pages/Users';
 import { DatabaseTools } from './pages/DatabaseTools';
 import { LiveActivity } from './pages/LiveActivity';
-import { getAuthToken } from './services/api';
+import { getAuthToken, removeAuthToken } from './services/api';
 import { wsClient } from './services/ws';
+
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes Idle Timeout
 
 const ProtectedLayout: React.FC = () => {
   const token = getAuthToken();
   const [wsConnected, setWsConnected] = useState(false);
+  const idleTimerRef = useRef<any>(null);
+
+  // Auto Logout Idle Session Protection
+  const resetIdleTimer = () => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    idleTimerRef.current = setTimeout(() => {
+      wsClient.disconnect();
+      removeAuthToken();
+      window.location.href = '/login?reason=idle_timeout';
+    }, IDLE_TIMEOUT_MS);
+  };
 
   useEffect(() => {
     if (token) {
       wsClient.connect();
       setWsConnected(true);
+
+      // Attach global activity listeners for idle session protection
+      const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+      events.forEach((evt) => window.addEventListener(evt, resetIdleTimer, { passive: true }));
+      resetIdleTimer();
+
+      return () => {
+        events.forEach((evt) => window.removeEventListener(evt, resetIdleTimer));
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+        wsClient.disconnect();
+      };
     }
-    return () => {
-      wsClient.disconnect();
-    };
   }, [token]);
 
   if (!token) {

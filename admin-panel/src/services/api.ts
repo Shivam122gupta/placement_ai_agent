@@ -4,8 +4,30 @@ export const BASE_URL = rawBaseUrl.endsWith('/api/v1')
   ? rawBaseUrl
   : `${rawBaseUrl.replace(/\/+$/, '')}/api/v1`;
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.exp && typeof payload.exp === 'number') {
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp <= currentTime;
+    }
+    return false;
+  } catch {
+    return true; // Malformed token treated as expired
+  }
+}
+
 export function getAuthToken(): string | null {
-  return localStorage.getItem('admin_access_token');
+  const token = localStorage.getItem('admin_access_token');
+  if (!token) return null;
+  
+  if (isTokenExpired(token)) {
+    removeAuthToken();
+    return null;
+  }
+  return token;
 }
 
 export function setAuthToken(token: string): void {
