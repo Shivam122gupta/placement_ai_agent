@@ -1,11 +1,10 @@
 import logging
 from datetime import datetime, timezone
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any
 from beanie import PydanticObjectId
 
 from app.models.skill_gap import SkillGapRoadmapDocument, RoadmapMilestone
 from app.models.job import JobDocument
-from app.models.matching import JobMatchDocument
 from app.schemas.skill_gap import (
     RoadmapGenerateRequest,
     SkillGapRoadmapResponse,

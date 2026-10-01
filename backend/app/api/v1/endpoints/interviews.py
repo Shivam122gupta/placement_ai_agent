@@ -1,7 +1,6 @@
 import logging
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from beanie import PydanticObjectId
 
 from app.models.user import UserDocument
 from app.api.deps import get_current_user

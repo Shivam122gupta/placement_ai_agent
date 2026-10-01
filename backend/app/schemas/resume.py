@@ -1,6 +1,6 @@
 import uuid
-from typing import List, Optional, Any, Dict, Union
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from typing import List, Optional, Any
+from pydantic import BaseModel, Field, model_validator
 
 
 class ParsedEducation(BaseModel):

@@ -38,8 +38,8 @@ async def get_admin_stats(admin_user: UserDocument = Depends(get_current_admin_u
     Returns dashboard overview stats: Total Users, Online Users, Resumes, Interviews, Traces.
     """
     total_users = await UserDocument.count()
-    online_users = await UserDocument.find(UserDocument.is_online == True).count()
-    verified_users = await UserDocument.find(UserDocument.is_verified == True).count()
+    online_users = await UserDocument.find(UserDocument.is_online == True).count()  # noqa: E712
+    verified_users = await UserDocument.find(UserDocument.is_verified == True).count()  # noqa: E712
     admin_count = await UserDocument.find(UserDocument.role == "admin").count()
     
     total_resumes = await ResumeDocument.count()
@@ -80,9 +80,9 @@ async def list_users(
         query_conditions.append(UserDocument.email.regex(search, options="i"))
         
     if filter_status == "online":
-        query_conditions.append(UserDocument.is_online == True)
+        query_conditions.append(UserDocument.is_online == True)  # noqa: E712
     elif filter_status == "offline":
-        query_conditions.append(UserDocument.is_online == False)
+        query_conditions.append(UserDocument.is_online == False)  # noqa: E712
     elif filter_status == "admin":
         query_conditions.append(UserDocument.role == "admin")
 
@@ -97,6 +97,13 @@ async def list_users(
     total_count = await base_query.count()
     users = await base_query.sort("-created_at").skip((page - 1) * limit).limit(limit).to_list()
 
+    def to_iso_utc(dt: Optional[datetime]) -> Optional[str]:
+        if not dt:
+            return None
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.isoformat().replace("+00:00", "Z")
+
     user_list = []
     for u in users:
         profile = await ProfileDocument.find_one(ProfileDocument.user_id == u.id)
@@ -108,9 +115,9 @@ async def list_users(
             "is_active": u.is_active,
             "is_verified": u.is_verified,
             "is_online": u.is_online,
-            "last_login_at": u.last_login_at.isoformat() if u.last_login_at else None,
-            "last_logout_at": u.last_logout_at.isoformat() if u.last_logout_at else None,
-            "created_at": u.created_at.isoformat(),
+            "last_login_at": to_iso_utc(u.last_login_at),
+            "last_logout_at": to_iso_utc(u.last_logout_at),
+            "created_at": to_iso_utc(u.created_at),
         })
 
     return StandardResponse(
@@ -222,7 +229,7 @@ async def cleanup_database(
             deleted_counts["mock_interviews"] = res.deleted_count if res else 0
 
         if "unverified_users" in req.target_collections:
-            unverified = await UserDocument.find(UserDocument.is_verified == False).to_list()
+            unverified = await UserDocument.find(UserDocument.is_verified == False).to_list()  # noqa: E712
             count = 0
             for u in unverified:
                 await ProfileDocument.find(ProfileDocument.user_id == u.id).delete()

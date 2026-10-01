@@ -58,7 +58,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
     errors = []
     for err in exc.errors():
-        loc = " -> ".join([str(l) for l in err.get("loc", [])])
+        loc = " -> ".join([str(item) for item in err.get("loc", [])])
         errors.append({"field": loc, "message": err.get("msg")})
     
     return create_error_response(

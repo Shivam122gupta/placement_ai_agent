@@ -1,4 +1,3 @@
-from app.core.config import settings
 from app.providers.jobs.base import BaseJobProvider, RawJobItem
 from app.providers.jobs.mock_job_provider import MockJobProvider
 

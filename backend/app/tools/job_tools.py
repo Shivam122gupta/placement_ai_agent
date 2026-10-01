@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
 from app.tools.base import BaseTool, ToolExecutionContext

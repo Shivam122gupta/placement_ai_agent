@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Tuple
 from fastapi import UploadFile
 from app.core.config import settings
-from app.core.exceptions import ValidationError, AppException
+from app.core.exceptions import ValidationError
 
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx"}

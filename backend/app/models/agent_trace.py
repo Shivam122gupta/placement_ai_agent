@@ -1,8 +1,7 @@
-import uuid
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 
 class AgentToolCallDocument(Document):

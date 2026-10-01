@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict
-from typing import Dict, List, Tuple
-from fastapi import Request, Depends
+from typing import Dict, List
+from fastapi import Request
 from app.core.exceptions import RateLimitExceededError
 import logging
 

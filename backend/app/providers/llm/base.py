@@ -37,7 +37,7 @@ class BaseLLMProvider(ABC):
         try:
             data = json.loads(cleaned_json_str)
             return schema.model_validate(data)
-        except Exception as e:
+        except Exception:
             # Secondary cleanup attempt
             data = self._repair_and_parse_json(cleaned_json_str)
             return schema.model_validate(data)

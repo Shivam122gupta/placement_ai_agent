@@ -1,6 +1,6 @@
 import uuid
 import logging
-from typing import List, Optional, Any, Dict
+from typing import Any
 from beanie import PydanticObjectId
 from app.core.exceptions import ResourceNotFoundError
 from app.models.user import UserDocument

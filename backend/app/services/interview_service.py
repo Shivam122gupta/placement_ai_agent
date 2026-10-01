@@ -1,6 +1,5 @@
 import json
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from beanie import PydanticObjectId
@@ -8,14 +7,11 @@ from beanie import PydanticObjectId
 from app.core.config import settings
 from app.models.interview import MockInterviewDocument, InterviewQuestionItem, AnswerEvaluationItem
 from app.models.profile import ProfileDocument
-from app.models.resume import ResumeDocument, ResumeVersionDocument
 from app.models.job import JobDocument
 from app.schemas.interview import (
     GenerateInterviewRequest,
     SubmitAnswerRequest,
     AnswerEvaluationSchema,
-    InterviewQuestionSchema,
-    MockInterviewResponse,
     SubmitAnswerResponse,
 )
 

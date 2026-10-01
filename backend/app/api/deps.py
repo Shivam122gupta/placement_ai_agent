@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import Depends, status
+from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from beanie import PydanticObjectId
 from app.core.security import decode_access_token

@@ -2,7 +2,6 @@ import logging
 import os
 from typing import Optional
 from qdrant_client import QdrantClient
-from qdrant_client.http import models
 from qdrant_client.http.models import Distance, VectorParams, PayloadSchemaType
 from app.core.config import settings
 

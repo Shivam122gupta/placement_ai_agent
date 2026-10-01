@@ -1,7 +1,6 @@
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, status
-from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends
 
 from app.schemas.agent import (
     AgentChatRequest,

@@ -1,5 +1,4 @@
 import logging
-from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from beanie import PydanticObjectId
 
@@ -78,7 +77,7 @@ async def sync_memory(
         )
         return response
     except Exception as e:
-        logger.error("Failed to sync candidate memory for user %s: %s", user_id, e, exc_info=True)
+        logger.error("Failed to sync candidate memory for user %s: %s", user_id_str, e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Memory synchronization failed: {str(e)}",

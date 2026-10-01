@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any
+from typing import Optional
 from beanie import Document, Indexed, PydanticObjectId
 from pydantic import Field
 from app.schemas.resume import ParsedResumeSchema

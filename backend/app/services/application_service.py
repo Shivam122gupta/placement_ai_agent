@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from datetime import datetime, timezone
 from beanie import PydanticObjectId
 
@@ -125,7 +125,7 @@ class ApplicationService:
                 title="Opportunity Tracked",
                 message=f"Added {title} at {company} to your application pipeline ({status}).",
                 type="STATUS_UPDATE",
-                link_url=f"/applications",
+                link_url="/applications",
             ),
         )
 
@@ -223,7 +223,7 @@ class ApplicationService:
                         title="Interview Scheduled 🎉",
                         message=f"You advanced to the INTERVIEW stage for {app_doc.job_title} at {app_doc.company_name}!",
                         type="INTERVIEW_REMINDER",
-                        link_url=f"/interviews",
+                        link_url="/interviews",
                     ),
                 )
             elif st == "OFFER":
@@ -233,7 +233,7 @@ class ApplicationService:
                         title="Job Offer Received! 🚀",
                         message=f"Congratulations! You received an OFFER for {app_doc.job_title} at {app_doc.company_name}.",
                         type="STATUS_UPDATE",
-                        link_url=f"/applications",
+                        link_url="/applications",
                     ),
                 )
 

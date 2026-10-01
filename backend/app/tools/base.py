@@ -2,7 +2,7 @@ import time
 from abc import ABC, abstractmethod
 from typing import Type, Dict, Any, Optional
 from beanie import PydanticObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ToolExecutionContext(BaseModel):

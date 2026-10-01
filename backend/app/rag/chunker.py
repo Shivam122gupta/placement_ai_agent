@@ -101,8 +101,8 @@ class SectionAwareChunker:
 
         if skill_names:
             skills_content = (
-                f"[TECHNICAL & SOFT SKILLS]\n"
-                f"Candidate Competencies:\n" + "\n".join(f"- {s}" for s in skill_names)
+                "[TECHNICAL & SOFT SKILLS]\n"
+                "Candidate Competencies:\n" + "\n".join(f"- {s}" for s in skill_names)
             )
             pure_skill_names = [s.get("name", "") if isinstance(s, dict) else s for s in raw_skills if s]
             chunks.append(

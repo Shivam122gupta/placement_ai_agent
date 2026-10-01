@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from pydantic import BaseModel
 from app.tools.base import BaseTool, ToolExecutionContext
 from app.services.profile_service import ProfileService

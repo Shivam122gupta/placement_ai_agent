@@ -40,7 +40,7 @@ class NotificationService:
         p_user_id = PydanticObjectId(user_id)
         query = [NotificationDocument.user_id == p_user_id]
         if unread_only:
-            query.append(NotificationDocument.is_read == False)
+            query.append(NotificationDocument.is_read == False)  # noqa: E712
 
         return await NotificationDocument.find(*query).sort(-NotificationDocument.created_at).limit(limit).to_list()
 
@@ -63,7 +63,7 @@ class NotificationService:
         p_user_id = PydanticObjectId(user_id)
         result = await NotificationDocument.find(
             NotificationDocument.user_id == p_user_id,
-            NotificationDocument.is_read == False,
+            NotificationDocument.is_read == False,  # noqa: E712
         ).update({"$set": {"is_read": True}})
 
         return result.modified_count if result else 0

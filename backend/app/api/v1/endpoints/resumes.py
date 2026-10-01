@@ -1,6 +1,6 @@
 import io
 from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File, status, Response
+from fastapi import APIRouter, Depends, UploadFile, File, status
 from fastapi.responses import StreamingResponse
 from beanie import PydanticObjectId
 

@@ -8,7 +8,6 @@ from app.models.profile import ProfileDocument, EducationItem, SkillItem, Projec
 from app.schemas.resume import (
     ParsedResumeSchema,
     ResumeResponse,
-    ResumeVersionResponse,
     ProfileSyncRequest,
 )
 from app.schemas.profile import ProfileResponse

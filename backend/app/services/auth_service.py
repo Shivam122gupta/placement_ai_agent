@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Tuple, Optional
+from typing import Tuple
 from beanie import PydanticObjectId
 from app.core.security import (
     get_password_hash,
@@ -9,7 +9,7 @@ from app.core.security import (
     create_refresh_token,
     decode_refresh_token,
 )
-from app.core.exceptions import AuthenticationError, ConflictError, ResourceNotFoundError
+from app.core.exceptions import AuthenticationError, ConflictError
 from app.core.token_blacklist import blacklist_token, is_blacklisted
 import logging
 from app.models.user import UserDocument

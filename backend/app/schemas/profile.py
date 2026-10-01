@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, field_validator
 from app.models.profile import EducationItem, SkillItem, ProjectItem, CertificationItem, ExperienceItem
 from app.core.sanitizer import sanitize_text
 

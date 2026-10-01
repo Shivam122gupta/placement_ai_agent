@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #141413;
+    color: #F4F3EE;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  
+  h1, h2, h3, .font-serif-claude {
+    font-family: 'Lora', Georgia, serif;
+  }
+
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Claude Ambient Warm Terracotta Mesh Background */
+.bg-mesh-pattern {
+  background-color: #141413;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(218, 119, 86, 0.12) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(217, 167, 82, 0.10) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(204, 107, 73, 0.08) 0px, transparent 50%);
+}
+
+/* Claude Warm Glassmorphism Panels */
+.glass-panel {
+  background: rgba(27, 27, 24, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(244, 243, 238, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glass-card {
+  background: rgba(31, 31, 28, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(244, 243, 238, 0.07);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(38, 38, 34, 0.95);
+  border-color: rgba(218, 119, 86, 0.35);
+  box-shadow: 0 12px 28px -6px rgba(218, 119, 86, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Claude Terracotta Utility Glow */
+.glow-terracotta-pulse {
+  box-shadow: 0 0 16px rgba(218, 119, 86, 0.4);
+}
+
+.glow-amber-pulse {
+  box-shadow: 0 0 14px rgba(217, 167, 82, 0.35);
+}
+
+/* Keyframe Animations */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulseGlowTerracotta {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.75; }
+}
+
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlowTerracotta 3s ease-in-out infinite;
+}
+
+/* Custom Warm Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #141413;
+}
+::-webkit-scrollbar-thumb {
+  background: #33322E;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #DA7756;
+}

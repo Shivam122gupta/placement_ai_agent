@@ -2,7 +2,7 @@ import re
 import hashlib
 import logging
 from datetime import datetime, timezone
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from beanie import PydanticObjectId
 
 from app.models.job import JobDocument

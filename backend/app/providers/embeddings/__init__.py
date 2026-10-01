@@ -2,7 +2,7 @@ import abc
 import hashlib
 import math
 import logging
-from typing import List, Optional
+from typing import List
 
 logger = logging.getLogger("app.embeddings")
 

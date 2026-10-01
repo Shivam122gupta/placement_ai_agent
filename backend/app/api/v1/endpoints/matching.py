@@ -1,6 +1,6 @@
 import logging
 from typing import List, Dict
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Depends, Path
 from beanie import PydanticObjectId
 
 from app.schemas.matching import JobMatchResponse

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Optional
 from beanie import Document, Indexed
-from pydantic import BaseModel, Field
+from pydantic import Field
 from app.schemas.job import JobRequirementSchema
 
 

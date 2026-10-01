@@ -9,7 +9,6 @@ from app.providers.embeddings import get_embedding_provider
 from app.rag.chunker import SectionAwareChunker, CandidateChunk
 from app.schemas.memory import (
     MemorySearchResultItem,
-    MemorySearchResponse,
     CandidateNoteCreate,
     CandidateNoteResponse,
     MemoryStatsResponse,

@@ -10,7 +10,6 @@ from app.schemas.profile import (
 )
 from app.schemas.common import StandardResponse
 from app.services.profile_service import ProfileService
-from app.services.resume_service import ResumeService
 from app.models.resume import ResumeDocument, ResumeVersionDocument
 from app.api.deps import get_current_active_user
 from app.models.user import UserDocument
