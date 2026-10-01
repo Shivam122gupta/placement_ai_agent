@@ -59,6 +59,11 @@ export async function adminFetch(endpoint: string, options: RequestInit = {}) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After') || '15';
+      const msg = data.error?.message || data.message || `Rate limit exceeded. System protection active. Please wait ${retryAfter} seconds before trying again.`;
+      throw new Error(msg);
+    }
     if (response.status === 401 || response.status === 403) {
       if (!endpoint.includes('/auth/login')) {
         removeAuthToken();

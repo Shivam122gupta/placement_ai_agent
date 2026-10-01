@@ -98,6 +98,10 @@ def get_client_ip(request: Request) -> str:
 
 # Route-specific rate limit rules: path prefix -> (max_requests, window_seconds)
 ROUTE_LIMITS: List[Tuple[str, int, int]] = [
+    ("/api/v1/admin/db/cleanup", 3, 300),         # Strict: 3 DB wipes / 5 min
+    ("/api/v1/admin/users", 30, 60),              # 30 user list queries / min
+    ("/api/v1/admin/stats", 60, 60),              # 60 stats fetches / min
+    ("/api/v1/admin", 45, 60),                    # 45 general admin calls / min
     ("/api/v1/auth/login", 10, 60),               # 10 attempts / min
     ("/api/v1/auth/register", 6, 60),              # 6 registrations / min
     ("/api/v1/auth/resend-verification", 3, 300),  # 3 resends / 5 min
