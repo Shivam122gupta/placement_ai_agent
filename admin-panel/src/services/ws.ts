@@ -1,4 +1,4 @@
-import { getAuthToken } from './api';
+import { getAuthToken, BASE_URL } from './api';
 
 export type WSEvent = {
   type: string;
@@ -6,6 +6,19 @@ export type WSEvent = {
 };
 
 type WSCallback = (event: WSEvent) => void;
+
+function getDefaultWSUrl(): string {
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+  // Auto derive WS URL from HTTP BASE_URL
+  if (BASE_URL) {
+    const wsProtocol = BASE_URL.startsWith('https') ? 'wss:' : 'ws:';
+    const hostAndPath = BASE_URL.replace(/^https?:\/\//, '');
+    return `${wsProtocol}//${hostAndPath}/admin/ws`;
+  }
+  return 'ws://localhost:8000/api/v1/admin/ws';
+}
 
 class AdminWebSocketClient {
   private socket: WebSocket | null = null;
@@ -21,7 +34,7 @@ class AdminWebSocketClient {
       return;
     }
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api/v1/admin/ws';
+    const wsUrl = getDefaultWSUrl();
     this.isConnecting = true;
     
     try {

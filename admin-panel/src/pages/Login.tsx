@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
-import { setAuthToken } from '../services/api';
+import { setAuthToken, BASE_URL } from '../services/api';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,16 +16,18 @@ export const Login: React.FC = () => {
     setError(null);
 
     try {
-      const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || data.detail || 'Login failed');
       }
 
       if (data.data?.user?.role !== 'admin') {
@@ -35,7 +37,7 @@ export const Login: React.FC = () => {
       setAuthToken(data.data.tokens.access_token);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+      setError(err.message || 'An unexpected error occurred during authentication');
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ export const Login: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="22shivamgupta05@gmail.com"
+                placeholder="admin@hirexora.com"
                 className="w-full bg-[#141413] border border-[#33322E] rounded-2xl py-3.5 pl-11 pr-4 text-xs font-medium text-[#F4F3EE] placeholder-[#787770] focus:outline-none focus:border-[#DA7756] transition-colors"
               />
             </div>
