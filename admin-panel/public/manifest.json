@@ -1,0 +1,25 @@
+{
+  "short_name": "HireXora Admin",
+  "name": "HireXora Admin Console",
+  "description": "Autonomous AI Placement & Career Copilot Admin Command Center",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0e141e",
+  "theme_color": "#00ea64",
+  "display": "standalone",
+  "orientation": "any",
+  "categories": ["business", "productivity", "utilities"]
+}

@@ -1,10 +1,16 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Database, Activity, LogOut, ChevronRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Users, Database, Activity, LogOut, ChevronRight, Sparkles, X } from 'lucide-react';
 import { removeAuthToken } from '../services/api';
 import { wsClient } from '../services/ws';
+import { PWAInstallButton } from './PWAInstallButton';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -20,62 +26,67 @@ export const Sidebar: React.FC = () => {
     { label: 'DB Maintenance', icon: Database, path: '/database' },
   ];
 
-  return (
-    <aside className="w-72 glass-panel border-r border-[#2D2C28] flex flex-col justify-between hidden md:flex h-screen sticky top-0 z-30 select-none bg-[#181816]">
+  const sidebarContent = (
+    <div className="w-64 bg-[#131b26] border-r border-[#2a3649] flex flex-col justify-between h-full select-none text-white font-mono">
       <div>
-        {/* HireXora Brand Header */}
-        <div className="p-6 border-b border-[#2D2C28] flex items-center justify-between">
-          <div className="flex items-center space-x-3.5">
-            <div className="relative">
-              <img
-                src="/hirxora-logo-2.jpg"
-                alt="HireXora"
-                className="w-11 h-11 rounded-2xl object-cover border border-[#DA7756]/40 shadow-lg shadow-[#DA7756]/20 shrink-0"
-              />
-              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#DA7756] border-2 border-[#181816] rounded-full animate-pulse" />
-            </div>
+        {/* Top Branding with Logo */}
+        <div className="p-4 border-b border-[#2a3649] flex items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <img
+              src="/hirexora-logo.jpg"
+              alt="HireXora Logo"
+              className="w-8 h-8 rounded-sm border border-[#00ea64] object-cover shadow-sm"
+            />
             <div>
-              <div className="flex items-center space-x-1.5">
-                <h1 className="font-serif text-lg font-bold text-[#F4F3EE] tracking-tight">HireXora</h1>
-                <span className="bg-[#DA7756]/15 text-[#DA7756] text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#DA7756]/30 font-semibold">
-                  v2.0
-                </span>
-              </div>
-              <span className="text-[11px] text-[#DA7756] font-extrabold uppercase tracking-wider block -mt-0.5">
-                Admin Console
+              <h1 className="font-mono text-xs font-extrabold text-white tracking-tight uppercase">
+                HIREXORA OPS
+              </h1>
+              <span className="text-[9px] font-mono text-[#00ea64] font-bold tracking-wider block -mt-0.5">
+                ADMIN CONSOLE v2.0
               </span>
             </div>
           </div>
+
+          {/* Close Mobile Drawer Button */}
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="md:hidden p-1 text-zinc-400 hover:text-white rounded-sm"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Section */}
-        <div className="p-4 space-y-6">
+        <div className="p-3.5 space-y-4">
           <div>
-            <span className="px-3 text-[11px] font-extrabold uppercase tracking-widest text-[#787770] block mb-2 font-mono">
-              Main Menu
+            <span className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-[#94a3b8] block mb-2">
+              SYSTEM CONTROL MENU
             </span>
-            <nav className="space-y-1.5">
+            <nav className="space-y-1">
               {navItems.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   end={item.path === '/'}
+                  onClick={onCloseMobile}
                   className={({ isActive }) =>
-                    `group flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 font-semibold text-xs uppercase tracking-wider ${
+                    `group flex items-center justify-between px-3.5 py-2.5 rounded-sm transition-all font-mono text-xs uppercase tracking-wide ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#DA7756] to-[#C86443] text-[#F4F3EE] shadow-lg shadow-[#DA7756]/25 border border-[#E88A6A]/40 font-bold'
-                        : 'text-[#A6A49B] hover:text-[#F4F3EE] hover:bg-[#252522] border border-transparent'
+                        ? 'bg-[#182230] text-[#00ea64] font-bold border-l-4 border-[#00ea64] shadow-sm'
+                        : 'text-[#94a3b8] hover:text-white hover:bg-[#182230] border-l-4 border-transparent'
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <div className="flex items-center space-x-3.5">
-                        <item.icon className={`w-4 h-4 transition-transform duration-200 ${isActive ? 'scale-110 text-[#F4F3EE]' : 'group-hover:scale-110 text-[#A6A49B] group-hover:text-[#DA7756]'}`} />
+                      <div className="flex items-center space-x-2.5">
+                        <item.icon className={`w-4 h-4 ${isActive ? 'text-[#00ea64]' : 'text-[#94a3b8] group-hover:text-white'}`} />
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase ${isActive ? 'bg-white/20 text-white' : 'bg-[#DA7756]/15 text-[#DA7756] border border-[#DA7756]/30'}`}>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-sm font-mono font-bold uppercase ${isActive ? 'bg-[#00ea64]/20 text-[#00ea64]' : 'bg-[#1e293b] text-[#94a3b8]'}`}>
                           {item.badge}
                         </span>
                       )}
@@ -86,48 +97,73 @@ export const Sidebar: React.FC = () => {
             </nav>
           </div>
 
+          {/* 1-Click PWA Install Button */}
+          <PWAInstallButton variant="sidebar" />
+
           {/* Environment Card */}
-          <div className="p-4 rounded-2xl bg-gradient-to-b from-[#242420] to-[#1C1C19] border border-[#383732] relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-1.5 text-xs font-bold text-[#DA7756] uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-[#DA7756]" />
-                <span>Environment</span>
+          <div className="p-3 rounded-sm bg-[#182230] border border-[#2a3649] font-mono text-xs text-white">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center space-x-1.5 text-[10px] font-bold text-[#00ea64] uppercase">
+                <Sparkles className="w-3.5 h-3.5 text-[#00ea64]" />
+                <span>ENVIRONMENT</span>
               </div>
-              <span className="w-2 h-2 rounded-full bg-[#DA7756] animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-[#00ea64] animate-ping" />
             </div>
-            <p className="text-xs text-[#ECEAE2] font-medium leading-relaxed">
-              FastAPI + MongoDB + Qdrant Vector Engine
+            <p className="text-[10px] text-[#94a3b8] font-medium leading-tight">
+              FastAPI + MongoDB + Qdrant Engine
             </p>
-            <div className="mt-3 flex items-center justify-between text-[11px] text-[#DA7756] font-bold">
-              <span>Status: Active</span>
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </div>
           </div>
         </div>
       </div>
 
       {/* Admin User Footer */}
-      <div className="p-4 border-t border-[#2D2C28]">
-        <div className="p-3 rounded-2xl bg-[#22221F] border border-[#33322E] flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#DA7756] to-[#C86443] flex items-center justify-center text-white font-serif font-bold text-base shadow-md border border-[#E88A6A]/30">
-              H
-            </div>
+      <div className="p-3.5 border-t border-[#2a3649] font-mono">
+        <div className="p-2.5 rounded-sm bg-[#182230] border border-[#2a3649] flex items-center justify-between mb-2.5">
+          <div className="flex items-center space-x-2.5">
+            <img
+              src="/hirexora-logo.jpg"
+              alt="HireXora Admin Avatar"
+              className="w-7 h-7 rounded-sm border border-[#00ea64] object-cover"
+            />
             <div>
-              <p className="text-xs font-bold text-[#F4F3EE] leading-snug">HireXora Admin</p>
-              <span className="text-[10px] text-[#DA7756] font-bold uppercase tracking-wider">Root Privilege</span>
+              <p className="text-xs font-bold text-white leading-none">HireXora Admin</p>
+              <span className="text-[9px] text-[#00ea64] font-bold uppercase tracking-wider block mt-0.5">ROOT ACCESS</span>
             </div>
           </div>
         </div>
 
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-[#DA7756] hover:bg-[#DA7756]/10 hover:border-[#DA7756]/30 border border-transparent transition-all text-xs font-extrabold uppercase tracking-wider"
+          className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-sm bg-[#00ea64]/10 text-[#00ea64] border border-[#00ea64]/30 hover:bg-[#00ea64] hover:text-[#0e141e] transition-all text-xs font-mono font-bold uppercase tracking-wider"
         >
-          <LogOut className="w-4 h-4" />
-          <span>Sign Out Admin</span>
+          <LogOut className="w-3.5 h-3.5" />
+          <span>SIGN OUT ADMIN</span>
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sticky Sidebar */}
+      <aside className="hidden md:flex h-screen sticky top-0 z-30">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Slide-Over Drawer with Backdrop */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Backdrop Overlay */}
+          <div
+            onClick={onCloseMobile}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+          />
+          {/* Drawer Content */}
+          <div className="relative z-10 flex-1 max-w-xs w-full shadow-2xl animate-in slide-in-from-left duration-200">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 };

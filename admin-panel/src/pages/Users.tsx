@@ -82,42 +82,42 @@ export const UsersPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 select-none">
+    <div className="space-y-6 select-none font-sans text-white">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-[#F4F3EE] tracking-tight">User Activity & Status</h1>
-          <p className="text-xs text-[#A6A49B] mt-1 font-medium">Real-time user status, login/logout timestamps, and account roles</p>
+          <h1 className="text-2xl font-mono font-extrabold text-white tracking-tight uppercase">User Activity & Status</h1>
+          <p className="text-xs font-mono text-[#94a3b8] mt-1">Real-time user status, login/logout timestamps, and account roles</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2 bg-[#1E1E1B] border border-[#33322E] px-4 py-2 rounded-2xl text-xs font-bold text-[#A6A49B]">
-            <span>Total Accounts:</span>
-            <span className="text-[#DA7756] font-bold text-sm font-mono">{totalUsers}</span>
+        <div className="flex items-center space-x-3 font-mono">
+          <div className="flex items-center space-x-2 bg-[#182230] border border-[#2a3649] px-4 py-2 rounded-sm text-xs font-bold text-white">
+            <span>TOTAL ACCOUNTS:</span>
+            <span className="text-[#00ea64] font-bold text-sm">{totalUsers}</span>
           </div>
           <button
             onClick={fetchUsers}
-            className="p-2.5 rounded-2xl bg-[#1E1E1B] hover:bg-[#252522] text-[#F4F3EE] border border-[#33322E] transition-colors"
+            className="p-2.5 rounded-sm bg-[#00ea64] hover:bg-[#00c854] text-[#0e141e] border border-[#00ea64] transition-colors font-bold shadow-sm"
           >
-            <RefreshCw className={`w-4 h-4 text-[#DA7756] ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-[#0e141e] ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="glass-panel p-5 rounded-3xl border border-[#33322E] flex flex-col md:flex-row items-center justify-between gap-4 bg-[#1E1E1B]">
+      <div className="bg-[#182230] p-4 rounded-sm border border-[#2a3649] shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
-          <Search className="w-4 h-4 text-[#A6A49B] absolute left-4 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#94a3b8] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search accounts by email..."
-            className="w-full bg-[#141413] border border-[#33322E] rounded-2xl py-2.5 pl-11 pr-4 text-xs font-medium text-[#F4F3EE] placeholder-[#787770] focus:outline-none focus:border-[#DA7756] transition-colors"
+            className="w-full bg-[#131b26] border border-[#2a3649] rounded-sm py-2 pl-10 pr-3 font-mono text-xs text-white placeholder-[#94a3b8]/50 focus:outline-none focus:border-[#00ea64]"
           />
         </div>
 
-        <div className="flex items-center space-x-2 overflow-x-auto w-full md:w-auto">
-          <Filter className="w-4 h-4 text-[#A6A49B] shrink-0" />
+        <div className="flex items-center space-x-2 overflow-x-auto w-full md:w-auto font-mono text-xs">
+          <Filter className="w-4 h-4 text-[#94a3b8] shrink-0" />
           {['All', 'Online', 'Offline', 'Admin'].map((filter) => (
             <button
               key={filter}
@@ -125,10 +125,10 @@ export const UsersPage: React.FC = () => {
                 setStatusFilter(filter);
                 setPage(1);
               }}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all uppercase tracking-wider ${
+              className={`px-3.5 py-1.5 rounded-sm font-bold transition-all uppercase tracking-wider ${
                 statusFilter === filter
-                  ? 'bg-gradient-to-r from-[#DA7756] to-[#C86443] text-white shadow-lg shadow-[#DA7756]/30 border border-[#E88A6A]/40'
-                  : 'bg-[#141413] text-[#A6A49B] hover:text-[#F4F3EE] hover:bg-[#252522] border border-[#33322E]'
+                  ? 'bg-[#00ea64] text-[#0e141e] border border-[#00ea64]'
+                  : 'bg-[#131b26] text-[#94a3b8] hover:text-white hover:bg-[#1f2d40] border border-[#2a3649]'
               }`}
             >
               {filter}
@@ -138,110 +138,110 @@ export const UsersPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="glass-panel rounded-3xl border border-[#33322E] overflow-hidden bg-[#1E1E1B]">
-        <div className="overflow-x-auto">
+      <div className="bg-[#182230] rounded-sm border border-[#2a3649] shadow-md overflow-hidden">
+        <div className="overflow-x-auto font-mono">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#141413] text-[#A6A49B] uppercase text-[11px] font-bold tracking-wider border-b border-[#33322E]">
+            <thead className="bg-[#131b26] text-[#00ea64] uppercase text-[11px] font-bold tracking-wider border-b border-[#2a3649]">
               <tr>
-                <th className="px-6 py-4">User Account</th>
-                <th className="px-6 py-4">Live Status</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Last Login</th>
-                <th className="px-6 py-4">Last Logout</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-5 py-3.5">User Account</th>
+                <th className="px-5 py-3.5">Live Status</th>
+                <th className="px-5 py-3.5">Role</th>
+                <th className="px-5 py-3.5">Last Login</th>
+                <th className="px-5 py-3.5">Last Logout</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#33322E]/60 font-medium text-[#ECEAE2]">
+            <tbody className="divide-y divide-[#2a3649] text-zinc-200 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center text-[#A6A49B]">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#DA7756] mb-2" />
+                  <td colSpan={6} className="px-6 py-12 text-center text-[#94a3b8]">
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto text-[#00ea64] mb-2" />
                     Loading user account records...
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center text-[#A6A49B]">
+                  <td colSpan={6} className="px-6 py-12 text-center text-[#94a3b8]">
                     No matching users found.
                   </td>
                 </tr>
               ) : (
                 users.map((u) => (
-                  <tr key={u.id} className="hover:bg-[#252522] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3.5">
-                        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#DA7756] to-[#C86443] flex items-center justify-center text-white font-serif font-bold text-xs shadow-md border border-[#E88A6A]/30">
+                  <tr key={u.id} className="hover:bg-[#131b26] transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-sm bg-[#00ea64] text-[#0e141e] font-mono font-bold text-xs flex items-center justify-center">
                           {u.email[0].toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-bold text-[#F4F3EE] text-xs">{u.email}</p>
-                          <span className="text-[10px] text-[#A6A49B] font-mono">ID: {u.id}</span>
+                          <p className="font-bold text-white text-xs">{u.email}</p>
+                          <span className="text-[10px] text-[#94a3b8]">ID: {u.id}</span>
                         </div>
                       </div>
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       {u.is_online ? (
-                        <span className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#DA7756]/15 text-[#DA7756] border border-[#DA7756]/30 glow-terracotta-pulse">
-                          <span className="w-2 h-2 rounded-full bg-[#DA7756] animate-pulse" />
-                          <span>Online</span>
+                        <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase bg-[#00ea64]/15 text-[#00ea64] border border-[#00ea64]/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#00ea64] animate-pulse" />
+                          <span>ONLINE</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#141413] text-[#787770] border border-[#33322E]">
-                          <span className="w-2 h-2 rounded-full bg-[#787770]" />
-                          <span>Offline</span>
+                        <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase bg-[#131b26] text-[#94a3b8] border border-[#2a3649]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                          <span>OFFLINE</span>
                         </span>
                       )}
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       {u.role === 'admin' ? (
-                        <span className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#DA7756]/15 text-[#DA7756] border border-[#DA7756]/30">
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#DA7756]" />
-                          <span>Admin</span>
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase bg-[#00ea64]/15 text-[#00ea64] border border-[#00ea64]/30">
+                          <ShieldCheck className="w-3 h-3 text-[#00ea64]" />
+                          <span>ADMIN</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-[#141413] text-[#A6A49B] border border-[#33322E]">
-                          <User className="w-3.5 h-3.5 text-[#A6A49B]" />
-                          <span>User</span>
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase bg-[#131b26] text-[#94a3b8] border border-[#2a3649]">
+                          <User className="w-3 h-3 text-[#94a3b8]" />
+                          <span>USER</span>
                         </span>
                       )}
                     </td>
 
-                    <td className="px-6 py-4 text-[#ECEAE2]">
+                    <td className="px-5 py-3.5 text-zinc-300">
                       {u.last_login_at ? (
-                        <span className="flex items-center space-x-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#DA7756] shrink-0" />
-                          <span className="font-mono text-[11px]">{formatDate(u.last_login_at)}</span>
+                        <span className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3 text-[#00ea64] shrink-0" />
+                          <span className="text-[10px]">{formatDate(u.last_login_at)}</span>
                         </span>
                       ) : (
-                        <span className="text-[#787770]">—</span>
+                        <span className="text-zinc-500">—</span>
                       )}
                     </td>
 
-                    <td className="px-6 py-4 text-[#ECEAE2]">
+                    <td className="px-5 py-3.5 text-zinc-300">
                       {u.last_logout_at ? (
-                        <span className="flex items-center space-x-1.5">
-                          <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                          <span className="font-mono text-[11px]">{formatDate(u.last_logout_at)}</span>
+                        <span className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                          <span className="text-[10px]">{formatDate(u.last_logout_at)}</span>
                         </span>
                       ) : (
-                        <span className="text-[#787770]">—</span>
+                        <span className="text-zinc-500">—</span>
                       )}
                     </td>
 
-                    <td className="px-6 py-4 text-right space-x-2">
+                    <td className="px-5 py-3.5 text-right space-x-2">
                       <button
                         onClick={() => handleRoleToggle(u.id, u.role)}
                         title="Toggle Admin Privilege"
-                        className="px-3 py-1.5 rounded-xl bg-[#141413] hover:bg-[#252522] text-[#DA7756] font-bold border border-[#33322E] transition-all text-xs uppercase tracking-wider"
+                        className="px-2.5 py-1 rounded-sm bg-[#131b26] hover:bg-[#00ea64] hover:text-[#0e141e] text-[#00ea64] font-bold border border-[#00ea64]/40 transition-all text-[10px] uppercase"
                       >
                         Toggle Role
                       </button>
                       <button
                         onClick={() => handleDeleteUser(u.id, u.email)}
                         title="Delete User Account"
-                        className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all"
+                        className="p-1.5 rounded-sm bg-[#131b26] hover:bg-red-500 hover:text-white text-red-400 border border-red-500/30 transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

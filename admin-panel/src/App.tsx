@@ -16,6 +16,7 @@ const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes Idle Timeout
 const ProtectedLayout: React.FC = () => {
   const token = getAuthToken();
   const [wsConnected, setWsConnected] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const idleTimerRef = useRef<any>(null);
 
   // Auto Logout Idle Session Protection
@@ -53,11 +54,15 @@ const ProtectedLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#141413] bg-mesh-pattern text-[#F4F3EE]">
-      <Sidebar />
+    <div className="flex min-h-screen bg-[#0e141e] text-white">
+      <Sidebar mobileOpen={mobileMenuOpen} onCloseMobile={() => setMobileMenuOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header wsConnected={wsConnected} />
-        <main className="p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
+        <Header
+          wsConnected={wsConnected}
+          mobileMenuOpen={mobileMenuOpen}
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+        />
+        <main className="p-4 sm:p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<UsersPage />} />
