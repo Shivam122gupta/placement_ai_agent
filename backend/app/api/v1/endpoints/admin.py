@@ -16,6 +16,8 @@ from app.services.admin_ws_service import admin_ws_manager
 from app.core.security import decode_access_token, verify_password
 from app.core.exceptions import PermissionDeniedError, ResourceNotFoundError, ValidationError
 
+from app.services.session_cleanup import cleanup_inactive_sessions
+
 router = APIRouter(prefix="/admin", tags=["Admin Panel"])
 
 
@@ -37,6 +39,7 @@ async def get_admin_stats(admin_user: UserDocument = Depends(get_current_admin_u
     """
     Returns dashboard overview stats: Total Users, Online Users, Resumes, Interviews, Traces.
     """
+    await cleanup_inactive_sessions()
     total_users = await UserDocument.count()
     online_users = await UserDocument.find(UserDocument.is_online == True).count()  # noqa: E712
     verified_users = await UserDocument.find(UserDocument.is_verified == True).count()  # noqa: E712
@@ -74,6 +77,7 @@ async def list_users(
     """
     Retrieves paginated list of users with online status and session timestamps.
     """
+    await cleanup_inactive_sessions()
     query_conditions = []
     
     if search:

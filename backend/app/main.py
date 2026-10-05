@@ -24,11 +24,17 @@ from app.api.v1.api_router import api_v1_router
 logger = setup_logging()
 
 
+import asyncio
+from app.services.session_cleanup import start_periodic_session_cleanup
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.PROJECT_NAME} in [{settings.ENVIRONMENT}] mode...")
+    cleanup_task = None
     try:
         await init_db()
+        cleanup_task = asyncio.create_task(start_periodic_session_cleanup(300))
     except Exception as e:
         logger.error(f"Failed to initialize database during startup: {e}")
     try:
@@ -38,6 +44,8 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Qdrant collection initialization notice: {qe}")
     yield
     logger.info("Shutting down application...")
+    if cleanup_task:
+        cleanup_task.cancel()
     await close_db()
 
 

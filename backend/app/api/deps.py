@@ -1,3 +1,4 @@
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -32,6 +33,24 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
     user = await UserDocument.get(obj_id)
     if not user:
         raise AuthenticationError("User not found", code="USER_NOT_FOUND")
+
+    # Check for 60-minute session inactivity timeout
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(minutes=60)
+
+    if user.last_active_at and user.last_active_at < cutoff:
+        user.is_online = False
+        user.last_logout_at = now
+        user.update_timestamp()
+        await user.save()
+        raise AuthenticationError("Session expired after 60 minutes of inactivity. Please login again.", code="SESSION_EXPIRED")
+
+    # Refresh last_active_at & is_online (throttled to max once every 60 seconds)
+    if not user.last_active_at or (now - user.last_active_at).total_seconds() > 60 or not user.is_online:
+        user.last_active_at = now
+        user.is_online = True
+        user.update_timestamp()
+        await user.save()
 
     return user
 

@@ -51,9 +51,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    await authService.logout();
+    try {
+      await authService.logout();
+    } catch {
+      // Ignore logout errors if session already expired
+    }
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     setUser(null);
   };
+
+  // 60-Minute Inactivity Auto-Logout Timer
+  useEffect(() => {
+    if (!user) return;
+
+    const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 60 minutes
+    let lastActivity = Date.now();
+
+    const handleUserActivity = () => {
+      lastActivity = Date.now();
+    };
+
+    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    activityEvents.forEach((event) => {
+      window.addEventListener(event, handleUserActivity, { passive: true });
+    });
+
+    const intervalId = setInterval(() => {
+      if (Date.now() - lastActivity >= INACTIVITY_LIMIT_MS) {
+        clearInterval(intervalId);
+        logout().then(() => {
+          alert('Your session has expired due to 1 hour of inactivity. Please log in again.');
+        });
+      }
+    }, 10000); // Check every 10 seconds
+
+    return () => {
+      activityEvents.forEach((event) => {
+        window.removeEventListener(event, handleUserActivity);
+      });
+      clearInterval(intervalId);
+    };
+  }, [user]);
 
   return (
     <AuthContext.Provider

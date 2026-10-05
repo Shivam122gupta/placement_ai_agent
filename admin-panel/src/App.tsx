@@ -11,7 +11,7 @@ import { LiveActivity } from './pages/LiveActivity';
 import { getAuthToken, removeAuthToken } from './services/api';
 import { wsClient } from './services/ws';
 
-const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes Idle Timeout
+const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 60 Minutes Idle Timeout
 
 const ProtectedLayout: React.FC = () => {
   const token = getAuthToken();
