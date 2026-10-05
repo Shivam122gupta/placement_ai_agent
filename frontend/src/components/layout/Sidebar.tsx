@@ -19,13 +19,13 @@ import { useAuth } from '../../context/AuthContext';
 export const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Candidate Profile', path: '/profile', icon: User },
-  { name: 'Resume Intelligence', path: '/resumes', icon: FileText, badge: 'AI Parse' },
-  { name: 'Job Discovery', path: '/jobs', icon: Briefcase, badge: 'Match' },
-  { name: 'Matching & Gaps', path: '/skill-gaps', icon: GitCompare, badge: 'Roadmap' },
-  { name: 'Semantic Memory', path: '/memory', icon: Database, badge: 'RAG' },
-  { name: 'AI Career Copilot', path: '/assistant', icon: Bot, badge: 'Agent' },
-  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare, badge: 'Live Arena' },
-  { name: 'Applications Tracker', path: '/applications', icon: Send, badge: 'Pipeline' },
+  { name: 'Resume Intelligence', path: '/resumes', icon: FileText },
+  { name: 'Job Discovery', path: '/jobs', icon: Briefcase },
+  { name: 'Matching & Gaps', path: '/skill-gaps', icon: GitCompare },
+  { name: 'Semantic Memory', path: '/memory', icon: Database },
+  { name: 'AI Career Copilot', path: '/assistant', icon: Bot },
+  { name: 'Mock Interviews', path: '/interviews', icon: MessageSquare },
+  { name: 'Applications Tracker', path: '/applications', icon: Send },
 ];
 
 interface SidebarProps {
@@ -95,11 +95,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onClose })
                   </div>
                   <span className="tracking-tight truncate">{item.name}</span>
                 </div>
-                {item.badge && (
-                  <span className="rounded-md bg-[#FAF8F5]/10 px-1.5 py-0.5 text-[9px] font-mono font-medium text-[#FAF8F5] border border-[#FAF8F5]/20 shrink-0">
-                    {item.badge}
-                  </span>
-                )}
               </NavLink>
             );
           })}
