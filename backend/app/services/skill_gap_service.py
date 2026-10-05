@@ -3,16 +3,18 @@ from datetime import datetime, timezone
 from typing import List, Optional, Any
 from beanie import PydanticObjectId
 
-from app.models.skill_gap import SkillGapRoadmapDocument, RoadmapMilestone
+from app.models.skill_gap import SkillGapRoadmapDocument, RoadmapMilestone, YouTubeResource
 from app.models.job import JobDocument
 from app.schemas.skill_gap import (
     RoadmapGenerateRequest,
     SkillGapRoadmapResponse,
     LLMRoadmapOutput,
     RoadmapMilestoneSchema,
+    YouTubeResource as YouTubeResourceSchema,
 )
 from app.providers.llm import get_llm_provider
 from app.services.matching_service import MatchingService
+from app.services.youtube_service import YouTubeService
 from app.core.exceptions import ResourceNotFoundError, AppException
 
 logger = logging.getLogger("app.services.skill_gap")
@@ -62,14 +64,10 @@ class SkillGapService:
             duration_type=request.duration_type,
         )
 
-        now = datetime.now(timezone.utc)
-        roadmap_doc = SkillGapRoadmapDocument(
-            user_id=user_obj_id,
-            job_id=job_obj_id,
-            target_role=target_role,
-            duration_type=request.duration_type,
-            gap_skills=gap_skills,
-            milestones=[
+        milestones_with_yt = []
+        for m in llm_roadmap.milestones:
+            yt_res = await YouTubeService.get_playlists_for_skills(m.target_skills, m.title)
+            milestones_with_yt.append(
                 RoadmapMilestone(
                     day_or_week=m.day_or_week,
                     title=m.title,
@@ -77,10 +75,27 @@ class SkillGapService:
                     key_topics=m.key_topics,
                     practice_project_idea=m.practice_project_idea,
                     recommended_resources=m.recommended_resources,
+                    youtube_playlists=[
+                        YouTubeResource(
+                            title=yt.title,
+                            url=yt.url,
+                            channel_title=yt.channel_title,
+                            thumbnail_url=yt.thumbnail_url,
+                        )
+                        for yt in yt_res
+                    ],
                     completed=False,
                 )
-                for m in llm_roadmap.milestones
-            ],
+            )
+
+        now = datetime.now(timezone.utc)
+        roadmap_doc = SkillGapRoadmapDocument(
+            user_id=user_obj_id,
+            job_id=job_obj_id,
+            target_role=target_role,
+            duration_type=request.duration_type,
+            gap_skills=gap_skills,
+            milestones=milestones_with_yt,
             readiness_impact=llm_roadmap.readiness_impact,
             created_at=now,
             updated_at=now,
@@ -239,6 +254,15 @@ class SkillGapService:
                     key_topics=m.key_topics,
                     practice_project_idea=m.practice_project_idea,
                     recommended_resources=m.recommended_resources,
+                    youtube_playlists=[
+                        YouTubeResourceSchema(
+                            title=y.title,
+                            url=y.url,
+                            channel_title=getattr(y, "channel_title", None),
+                            thumbnail_url=getattr(y, "thumbnail_url", None),
+                        )
+                        for y in getattr(m, "youtube_playlists", [])
+                    ],
                     completed=m.completed,
                 )
                 for m in doc.milestones

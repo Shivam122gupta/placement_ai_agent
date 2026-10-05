@@ -1,3 +1,10 @@
+export interface YouTubeResource {
+  title: string;
+  url: string;
+  channel_title?: string;
+  thumbnail_url?: string;
+}
+
 export interface RoadmapMilestone {
   day_or_week: string;
   title: string;
@@ -5,6 +12,7 @@ export interface RoadmapMilestone {
   key_topics: string[];
   practice_project_idea?: string;
   recommended_resources: string[];
+  youtube_playlists?: YouTubeResource[];
   completed: boolean;
 }
 

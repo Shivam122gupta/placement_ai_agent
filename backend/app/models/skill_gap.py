@@ -4,6 +4,13 @@ from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
 
 
+class YouTubeResource(BaseModel):
+    title: str
+    url: str
+    channel_title: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+
+
 class RoadmapMilestone(BaseModel):
     day_or_week: str  # e.g., "Day 1-2", "Day 3-4", "Week 1", "Week 2"
     title: str
@@ -11,6 +18,7 @@ class RoadmapMilestone(BaseModel):
     key_topics: List[str] = Field(default_factory=list)
     practice_project_idea: Optional[str] = None
     recommended_resources: List[str] = Field(default_factory=list)
+    youtube_playlists: List[YouTubeResource] = Field(default_factory=list)
     completed: bool = False
 
 

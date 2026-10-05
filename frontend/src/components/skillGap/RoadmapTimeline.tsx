@@ -5,6 +5,9 @@ import {
   BookOpen,
   Code2,
   Sparkles,
+  Youtube,
+  ExternalLink,
+  PlaySquare,
 } from 'lucide-react';
 import { SkillGapRoadmap } from '../../types/skillGap';
 
@@ -147,6 +150,59 @@ export const RoadmapTimeline: React.FC<Props> = ({ roadmap, onToggleMilestone })
                       <span>{res}</span>
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* YouTube Playlists & Courses */}
+              {((milestone.youtube_playlists && milestone.youtube_playlists.length > 0) || milestone.target_skills.length > 0) && (
+                <div className="mt-4 pt-3 border-t border-[#FAF8F5]/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-medium text-red-400 uppercase tracking-wider flex items-center space-x-1.5">
+                      <Youtube className="h-4 w-4 text-red-500 fill-red-500/20" />
+                      <span>Suggested YouTube Playlists & Courses</span>
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {(milestone.youtube_playlists && milestone.youtube_playlists.length > 0
+                      ? milestone.youtube_playlists
+                      : milestone.target_skills.slice(0, 2).map((skill) => ({
+                          title: `${skill} — Curated YouTube Playlists`,
+                          url: `https://www.youtube.com/results?search_query=${encodeURIComponent(skill + ' full course playlist tutorial')}&sp=EgIQAw%253D%253D`,
+                          channel_title: 'YouTube Search',
+                          thumbnail_url: undefined,
+                        }))
+                    ).map((yt, yIdx) => (
+                      <a
+                        key={yIdx}
+                        href={yt.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group/yt flex items-center space-x-3 p-2.5 rounded-2xl bg-[#1a1a1e] border border-red-500/20 hover:border-red-500/50 hover:bg-red-950/10 transition-all duration-200"
+                      >
+                        {yt.thumbnail_url ? (
+                          <img
+                            src={yt.thumbnail_url}
+                            alt={yt.title}
+                            className="h-12 w-20 object-cover rounded-xl border border-white/10 shrink-0"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-xl bg-red-600/15 border border-red-500/30 flex items-center justify-center shrink-0 group-hover/yt:bg-red-600/30 transition-colors">
+                            <PlaySquare className="h-5 w-5 text-red-400" />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-xs font-medium text-white group-hover/yt:text-red-300 transition-colors truncate">
+                            {yt.title}
+                          </h4>
+                          <span className="text-[10px] font-mono text-neutral-400 flex items-center space-x-1 mt-0.5">
+                            <span>{yt.channel_title || 'YouTube Playlist'}</span>
+                            <ExternalLink className="h-2.5 w-2.5 text-neutral-500 group-hover/yt:text-red-400" />
+                          </span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

@@ -2,6 +2,13 @@ from typing import List, Optional, Any
 from pydantic import BaseModel, Field, model_validator
 
 
+class YouTubeResource(BaseModel):
+    title: str
+    url: str
+    channel_title: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+
+
 class RoadmapMilestoneSchema(BaseModel):
     day_or_week: str
     title: str
@@ -9,6 +16,7 @@ class RoadmapMilestoneSchema(BaseModel):
     key_topics: List[str] = Field(default_factory=list)
     practice_project_idea: Optional[str] = None
     recommended_resources: List[str] = Field(default_factory=list)
+    youtube_playlists: List[YouTubeResource] = Field(default_factory=list)
     completed: bool = False
 
 
