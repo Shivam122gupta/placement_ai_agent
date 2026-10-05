@@ -24,6 +24,8 @@ async def cleanup_inactive_sessions() -> int:
         
         for user in online_users:
             last_active = user.last_active_at or user.last_login_at
+            if last_active and last_active.tzinfo is None:
+                last_active = last_active.replace(tzinfo=timezone.utc)
             if not last_active or last_active < cutoff:
                 user.is_online = False
                 user.last_logout_at = now
