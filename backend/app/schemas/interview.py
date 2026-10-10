@@ -1,5 +1,6 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.core.sanitizer import sanitize_text
 
 
 class GenerateInterviewRequest(BaseModel):
@@ -8,10 +9,25 @@ class GenerateInterviewRequest(BaseModel):
     job_id: Optional[str] = Field(default=None, description="Optional job ID to tailor interview questions specifically to the JD")
     num_questions: int = Field(default=5, ge=3, le=8, description="Number of questions in mock session")
 
+    @field_validator("role", "experience_level", mode="before")
+    @classmethod
+    def sanitize_role_fields(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
+        return sanitize_text(str(v))
+
 
 class SubmitAnswerRequest(BaseModel):
     question_id: str = Field(..., description="ID of the question being answered")
     candidate_answer: str = Field(..., min_length=5, max_length=10000, description="Candidate's technical or behavioral answer")
+
+    @field_validator("candidate_answer", mode="before")
+    @classmethod
+    def sanitize_answer(cls, v: str) -> str:
+        if not v:
+            return v
+        return sanitize_text(str(v), allow_basic_formatting=True)
+
 
 
 class AnswerEvaluationSchema(BaseModel):

@@ -1,11 +1,20 @@
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from app.agents.state import ToolCallAudit, PendingConfirmation
+from app.core.sanitizer import sanitize_text
 
 
 class AgentChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000, description="Candidate prompt or question")
     session_id: Optional[str] = None
+
+    @field_validator("message", mode="before")
+    @classmethod
+    def sanitize_message(cls, v: str) -> str:
+        if not v:
+            return v
+        return sanitize_text(str(v), allow_basic_formatting=True)
+
 
 
 class AgentChatResponse(BaseModel):

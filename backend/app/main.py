@@ -81,22 +81,36 @@ async def add_security_headers_and_timing(request: Request, call_next):
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time-Seconds"] = f"{process_time:.4f}"
 
-    # Production-Grade HTTP Security Headers
+    # Enterprise-Grade HTTP Security Headers
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https: wss: ws: http:;"
+    )
     return response
 
 # 3. CORS
+allowed_origins_list = (
+    settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [settings.CORS_ORIGINS]
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [settings.CORS_ORIGINS],
-    allow_origin_regex=r"^https?:\/\/(localhost|127\.0\.0\.1|.*\.vercel\.app)(:[0-9]+)?$",
+    allow_origins=allowed_origins_list,
+    allow_origin_regex=r"^https?:\/\/(localhost|127\.0\.0\.1)(:[0-9]+)?$" if _is_prod else r"^https?:\/\/(localhost|127\.0\.0\.1|.*\.vercel\.app)(:[0-9]+)?$",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],
 )
+
 
 # ----------------- Exception Handlers -----------------
 app.add_exception_handler(AppException, app_exception_handler)

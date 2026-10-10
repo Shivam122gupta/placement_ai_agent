@@ -46,6 +46,28 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    @field_validator("JWT_SECRET", "JWT_REFRESH_SECRET")
+    @classmethod
+    def validate_jwt_secrets(cls, v: str) -> str:
+        default_placeholders = {
+            "default_dev_jwt_secret_key_change_in_production_32char",
+            "default_dev_jwt_refresh_secret_key_change_in_prod",
+            "your-super-secret-jwt-access-key-here",
+            "your-super-secret-jwt-refresh-key-here",
+            "change_this_in_production_to_a_secure_random_key_min_32_chars",
+        }
+        if v in default_placeholders:
+            import os
+            env_mode = os.getenv("ENVIRONMENT", "production").lower()
+            debug_mode = os.getenv("DEBUG", "false").lower() == "true"
+            if env_mode == "production" and not debug_mode:
+                raise ValueError(
+                    "FATAL SECURITY RISK: Insecure default JWT secret detected in production! "
+                    "You MUST set a custom 32+ char JWT_SECRET and JWT_REFRESH_SECRET in .env."
+                )
+        return v
+
+
     # 4. LLM Providers
     LLM_PROVIDER: str = "groq"
     GROQ_API_KEY: str = ""

@@ -1,5 +1,6 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from app.core.sanitizer import sanitize_text
 
 
 class ApplicationCreate(BaseModel):
@@ -15,6 +16,13 @@ class ApplicationCreate(BaseModel):
     salary_offered: Optional[str] = None
     location: Optional[str] = None
 
+    @field_validator("company_name", "job_title", "next_action", "notes", "salary_offered", "location", mode="before")
+    @classmethod
+    def sanitize_input_text(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_text(str(v))
+
 
 class ApplicationUpdate(BaseModel):
     status: Optional[str] = None
@@ -25,6 +33,14 @@ class ApplicationUpdate(BaseModel):
     notes: Optional[str] = None
     salary_offered: Optional[str] = None
     location: Optional[str] = None
+
+    @field_validator("next_action", "notes", "salary_offered", "location", mode="before")
+    @classmethod
+    def sanitize_input_text(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        return sanitize_text(str(v))
+
 
 
 class ApplicationResponse(BaseModel):
