@@ -55,7 +55,8 @@ export const Login: React.FC = () => {
           setFailedAttempts(0);
           throw new Error(`Too many failed login attempts. Security cooldown active for ${COOLDOWN_SECONDS} seconds.`);
         }
-        throw new Error(data.message || data.detail || 'Login failed');
+        const errMsg = data.error?.message || data.message || data.detail || 'Login failed';
+        throw new Error(errMsg);
       }
 
       if (data.data?.user?.role !== 'admin') {
@@ -66,8 +67,13 @@ export const Login: React.FC = () => {
       setAuthToken(data.data.tokens.access_token);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred during authentication');
+      if (err.name === 'TypeError' && err.message?.toLowerCase().includes('fetch')) {
+        setError(`Unable to connect to backend API at ${BASE_URL}. If running locally, please start the backend server.`);
+      } else {
+        setError(err.message || 'An unexpected error occurred during authentication');
+      }
     } finally {
+
       setLoading(false);
     }
   };

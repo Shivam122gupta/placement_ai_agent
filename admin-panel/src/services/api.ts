@@ -1,8 +1,18 @@
-const rawBaseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1').trim();
+const getBaseApiUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl.trim()) {
+    let clean = envUrl.trim().replace(/\/+$/, '');
+    return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
+  }
+  // When running on deployed domain (Vercel, Render, etc.), fallback to live production backend
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://placement-ai-agent-655t.onrender.com/api/v1';
+  }
+  return 'http://localhost:8000/api/v1';
+};
 
-export const BASE_URL = rawBaseUrl.endsWith('/api/v1')
-  ? rawBaseUrl
-  : `${rawBaseUrl.replace(/\/+$/, '')}/api/v1`;
+export const BASE_URL = getBaseApiUrl();
+
 
 function isTokenExpired(token: string): boolean {
   try {
