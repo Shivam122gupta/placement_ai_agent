@@ -130,7 +130,7 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
 
-@app.get("/", include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 async def root():
     """Root endpoint — returns service info in production, redirects to docs in dev."""
     if _is_prod:
@@ -143,6 +143,7 @@ async def root():
         })
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/docs")
+
 
 
 @app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])

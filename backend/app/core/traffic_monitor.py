@@ -131,8 +131,16 @@ class TrafficMonitorMiddleware(BaseHTTPMiddleware):
         test_bot_block = request.headers.get("X-Test-Bot-Block") == "true"
         test_scraper_block = request.headers.get("X-Test-Scraper-Check") == "true"
 
+        # Infrastructure probes, root health checks, and HEAD/OPTIONS requests must never be blocked as bots
+        is_infra_path = (
+            raw_path in ("/", "/health", "/favicon.ico", "/robots.txt")
+            or raw_path.startswith(("/docs", "/openapi", "/redoc"))
+            or raw_path.endswith("/health")
+            or request.method in ("HEAD", "OPTIONS")
+        )
+
         # 1. Bot & Automated Scraper Detection
-        if not is_test_env or test_bot_block:
+        if not is_infra_path and (not is_test_env or test_bot_block):
             is_bot = False
             matched_agent = ""
 

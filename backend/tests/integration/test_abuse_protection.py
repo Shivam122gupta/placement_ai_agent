@@ -32,7 +32,40 @@ async def test_bot_user_agent_detection(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_cloud_health_probes_not_blocked(async_client: AsyncClient):
+    """
+    Verifies that cloud uptime monitors and load balancer probes (like Render's
+    Go-http-client or container curl probes) hitting / and /health via GET or HEAD
+    are never blocked by bot detection.
+    """
+    probe_agents = [
+        "Go-http-client/1.1",
+        "Go-http-client/2.0",
+        "curl/7.68.0",
+        "kube-probe/1.24",
+    ]
+
+    for ua in probe_agents:
+        # Test GET /
+        res_root = await async_client.get("/", headers={"User-Agent": ua, "X-Test-Bot-Block": "true"})
+        assert res_root.status_code in (200, 307), f"Expected 200/307 for {ua} on /, got {res_root.status_code}"
+
+        # Test HEAD /
+        res_head_root = await async_client.head("/", headers={"User-Agent": ua, "X-Test-Bot-Block": "true"})
+        assert res_head_root.status_code in (200, 307), f"Expected 200/307 for {ua} on HEAD /, got {res_head_root.status_code}"
+
+        # Test GET /health
+        res_health = await async_client.get("/health", headers={"User-Agent": ua, "X-Test-Bot-Block": "true"})
+        assert res_health.status_code == 200, f"Expected 200 for {ua} on /health, got {res_health.status_code}"
+
+        # Test HEAD /health
+        res_head_health = await async_client.head("/health", headers={"User-Agent": ua, "X-Test-Bot-Block": "true"})
+        assert res_head_health.status_code == 200, f"Expected 200 for {ua} on HEAD /health, got {res_head_health.status_code}"
+
+
+@pytest.mark.asyncio
 async def test_honeypot_registration_protection(async_client: AsyncClient):
+
     """
     Verifies that automated bots filling the hidden honeypot field
     are rejected immediately with HTTP 400.
