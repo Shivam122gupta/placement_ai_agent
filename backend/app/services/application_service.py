@@ -156,8 +156,11 @@ class ApplicationService:
         return docs
 
     async def get_application_by_id(self, user_id: str, app_id: str) -> Optional[ApplicationDocument]:
-        p_user_id = PydanticObjectId(user_id)
-        p_app_id = PydanticObjectId(app_id)
+        try:
+            p_user_id = PydanticObjectId(user_id)
+            p_app_id = PydanticObjectId(app_id)
+        except Exception:
+            return None
         return await ApplicationDocument.find_one(
             ApplicationDocument.id == p_app_id,
             ApplicationDocument.user_id == p_user_id,

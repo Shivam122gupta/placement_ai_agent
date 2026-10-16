@@ -232,8 +232,11 @@ Return ONLY valid JSON matching this schema:
         """
         Evaluates a candidate's submitted answer in real-time using a 3-pillar rubric.
         """
-        p_user_id = PydanticObjectId(user_id)
-        p_interview_id = PydanticObjectId(interview_id)
+        try:
+            p_user_id = PydanticObjectId(user_id)
+            p_interview_id = PydanticObjectId(interview_id)
+        except Exception:
+            raise ValueError("Interview session not found.")
 
         interview = await MockInterviewDocument.find_one(
             MockInterviewDocument.id == p_interview_id,
@@ -296,6 +299,7 @@ Return ONLY valid JSON matching this schema:
         if not self.groq_client:
             return self._fallback_evaluation(question, expected_concepts, candidate_answer)
 
+        clean_answer = candidate_answer.replace('"""', "'''").strip()
         prompt = f"""You are a strict, constructive Technical Interview Evaluator.
 Evaluate the candidate's answer using this rigorous 3-pillar rubric:
 
@@ -304,7 +308,7 @@ CATEGORY: {category}
 EXPECTED KEY CONCEPTS: {', '.join(expected_concepts)}
 
 CANDIDATE ANSWER:
-\"\"\"{candidate_answer}\"\"\"
+\"\"\"{clean_answer}\"\"\"
 
 EVALUATION RUBRIC:
 1. Technical Correctness (0.0 - 10.0): Accuracy of terminology, underlying mechanics, and technical validity.
@@ -437,8 +441,11 @@ Return ONLY valid JSON matching this schema:
 
     async def get_interview_by_id(self, user_id: str, interview_id: str) -> Optional[MockInterviewDocument]:
         """Retrieves a specific mock interview session."""
-        p_user_id = PydanticObjectId(user_id)
-        p_interview_id = PydanticObjectId(interview_id)
+        try:
+            p_user_id = PydanticObjectId(user_id)
+            p_interview_id = PydanticObjectId(interview_id)
+        except Exception:
+            return None
         return await MockInterviewDocument.find_one(
             MockInterviewDocument.id == p_interview_id,
             MockInterviewDocument.user_id == p_user_id,
@@ -446,8 +453,11 @@ Return ONLY valid JSON matching this schema:
 
     async def delete_interview(self, user_id: str, interview_id: str) -> bool:
         """Deletes a mock interview record."""
-        p_user_id = PydanticObjectId(user_id)
-        p_interview_id = PydanticObjectId(interview_id)
+        try:
+            p_user_id = PydanticObjectId(user_id)
+            p_interview_id = PydanticObjectId(interview_id)
+        except Exception:
+            return False
         interview = await MockInterviewDocument.find_one(
             MockInterviewDocument.id == p_interview_id,
             MockInterviewDocument.user_id == p_user_id,

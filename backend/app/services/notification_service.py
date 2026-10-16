@@ -46,8 +46,11 @@ class NotificationService:
 
     async def mark_as_read(self, user_id: str, notification_id: str) -> Optional[NotificationDocument]:
         """Marks a single notification as read."""
-        p_user_id = PydanticObjectId(user_id)
-        p_notif_id = PydanticObjectId(notification_id)
+        try:
+            p_user_id = PydanticObjectId(user_id)
+            p_notif_id = PydanticObjectId(notification_id)
+        except Exception:
+            return None
         doc = await NotificationDocument.find_one(
             NotificationDocument.id == p_notif_id,
             NotificationDocument.user_id == p_user_id,

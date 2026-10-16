@@ -138,12 +138,12 @@ class ResumeService:
 
     @classmethod
     async def get_resume_by_id(cls, user_id: PydanticObjectId, resume_id: PydanticObjectId) -> ResumeResponse:
-        resume = await ResumeDocument.get(resume_id)
+        resume = await ResumeDocument.find_one(
+            ResumeDocument.id == resume_id,
+            ResumeDocument.user_id == user_id,
+        )
         if not resume:
             raise ResourceNotFoundError("Resume", str(resume_id))
-
-        if resume.user_id != user_id:
-            raise PermissionDeniedError("You do not have access to this resume.")
 
         latest_version = await ResumeVersionDocument.find_one(
             ResumeVersionDocument.resume_id == resume.id,
@@ -154,12 +154,12 @@ class ResumeService:
 
     @classmethod
     async def get_raw_file_for_download(cls, user_id: PydanticObjectId, resume_id: PydanticObjectId) -> Tuple[bytes, str, str]:
-        resume = await ResumeDocument.get(resume_id)
+        resume = await ResumeDocument.find_one(
+            ResumeDocument.id == resume_id,
+            ResumeDocument.user_id == user_id,
+        )
         if not resume:
             raise ResourceNotFoundError("Resume", str(resume_id))
-
-        if resume.user_id != user_id:
-            raise PermissionDeniedError("You do not have access to this resume.")
 
         data = StorageService.read_file_bytes(resume.file_path)
         return data, resume.filename, resume.mime_type
@@ -168,8 +168,11 @@ class ResumeService:
     async def sync_to_profile(
         cls, user_id: PydanticObjectId, resume_id: PydanticObjectId, sync_req: ProfileSyncRequest
     ) -> ProfileResponse:
-        resume = await ResumeDocument.get(resume_id)
-        if not resume or resume.user_id != user_id:
+        resume = await ResumeDocument.find_one(
+            ResumeDocument.id == resume_id,
+            ResumeDocument.user_id == user_id,
+        )
+        if not resume:
             raise ResourceNotFoundError("Resume", str(resume_id))
 
         latest_version = await ResumeVersionDocument.find_one(
@@ -291,12 +294,12 @@ class ResumeService:
 
     @classmethod
     async def delete_resume(cls, user_id: PydanticObjectId, resume_id: PydanticObjectId) -> bool:
-        resume = await ResumeDocument.get(resume_id)
+        resume = await ResumeDocument.find_one(
+            ResumeDocument.id == resume_id,
+            ResumeDocument.user_id == user_id,
+        )
         if not resume:
             raise ResourceNotFoundError("Resume", str(resume_id))
-
-        if resume.user_id != user_id:
-            raise PermissionDeniedError("You do not have access to delete this resume.")
 
         # Delete physical file
         StorageService.delete_file(resume.file_path)

@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional, Any
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+from app.core.sanitizer import clean_text
 
 
 class MemorySearchRequest(BaseModel):
@@ -10,6 +11,12 @@ class MemorySearchRequest(BaseModel):
     )
     top_k: int = Field(default=5, ge=1, le=25, description="Maximum number of relevant chunks to retrieve")
     score_threshold: float = Field(default=0.0, ge=-1.0, le=1.0, description="Minimum cosine similarity threshold")
+
+    @field_validator("query")
+    @classmethod
+    def sanitize_query(cls, v: str) -> str:
+        return clean_text(v)
+
 
 
 class MemorySearchResultItem(BaseModel):
@@ -50,7 +57,18 @@ class MemorySearchResponse(BaseModel):
 class CandidateNoteCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200, description="Title of note or learning topic")
     content: str = Field(..., min_length=1, max_length=5000, description="Note body, system design snippet or learnings")
-    tags: List[str] = Field(default_factory=list, description="Skill tags or keywords (e.g. ['Redis', 'Caching'])")
+    tags: List[str] = Field(default_factory=list, max_length=20, description="Skill tags or keywords (e.g. ['Redis', 'Caching'])")
+
+    @field_validator("title", "content")
+    @classmethod
+    def sanitize_text_fields(cls, v: str) -> str:
+        return clean_text(v)
+
+    @field_validator("tags")
+    @classmethod
+    def sanitize_tags(cls, v: List[str]) -> List[str]:
+        return [clean_text(tag[:50]) for tag in v if tag]
+
 
 
 class CandidateNoteResponse(BaseModel):

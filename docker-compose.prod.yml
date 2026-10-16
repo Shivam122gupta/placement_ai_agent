@@ -1,0 +1,119 @@
+version: '3.8'
+
+# =============================================================================
+# Production Hardened Docker Compose
+# Architecture:
+# - Databases (MongoDB, Qdrant, Redis) are completely isolated on private_data_net
+#   with ZERO public ports exposed to the host or internet.
+# - Nginx is the sole ingress point on public_web_net (ports 80 & 443).
+# - Application container bridges both networks.
+# =============================================================================
+
+services:
+  # 1. Reverse Proxy (TLS Termination, Ingress Gatekeeper)
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: hirxora_proxy_prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./certbot_www:/var/www/certbot:ro
+    networks:
+      - public_web_net
+    depends_on:
+      - backend
+
+  # 2. FastAPI Backend Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hirxora_backend_prod
+    restart: always
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - ENFORCE_HTTPS=true
+      - MONGODB_URL=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongodb:27017/ai_placement_db?authSource=admin
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+    volumes:
+      - app_storage:/app/storage
+      - app_logs:/app/logs
+    networks:
+      - public_web_net
+      - private_data_net
+    depends_on:
+      - mongodb
+      - qdrant
+      - redis
+
+  # 3. MongoDB - Internal Network Only (Zero Public Ports)
+  mongodb:
+    image: mongo:7.0
+    container_name: hirxora_mongodb_prod
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ai_placement_db
+    volumes:
+      - mongodb_prod_data:/data/db
+    networks:
+      - private_data_net
+    # NOTICE: No 'ports' mapping here! Strictly unreachable from internet.
+    expose:
+      - "27017"
+
+  # 4. Qdrant Vector DB - Internal Network Only (Zero Public Ports)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: hirxora_qdrant_prod
+    restart: always
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
+    volumes:
+      - qdrant_prod_data:/qdrant/storage
+    networks:
+      - private_data_net
+    # NOTICE: No 'ports' mapping here! Strictly unreachable from internet.
+    expose:
+      - "6333"
+
+  # 5. Redis Broker - Internal Network Only (Zero Public Ports)
+  redis:
+    image: redis:7-alpine
+    container_name: hirxora_redis_prod
+    restart: always
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - private_data_net
+    # NOTICE: No 'ports' mapping here! Strictly unreachable from internet.
+    expose:
+      - "6379"
+
+volumes:
+  mongodb_prod_data:
+  qdrant_prod_data:
+  redis_prod_data:
+  app_storage:
+  app_logs:
+
+networks:
+  public_web_net:
+    driver: bridge
+  private_data_net:
+    driver: bridge
+    internal: true  # Prevents direct external routing

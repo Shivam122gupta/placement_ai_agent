@@ -21,15 +21,21 @@ class RoadmapMilestoneSchema(BaseModel):
 
 
 class RoadmapGenerateRequest(BaseModel):
-    job_id: Optional[str] = None
-    target_role: Optional[str] = "Software Engineer"
+    job_id: Optional[str] = Field(default=None, max_length=50)
+    target_role: Optional[str] = Field(default="Software Engineer", max_length=150)
     duration_type: str = Field(default="2_weeks", description="'1_week', '2_weeks', or '1_month'")
-    custom_gap_skills: Optional[List[str]] = None
+    custom_gap_skills: Optional[List[str]] = Field(default=None, max_length=20)
 
     @model_validator(mode="before")
     @classmethod
     def normalize_request(cls, data: Any) -> Any:
         if isinstance(data, dict):
+            from app.core.sanitizer import sanitize_text
+            if "target_role" in data and data["target_role"]:
+                data["target_role"] = sanitize_text(str(data["target_role"]))
+            if "custom_gap_skills" in data and isinstance(data["custom_gap_skills"], list):
+                data["custom_gap_skills"] = [sanitize_text(str(s), max_length=50) for s in data["custom_gap_skills"] if s]
+
             dt = str(data.get("duration_type", "")).lower()
             if "1" in dt and "week" in dt:
                 data["duration_type"] = "1_week"

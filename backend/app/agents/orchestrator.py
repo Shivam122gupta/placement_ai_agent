@@ -195,6 +195,14 @@ class AgentOrchestrator:
         params: Dict[str, Any],
         decision: str = "approve",  # "approve" | "reject"
     ) -> AgentState:
+        # Prevent IDOR: Ensure session ownership if this session already exists
+        existing_run = await AgentRunDocument.find_one(
+            AgentRunDocument.session_id == session_id,
+        )
+        if existing_run and existing_run.user_id != user_id:
+            from app.core.exceptions import PermissionDeniedError
+            raise PermissionDeniedError("You do not have permission to confirm actions for this session.", code="SESSION_ACCESS_DENIED")
+
         state = AgentState(
             session_id=session_id,
             user_id=user_id,

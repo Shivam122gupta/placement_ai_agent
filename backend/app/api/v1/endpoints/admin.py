@@ -7,14 +7,18 @@ from beanie import PydanticObjectId
 from app.api.deps import get_current_admin_user
 from app.models.user import UserDocument
 from app.models.profile import ProfileDocument
-from app.models.resume import ResumeDocument
+from app.models.resume import ResumeDocument, ResumeVersionDocument
 from app.models.interview import MockInterviewDocument
-from app.models.agent_trace import AgentToolCallDocument
+from app.models.agent_trace import AgentToolCallDocument, AgentRunDocument
 from app.models.notification import NotificationDocument
+from app.models.application import ApplicationDocument
+from app.models.matching import JobMatchDocument
+from app.models.skill_gap import SkillGapRoadmapDocument
 from app.schemas.common import StandardResponse
 from app.services.admin_ws_service import admin_ws_manager
 from app.core.security import decode_access_token, verify_password
 from app.core.exceptions import PermissionDeniedError, ResourceNotFoundError, ValidationError
+from app.core.sanitizer import safe_regex_pattern
 
 from app.services.session_cleanup import cleanup_inactive_sessions
 
@@ -23,13 +27,13 @@ router = APIRouter(prefix="/admin", tags=["Admin Panel"])
 
 # Request Schemas for Admin
 class RoleUpdateRequest(BaseModel):
-    role: str = Field(..., description="Role to set: 'user' or 'admin'")
+    role: str = Field(..., pattern=r"^(user|admin)$", description="Role to set: 'user' or 'admin'")
 
 
 class DBCleanupRequest(BaseModel):
-    cleanup_type: str = Field(..., description="'selective' or 'full_test_reset'")
-    target_collections: List[str] = Field(default=[], description="Collections to clear: traces, interviews, notifications, test_users")
-    admin_password_confirm: str = Field(..., description="Admin password confirmation for safety")
+    cleanup_type: str = Field(..., pattern=r"^(selective|full_test_reset)$", description="'selective' or 'full_test_reset'")
+    target_collections: List[str] = Field(default=[], max_length=10, description="Collections to clear: traces, interviews, notifications, test_users")
+    admin_password_confirm: str = Field(..., min_length=1, max_length=128, description="Admin password confirmation for safety")
 
 
 # --- REST ENDPOINTS ---
@@ -68,8 +72,8 @@ async def get_admin_stats(admin_user: UserDocument = Depends(get_current_admin_u
 
 @router.get("/users", response_model=StandardResponse[dict])
 async def list_users(
-    page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
+    page: int = Query(1, ge=1, le=100, description="Max 100 pages"),
+    limit: int = Query(20, ge=1, le=50, description="Max 50 users per page to prevent scraping"),
     search: Optional[str] = None,
     filter_status: Optional[str] = Query(None, description="All, online, offline, admin"),
     admin_user: UserDocument = Depends(get_current_admin_user)
@@ -80,8 +84,9 @@ async def list_users(
     await cleanup_inactive_sessions()
     query_conditions = []
     
-    if search:
-        query_conditions.append(UserDocument.email.regex(search, options="i"))
+    if search and search.strip():
+        safe_email_pattern = safe_regex_pattern(search)
+        query_conditions.append(UserDocument.email.regex(safe_email_pattern, options="i"))
         
     if filter_status == "online":
         query_conditions.append(UserDocument.is_online == True)  # noqa: E712
@@ -149,7 +154,12 @@ async def update_user_role(
     if req.role not in ["user", "admin"]:
         raise ValidationError("Role must be 'user' or 'admin'", code="INVALID_ROLE")
 
-    target = await UserDocument.get(PydanticObjectId(target_user_id))
+    try:
+        p_target_id = PydanticObjectId(target_user_id)
+    except Exception:
+        raise ResourceNotFoundError("User not found", code="USER_NOT_FOUND")
+
+    target = await UserDocument.get(p_target_id)
     if not target:
         raise ResourceNotFoundError("User not found", code="USER_NOT_FOUND")
 
@@ -182,15 +192,33 @@ async def delete_user(
     if str(admin_user.id) == target_user_id:
         raise PermissionDeniedError("You cannot delete your own admin account", code="CANNOT_DELETE_SELF")
 
-    target = await UserDocument.get(PydanticObjectId(target_user_id))
+    try:
+        p_target_id = PydanticObjectId(target_user_id)
+    except Exception:
+        raise ResourceNotFoundError("User not found", code="USER_NOT_FOUND")
+
+    target = await UserDocument.get(p_target_id)
     if not target:
         raise ResourceNotFoundError("User not found", code="USER_NOT_FOUND")
 
     email = target.email
-    # Delete related documents
+    # Cascade delete all related documents across user collections to prevent orphan residues
     await ProfileDocument.find(ProfileDocument.user_id == target.id).delete()
     await ResumeDocument.find(ResumeDocument.user_id == target.id).delete()
+    await ResumeVersionDocument.find(ResumeVersionDocument.user_id == target.id).delete()
+    await ApplicationDocument.find(ApplicationDocument.user_id == target.id).delete()
     await MockInterviewDocument.find(MockInterviewDocument.user_id == target.id).delete()
+    await NotificationDocument.find(NotificationDocument.user_id == target.id).delete()
+    await JobMatchDocument.find(JobMatchDocument.user_id == target.id).delete()
+    await SkillGapRoadmapDocument.find(SkillGapRoadmapDocument.user_id == target.id).delete()
+    await AgentRunDocument.find(AgentRunDocument.user_id == target.id).delete()
+    await AgentToolCallDocument.find(AgentToolCallDocument.user_id == target.id).delete()
+    try:
+        from app.services.memory_service import memory_service
+        memory_service.delete_candidate_memory(user_id=str(target.id))
+    except Exception:
+        pass
+
     await target.delete()
 
     await admin_ws_manager.broadcast("USER_DELETED", {

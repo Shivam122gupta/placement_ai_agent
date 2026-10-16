@@ -10,6 +10,7 @@ from app.schemas.common import StandardResponse, MessageResponse
 from app.services.resume_service import ResumeService
 from app.api.deps import get_current_active_user
 from app.models.user import UserDocument
+from app.core.exceptions import AppException
 
 router = APIRouter(prefix="/resumes", tags=["Resume Intelligence"])
 
@@ -37,11 +38,19 @@ async def list_resumes(current_user: UserDocument = Depends(get_current_active_u
     )
 
 
+def _parse_resume_id(resume_id: str) -> PydanticObjectId:
+    try:
+        return PydanticObjectId(resume_id)
+    except Exception:
+        raise AppException(status_code=400, code="INVALID_ID", message="Invalid Resume ID format")
+
+
 @router.get("/{resume_id}", response_model=StandardResponse[ResumeResponse], status_code=status.HTTP_200_OK)
 async def get_resume(resume_id: str, current_user: UserDocument = Depends(get_current_active_user)):
+    obj_id = _parse_resume_id(resume_id)
     resume = await ResumeService.get_resume_by_id(
         user_id=current_user.id,
-        resume_id=PydanticObjectId(resume_id),
+        resume_id=obj_id,
     )
     return StandardResponse(
         success=True,
@@ -52,9 +61,10 @@ async def get_resume(resume_id: str, current_user: UserDocument = Depends(get_cu
 
 @router.get("/{resume_id}/download")
 async def download_resume(resume_id: str, current_user: UserDocument = Depends(get_current_active_user)):
+    obj_id = _parse_resume_id(resume_id)
     file_bytes, filename, mime_type = await ResumeService.get_raw_file_for_download(
         user_id=current_user.id,
-        resume_id=PydanticObjectId(resume_id),
+        resume_id=obj_id,
     )
     return StreamingResponse(
         io.BytesIO(file_bytes),
@@ -69,9 +79,10 @@ async def sync_resume_to_profile(
     sync_req: ProfileSyncRequest,
     current_user: UserDocument = Depends(get_current_active_user),
 ):
+    obj_id = _parse_resume_id(resume_id)
     updated_profile = await ResumeService.sync_to_profile(
         user_id=current_user.id,
-        resume_id=PydanticObjectId(resume_id),
+        resume_id=obj_id,
         sync_req=sync_req,
     )
     return StandardResponse(
@@ -83,9 +94,10 @@ async def sync_resume_to_profile(
 
 @router.delete("/{resume_id}", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
 async def delete_resume(resume_id: str, current_user: UserDocument = Depends(get_current_active_user)):
+    obj_id = _parse_resume_id(resume_id)
     await ResumeService.delete_resume(
         user_id=current_user.id,
-        resume_id=PydanticObjectId(resume_id),
+        resume_id=obj_id,
     )
     return StandardResponse(
         success=True,

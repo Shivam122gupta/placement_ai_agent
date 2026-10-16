@@ -6,7 +6,7 @@ from app.core.sanitizer import sanitize_text
 
 class AgentChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000, description="Candidate prompt or question")
-    session_id: Optional[str] = None
+    session_id: Optional[str] = Field(default=None, max_length=100)
 
     @field_validator("message", mode="before")
     @classmethod
@@ -14,7 +14,6 @@ class AgentChatRequest(BaseModel):
         if not v:
             return v
         return sanitize_text(str(v), allow_basic_formatting=True)
-
 
 
 class AgentChatResponse(BaseModel):
@@ -27,10 +26,10 @@ class AgentChatResponse(BaseModel):
 
 
 class ActionConfirmationRequest(BaseModel):
-    session_id: str
-    tool_name: str
-    params: Dict[str, Any]
-    decision: str = Field(default="approve", description="'approve' or 'reject'")
+    session_id: str = Field(..., max_length=100)
+    tool_name: str = Field(..., max_length=100)
+    params: Dict[str, Any] = Field(default_factory=dict)
+    decision: str = Field(default="approve", max_length=20, description="'approve' or 'reject'")
 
 
 class AgentHistoryItem(BaseModel):

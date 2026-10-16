@@ -4,17 +4,17 @@ from app.core.sanitizer import sanitize_text
 
 
 class ApplicationCreate(BaseModel):
-    job_id: Optional[str] = Field(default=None, description="Optional job ID if applying to an ingested job")
-    company_name: Optional[str] = Field(default=None, description="Company name (auto-filled if job_id provided)")
-    job_title: Optional[str] = Field(default=None, description="Job title (auto-filled if job_id provided)")
-    status: str = Field(default="SAVED", description="Initial stage: SAVED, APPLIED, ASSESSMENT, SHORTLISTED, INTERVIEW, OFFER, REJECTED, WITHDRAWN")
-    applied_date: Optional[str] = None
-    interview_date: Optional[str] = None
-    next_action: Optional[str] = None
-    next_action_date: Optional[str] = None
-    notes: Optional[str] = None
-    salary_offered: Optional[str] = None
-    location: Optional[str] = None
+    job_id: Optional[str] = Field(default=None, max_length=50, description="Optional job ID if applying to an ingested job")
+    company_name: Optional[str] = Field(default=None, max_length=150, description="Company name")
+    job_title: Optional[str] = Field(default=None, max_length=150, description="Job title")
+    status: str = Field(default="SAVED", max_length=30, description="Initial stage")
+    applied_date: Optional[str] = Field(default=None, max_length=50)
+    interview_date: Optional[str] = Field(default=None, max_length=50)
+    next_action: Optional[str] = Field(default=None, max_length=200)
+    next_action_date: Optional[str] = Field(default=None, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=3000)
+    salary_offered: Optional[str] = Field(default=None, max_length=100)
+    location: Optional[str] = Field(default=None, max_length=100)
 
     @field_validator("company_name", "job_title", "next_action", "notes", "salary_offered", "location", mode="before")
     @classmethod
@@ -25,14 +25,14 @@ class ApplicationCreate(BaseModel):
 
 
 class ApplicationUpdate(BaseModel):
-    status: Optional[str] = None
-    applied_date: Optional[str] = None
-    interview_date: Optional[str] = None
-    next_action: Optional[str] = None
-    next_action_date: Optional[str] = None
-    notes: Optional[str] = None
-    salary_offered: Optional[str] = None
-    location: Optional[str] = None
+    status: Optional[str] = Field(default=None, max_length=30)
+    applied_date: Optional[str] = Field(default=None, max_length=50)
+    interview_date: Optional[str] = Field(default=None, max_length=50)
+    next_action: Optional[str] = Field(default=None, max_length=200)
+    next_action_date: Optional[str] = Field(default=None, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=3000)
+    salary_offered: Optional[str] = Field(default=None, max_length=100)
+    location: Optional[str] = Field(default=None, max_length=100)
 
     @field_validator("next_action", "notes", "salary_offered", "location", mode="before")
     @classmethod

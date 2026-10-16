@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     MONGODB_URL: str = "mongodb://localhost:27017"
     MONGODB_DB_NAME: str = "ai_placement_db"
 
+    ENFORCE_HTTPS: bool = False
+
     # 3. Security & JWT
     JWT_SECRET: str = "default_dev_jwt_secret_key_change_in_production_32char"
     JWT_REFRESH_SECRET: str = "default_dev_jwt_refresh_secret_key_change_in_prod"
@@ -66,15 +68,31 @@ class Settings(BaseSettings):
             "your-super-secret-jwt-refresh-key-here",
             "change_this_in_production_to_a_secure_random_key_min_32_chars",
         }
-        if v in default_placeholders:
-            import os
-            env_mode = os.getenv("ENVIRONMENT", "production").lower()
-            debug_mode = os.getenv("DEBUG", "false").lower() == "true"
-            if env_mode == "production" and not debug_mode:
+        import os
+        env_mode = os.getenv("ENVIRONMENT", "production").lower()
+        debug_mode = os.getenv("DEBUG", "false").lower() == "true"
+        if env_mode == "production" and not debug_mode:
+            if v in default_placeholders:
                 raise ValueError(
                     "FATAL SECURITY RISK: Insecure default JWT secret detected in production! "
                     "You MUST set a custom 32+ char JWT_SECRET and JWT_REFRESH_SECRET in .env."
                 )
+            if len(v) < 32:
+                raise ValueError(
+                    "FATAL SECURITY RISK: JWT secrets must be at least 32 characters long in production."
+                )
+        return v
+
+    @field_validator("JWT_REFRESH_SECRET")
+    @classmethod
+    def validate_distinct_secrets(cls, v: str, info) -> str:
+        jwt_secret = info.data.get("JWT_SECRET")
+        if jwt_secret and v == jwt_secret:
+            import os
+            env_mode = os.getenv("ENVIRONMENT", "production").lower()
+            debug_mode = os.getenv("DEBUG", "false").lower() == "true"
+            if env_mode == "production" and not debug_mode:
+                raise ValueError("FATAL SECURITY RISK: JWT_SECRET and JWT_REFRESH_SECRET must be distinct keys.")
         return v
 
 

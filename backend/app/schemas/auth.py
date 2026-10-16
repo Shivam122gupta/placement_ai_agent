@@ -35,6 +35,7 @@ class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=128, description="Password must meet complexity criteria")
     full_name: Optional[str] = Field(default="", max_length=100)
+    website: Optional[str] = Field(default=None, description="Honeypot field for bot detection; must remain empty")
 
     @field_validator("full_name")
     @classmethod
@@ -60,12 +61,12 @@ class TokenResponse(BaseModel):
 
 
 class RefreshTokenRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str = Field(..., min_length=10, max_length=1000)
 
 
 class LogoutRequest(BaseModel):
-    refresh_token: Optional[str] = None  # Client should send this so it can be blacklisted
-    access_token: Optional[str] = None   # Optional direct access token revocation
+    refresh_token: Optional[str] = Field(None, max_length=1000)  # Client should send this so it can be blacklisted
+    access_token: Optional[str] = Field(None, max_length=1000)   # Optional direct access token revocation
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -73,7 +74,7 @@ class ForgotPasswordRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    token: str
+    token: str = Field(..., min_length=10, max_length=1000)
     new_password: str = Field(..., min_length=8, max_length=128)
 
     @field_validator("new_password")
@@ -83,7 +84,7 @@ class ResetPasswordRequest(BaseModel):
 
 
 class VerifyEmailRequest(BaseModel):
-    token: str
+    token: str = Field(..., min_length=10, max_length=1000)
 
 
 class UserResponse(BaseModel):

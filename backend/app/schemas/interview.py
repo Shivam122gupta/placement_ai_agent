@@ -4,9 +4,9 @@ from app.core.sanitizer import sanitize_text
 
 
 class GenerateInterviewRequest(BaseModel):
-    role: Optional[str] = Field(default="Software Engineer", description="Target role (e.g., 'Backend Engineer', 'Full Stack Developer')")
-    experience_level: Optional[str] = Field(default="0-1 years", description="Experience level: '0-1 years', '1-3 years', 'Fresher'")
-    job_id: Optional[str] = Field(default=None, description="Optional job ID to tailor interview questions specifically to the JD")
+    role: Optional[str] = Field(default="Software Engineer", max_length=150, description="Target role")
+    experience_level: Optional[str] = Field(default="0-1 years", max_length=50, description="Experience level")
+    job_id: Optional[str] = Field(default=None, max_length=50, description="Optional job ID")
     num_questions: int = Field(default=5, ge=3, le=8, description="Number of questions in mock session")
 
     @field_validator("role", "experience_level", mode="before")
@@ -18,7 +18,7 @@ class GenerateInterviewRequest(BaseModel):
 
 
 class SubmitAnswerRequest(BaseModel):
-    question_id: str = Field(..., description="ID of the question being answered")
+    question_id: str = Field(..., max_length=50, description="ID of the question being answered")
     candidate_answer: str = Field(..., min_length=5, max_length=10000, description="Candidate's technical or behavioral answer")
 
     @field_validator("candidate_answer", mode="before")

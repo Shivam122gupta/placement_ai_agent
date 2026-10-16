@@ -12,6 +12,8 @@ from app.core.logging import setup_logging
 from app.core.exceptions import AppException
 from app.core.rate_limiter import RateLimiterMiddleware
 from app.core.compression import CompressionMiddleware
+from app.core.traffic_monitor import TrafficMonitorMiddleware
+from app.core.https_enforcement import HTTPSEnforcementMiddleware
 from app.core.error_handlers import (
     app_exception_handler,
     http_exception_handler,
@@ -68,7 +70,13 @@ app.add_middleware(CompressionMiddleware, minimum_size=512, gzip_level=6, brotli
 # 2. Sliding-Window Rate Limiting & DoS Protection
 app.add_middleware(RateLimiterMiddleware)
 
-# 2. Request ID, Timing & Security Headers
+# 3. Real-Time Traffic Anomaly & Exploit Pattern Monitoring
+app.add_middleware(TrafficMonitorMiddleware)
+
+# 4. HTTPS Enforcement in Production
+app.add_middleware(HTTPSEnforcementMiddleware)
+
+# 5. Request ID, Timing & Security Headers
 @app.middleware("http")
 async def add_security_headers_and_timing(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))

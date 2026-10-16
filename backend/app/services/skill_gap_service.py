@@ -207,8 +207,11 @@ class SkillGapService:
 
     @classmethod
     async def get_roadmap_by_id(cls, user_id: PydanticObjectId, roadmap_id: PydanticObjectId) -> SkillGapRoadmapResponse:
-        doc = await SkillGapRoadmapDocument.get(roadmap_id)
-        if not doc or doc.user_id != user_id:
+        doc = await SkillGapRoadmapDocument.find_one(
+            SkillGapRoadmapDocument.id == roadmap_id,
+            SkillGapRoadmapDocument.user_id == user_id,
+        )
+        if not doc:
             raise ResourceNotFoundError("Roadmap", str(roadmap_id))
         return cls._to_roadmap_response(doc)
 
@@ -219,8 +222,11 @@ class SkillGapService:
         roadmap_id: PydanticObjectId,
         milestone_index: int,
     ) -> SkillGapRoadmapResponse:
-        doc = await SkillGapRoadmapDocument.get(roadmap_id)
-        if not doc or doc.user_id != user_id:
+        doc = await SkillGapRoadmapDocument.find_one(
+            SkillGapRoadmapDocument.id == roadmap_id,
+            SkillGapRoadmapDocument.user_id == user_id,
+        )
+        if not doc:
             raise ResourceNotFoundError("Roadmap", str(roadmap_id))
         
         if 0 <= milestone_index < len(doc.milestones):
@@ -232,8 +238,11 @@ class SkillGapService:
 
     @classmethod
     async def delete_roadmap(cls, user_id: PydanticObjectId, roadmap_id: PydanticObjectId) -> None:
-        doc = await SkillGapRoadmapDocument.get(roadmap_id)
-        if not doc or doc.user_id != user_id:
+        doc = await SkillGapRoadmapDocument.find_one(
+            SkillGapRoadmapDocument.id == roadmap_id,
+            SkillGapRoadmapDocument.user_id == user_id,
+        )
+        if not doc:
             raise ResourceNotFoundError("Roadmap", str(roadmap_id))
         await doc.delete()
 

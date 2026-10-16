@@ -15,6 +15,7 @@ from app.schemas.job import (
 from app.providers.jobs import get_job_provider
 from app.providers.llm import get_llm_provider
 from app.core.exceptions import ResourceNotFoundError, AppException
+from app.core.sanitizer import safe_regex_pattern
 
 logger = logging.getLogger("app.services.job")
 
@@ -176,13 +177,16 @@ class JobService:
         skip: int = 0,
     ) -> List[JobResponse]:
         filters = []
-        if query:
-            regex_query = {"$regex": query, "$options": "i"}
+        if query and query.strip():
+            safe_q = safe_regex_pattern(query)
+            regex_query = {"$regex": safe_q, "$options": "i"}
             filters.append({"$or": [{"title": regex_query}, {"company": regex_query}, {"description_raw": regex_query}]})
-        if location:
-            filters.append({"location": {"$regex": location, "$options": "i"}})
-        if employment_type:
-            filters.append({"employment_type": {"$regex": employment_type, "$options": "i"}})
+        if location and location.strip():
+            safe_loc = safe_regex_pattern(location)
+            filters.append({"location": {"$regex": safe_loc, "$options": "i"}})
+        if employment_type and employment_type.strip():
+            safe_emp = safe_regex_pattern(employment_type)
+            filters.append({"employment_type": {"$regex": safe_emp, "$options": "i"}})
 
         if filters:
             query_filter = {"$and": filters} if len(filters) > 1 else filters[0]

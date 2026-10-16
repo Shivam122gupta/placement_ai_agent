@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request, HTTPException
+from app.core.security_logger import get_client_ip, security_logger, SecurityEventType
+from app.core.rate_limiter import check_login_email_rate_limit
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,
@@ -28,7 +30,28 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(rate_limit(requests_limit=5, window_seconds=60, key_prefix="auth_reg"))],
 )
-async def register(req: UserRegisterRequest):
+async def register(req: UserRegisterRequest, request: Request):
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("User-Agent")
+
+    # Honeypot validation against automated form-filling bots
+    if req.website:
+        security_logger.log_event(
+            event_type=SecurityEventType.BOT_HONEYPOT_TRIGGERED,
+            severity="WARNING",
+            client_ip=client_ip,
+            user_agent=user_agent,
+            endpoint="/api/v1/auth/register",
+            details={
+                "honeypot_value": req.website[:50],
+                "action": "BLOCKED_BOT_REGISTRATION",
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration submission rejected by bot protection filter.",
+        )
+
     user, tokens = await AuthService.register(req)
     return StandardResponse(
         success=True,
@@ -46,8 +69,35 @@ async def register(req: UserRegisterRequest):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(rate_limit(requests_limit=10, window_seconds=60, key_prefix="auth_login"))],
 )
-async def login(req: UserLoginRequest):
-    user, tokens = await AuthService.login(req)
+async def login(req: UserLoginRequest, request: Request):
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("User-Agent")
+
+    # Anti-credential stuffing: throttle repeated attempts on the target email across distributed IPs
+    is_test_env = getattr(request.app.state, "disable_rate_limiting", False)
+    test_rate_check = request.headers.get("X-Test-Rate-Limit") == "true"
+    if not is_test_env or test_rate_check:
+        allowed, retry_after = check_login_email_rate_limit(req.email)
+        if not allowed:
+            security_logger.log_event(
+                event_type=SecurityEventType.RATE_LIMIT_EXCEEDED,
+                severity="WARNING",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                email=req.email,
+                endpoint="/api/v1/auth/login",
+                details={
+                    "action": "EMAIL_LOGIN_RATE_LIMITED",
+                    "retry_after_seconds": retry_after,
+                },
+            )
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many login attempts for this account. Please wait {retry_after} seconds before trying again.",
+                headers={"Retry-After": str(retry_after)},
+            )
+
+    user, tokens = await AuthService.login(req, client_ip=client_ip, user_agent=user_agent)
     return StandardResponse(
         success=True,
         message="Logged in successfully",

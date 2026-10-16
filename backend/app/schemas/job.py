@@ -55,11 +55,23 @@ class JobRequirementSchema(BaseModel):
 
 
 class JobSearchQuery(BaseModel):
-    query: Optional[str] = ""
-    location: Optional[str] = ""
-    employment_type: Optional[str] = ""
-    skills: Optional[List[str]] = None
-    limit: Optional[int] = 20
+    query: Optional[str] = Field(default="", max_length=150)
+    location: Optional[str] = Field(default="", max_length=100)
+    employment_type: Optional[str] = Field(default="", max_length=50)
+    skills: Optional[List[str]] = Field(default=None, max_length=20)
+    limit: Optional[int] = Field(default=20, ge=1, le=50)
+
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize_search_inputs(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            from app.core.sanitizer import sanitize_text
+            for k in ["query", "location", "employment_type"]:
+                if k in data and data[k]:
+                    data[k] = sanitize_text(str(data[k]))
+            if "skills" in data and isinstance(data["skills"], list):
+                data["skills"] = [sanitize_text(str(s)) for s in data["skills"] if s]
+        return data
 
 
 class JobResponse(BaseModel):
@@ -79,9 +91,20 @@ class JobResponse(BaseModel):
 
 
 class JDAnalysisRequest(BaseModel):
-    raw_text: str = Field(..., min_length=20, description="Raw job description text to parse")
-    title: Optional[str] = "Untitled Role"
-    company: Optional[str] = "Undisclosed Company"
+    raw_text: str = Field(..., min_length=20, max_length=50000, description="Raw job description text to parse")
+    title: Optional[str] = Field(default="Untitled Role", max_length=150)
+    company: Optional[str] = Field(default="Undisclosed Company", max_length=150)
+
+    @model_validator(mode="before")
+    @classmethod
+    def sanitize_jd_inputs(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            from app.core.sanitizer import sanitize_text
+            if "title" in data and data["title"]:
+                data["title"] = sanitize_text(str(data["title"]))
+            if "company" in data and data["company"]:
+                data["company"] = sanitize_text(str(data["company"]))
+        return data
 
 
 class JDAnalysisResponse(BaseModel):

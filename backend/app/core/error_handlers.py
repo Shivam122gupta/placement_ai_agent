@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.core.exceptions import AppException
 import logging
+from app.core.security_logger import security_logger, SecurityEventType, get_client_ip
 
 logger = logging.getLogger("app.error_handler")
 
@@ -24,7 +25,20 @@ def create_error_response(code: str, message: str, status_code: int, request_id:
 
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    client_ip = get_client_ip(request)
     logger.warning(f"[{request_id}] AppException: {exc.code} - {exc.message}")
+
+    if exc.status_code in [401, 403]:
+        security_logger.log_event(
+            event_type=SecurityEventType.API_ACCESS_DENIED,
+            severity="WARNING",
+            client_ip=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            endpoint=request.url.path,
+            method=request.method,
+            details={"code": exc.code, "message": exc.message, "status_code": exc.status_code},
+        )
+
     return create_error_response(
         code=exc.code,
         message=exc.message,
@@ -36,6 +50,7 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
 
 async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    client_ip = get_client_ip(request)
     code_map = {
         400: "BAD_REQUEST",
         401: "UNAUTHORIZED",
@@ -46,6 +61,28 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
         500: "INTERNAL_SERVER_ERROR",
     }
     code = code_map.get(exc.status_code, "HTTP_ERROR")
+
+    if exc.status_code in [401, 403]:
+        security_logger.log_event(
+            event_type=SecurityEventType.API_ACCESS_DENIED,
+            severity="WARNING",
+            client_ip=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            endpoint=request.url.path,
+            method=request.method,
+            details={"code": code, "detail": str(exc.detail), "status_code": exc.status_code},
+        )
+    elif exc.status_code == 429:
+        security_logger.log_event(
+            event_type=SecurityEventType.RATE_LIMIT_EXCEEDED,
+            severity="WARNING",
+            client_ip=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            endpoint=request.url.path,
+            method=request.method,
+            details={"code": code, "detail": str(exc.detail)},
+        )
+
     return create_error_response(
         code=code,
         message=str(exc.detail),
@@ -72,7 +109,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    client_ip = get_client_ip(request)
     logger.error(f"[{request_id}] Unhandled Exception: {str(exc)}", exc_info=True)
+
+    security_logger.log_event(
+        event_type=SecurityEventType.API_ERROR_5XX,
+        severity="CRITICAL",
+        client_ip=client_ip,
+        user_agent=request.headers.get("User-Agent"),
+        endpoint=request.url.path,
+        method=request.method,
+        details={"request_id": request_id, "error": str(exc), "error_type": type(exc).__name__},
+    )
+
     return create_error_response(
         code="INTERNAL_SERVER_ERROR",
         message="An unexpected internal server error occurred. Please contact support.",

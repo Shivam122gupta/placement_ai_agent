@@ -22,6 +22,7 @@ from app.core.config import settings
 from app.services.email_service import EmailService
 
 from app.services.admin_ws_service import admin_ws_manager
+from app.core.security_logger import security_logger, SecurityEventType
 
 logger = logging.getLogger(__name__)
 
@@ -109,13 +110,25 @@ class AuthService:
         return user_resp, token_resp
 
     @staticmethod
-    async def login(req: UserLoginRequest) -> Tuple[UserResponse, TokenResponse]:
+    async def login(
+        req: UserLoginRequest,
+        client_ip: str = "unknown",
+        user_agent: Optional[str] = None,
+    ) -> Tuple[UserResponse, TokenResponse]:
         now = datetime.now(timezone.utc)
         user = await UserDocument.find_one({"email": req.email.lower()})
 
         # Anti-enumeration timing attack mitigation
         if not user:
             constant_time_dummy_verify(req.password)
+            security_logger.log_event(
+                event_type=SecurityEventType.AUTH_LOGIN_FAILED,
+                severity="WARNING",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                email=req.email.lower(),
+                details={"reason": "User does not exist"},
+            )
             raise AuthenticationError("Invalid email or password", code="INVALID_CREDENTIALS")
 
         # 1. Account Lockout Check (Anti-Brute-Force & Credential Stuffing Defense)
@@ -124,6 +137,15 @@ class AuthService:
             remaining_seconds = int((locked_until - now).total_seconds())
             remaining_minutes = max(1, (remaining_seconds + 59) // 60)
             logger.warning(f"Login attempted on locked account: {user.email} (locked for {remaining_minutes}m)")
+            security_logger.log_event(
+                event_type=SecurityEventType.AUTH_ACCOUNT_LOCKED,
+                severity="WARNING",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                user_id=str(user.id),
+                email=user.email,
+                details={"remaining_minutes": remaining_minutes, "reason": "Account locked"},
+            )
             raise AuthenticationError(
                 f"Account is temporarily locked due to multiple failed login attempts. Please try again in {remaining_minutes} minute(s) or reset your password.",
                 code="ACCOUNT_LOCKED"
@@ -141,21 +163,57 @@ class AuthService:
                     f"Account {user.email} has been locked for {settings.ACCOUNT_LOCKOUT_MINUTES}m "
                     f"due to {settings.MAX_FAILED_LOGIN_ATTEMPTS} failed attempts."
                 )
+                security_logger.log_event(
+                    event_type=SecurityEventType.AUTH_ACCOUNT_LOCKED,
+                    severity="CRITICAL",
+                    client_ip=client_ip,
+                    user_agent=user_agent,
+                    user_id=str(user.id),
+                    email=user.email,
+                    details={"lockout_minutes": settings.ACCOUNT_LOCKOUT_MINUTES, "reason": "Max failed attempts reached"},
+                )
                 raise AuthenticationError(
                     f"Account has been temporarily locked for {settings.ACCOUNT_LOCKOUT_MINUTES} minutes due to {settings.MAX_FAILED_LOGIN_ATTEMPTS} failed login attempts.",
                     code="ACCOUNT_LOCKED"
                 )
             user.update_timestamp()
             await user.save()
+            security_logger.log_event(
+                event_type=SecurityEventType.AUTH_LOGIN_FAILED,
+                severity="WARNING",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                user_id=str(user.id),
+                email=user.email,
+                details={"failed_attempts": user.failed_login_attempts, "max_allowed": settings.MAX_FAILED_LOGIN_ATTEMPTS},
+            )
             raise AuthenticationError("Invalid email or password", code="INVALID_CREDENTIALS")
 
         # 3. Check account active status
         if not user.is_active:
+            security_logger.log_event(
+                event_type=SecurityEventType.AUTH_LOGIN_FAILED,
+                severity="WARNING",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                user_id=str(user.id),
+                email=user.email,
+                details={"reason": "ACCOUNT_INACTIVE"},
+            )
             raise AuthenticationError("Your account has been deactivated. Please contact support.", code="ACCOUNT_INACTIVE")
 
         # 4. Enforce email verification if configured
         if settings.REQUIRE_EMAIL_VERIFICATION and not user.is_verified:
             logger.info(f"Unverified login attempt for {user.email}")
+            security_logger.log_event(
+                event_type=SecurityEventType.AUTH_LOGIN_FAILED,
+                severity="INFO",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                user_id=str(user.id),
+                email=user.email,
+                details={"reason": "EMAIL_NOT_VERIFIED"},
+            )
             raise AuthenticationError(
                 "Your email address is not verified. Please check your inbox for the verification link or use resend-verification.",
                 code="EMAIL_NOT_VERIFIED"
@@ -169,6 +227,16 @@ class AuthService:
         user.last_active_at = now
         user.update_timestamp()
         await user.save()
+
+        # Log successful authentication
+        security_logger.log_event(
+            event_type=SecurityEventType.AUTH_LOGIN_SUCCESS,
+            severity="INFO",
+            client_ip=client_ip,
+            user_agent=user_agent,
+            user_id=str(user.id),
+            email=user.email,
+        )
 
         # Broadcast WebSocket event to Admin Panel
         try:
