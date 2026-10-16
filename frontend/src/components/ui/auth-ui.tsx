@@ -256,6 +256,15 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
       setError("Password must be at least 8 characters long.");
       return;
     }
+    if (
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password) ||
+      !/\d/.test(password) ||
+      !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password)
+    ) {
+      setError("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {

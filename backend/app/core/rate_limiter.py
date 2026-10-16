@@ -102,11 +102,14 @@ ROUTE_LIMITS: List[Tuple[str, int, int]] = [
     ("/api/v1/admin/users", 30, 60),              # 30 user list queries / min
     ("/api/v1/admin/stats", 60, 60),              # 60 stats fetches / min
     ("/api/v1/admin", 45, 60),                    # 45 general admin calls / min
-    ("/api/v1/auth/login", 10, 60),               # 10 attempts / min
-    ("/api/v1/auth/register", 6, 60),              # 6 registrations / min
-    ("/api/v1/auth/resend-verification", 3, 300),  # 3 resends / 5 min
-    ("/api/v1/agent/chat", 30, 60),                # 30 agent turns / min
-    ("/api/v1/resumes/upload", 15, 60),            # 15 uploads / min
+    ("/api/v1/auth/login", 5, 60),                # 5 attempts / min
+    ("/api/v1/auth/register", 6, 60),             # 6 registrations / min
+    ("/api/v1/auth/resend-verification", 3, 300), # 3 resends / 5 min
+    ("/api/v1/auth/forgot-password", 5, 300),     # 5 password reset requests / 5 min
+    ("/api/v1/auth/reset-password", 5, 300),      # 5 password resets / 5 min
+    ("/api/v1/auth/verify-email", 10, 60),        # 10 email verify attempts / min
+    ("/api/v1/agent/chat", 30, 60),               # 30 agent turns / min
+    ("/api/v1/resumes/upload", 15, 60),           # 15 uploads / min
 ]
 
 GLOBAL_LIMIT = (180, 60)  # 180 requests / min default for other routes

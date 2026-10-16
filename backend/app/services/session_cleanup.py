@@ -3,10 +3,11 @@ from datetime import datetime, timezone, timedelta
 import logging
 from app.models.user import UserDocument
 from app.services.admin_ws_service import admin_ws_manager
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-SESSION_TIMEOUT_MINUTES = 60
+SESSION_TIMEOUT_MINUTES = settings.SESSION_INACTIVITY_TIMEOUT_MINUTES
 
 
 async def cleanup_inactive_sessions() -> int:

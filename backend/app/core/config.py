@@ -45,6 +45,16 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SESSION_INACTIVITY_TIMEOUT_MINUTES: int = 60
+
+    # 3.1 Authentication & Security Policies
+    PASSWORD_MIN_LENGTH: int = 8
+    PASSWORD_MAX_LENGTH: int = 128
+    REQUIRE_EMAIL_VERIFICATION: bool = True
+    VERIFICATION_TOKEN_EXPIRE_HOURS: int = 24
+    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 15
+    MAX_FAILED_LOGIN_ATTEMPTS: int = 5
+    ACCOUNT_LOCKOUT_MINUTES: int = 15
 
     @field_validator("JWT_SECRET", "JWT_REFRESH_SECRET")
     @classmethod

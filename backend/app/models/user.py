@@ -16,8 +16,12 @@ class UserDocument(Document):
     last_active_at: Optional[datetime] = None
     signup_ip: Optional[str] = None
     verification_token: Optional[str] = None
+    verification_token_expires_at: Optional[datetime] = None
     reset_password_token: Optional[str] = None
     reset_password_expires_at: Optional[datetime] = None
+    token_version: int = 1
+    failed_login_attempts: int = 0
+    locked_until: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -28,6 +32,8 @@ class UserDocument(Document):
             "email",
             "created_at",
             "is_online",
+            "verification_token",
+            "reset_password_token",
         ]
 
     def update_timestamp(self):

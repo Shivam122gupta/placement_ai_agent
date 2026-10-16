@@ -12,7 +12,9 @@ from app.schemas.auth import (
 )
 from app.schemas.common import StandardResponse, MessageResponse
 from app.services.auth_service import AuthService
-from app.api.deps import get_current_active_user
+from typing import Optional
+from fastapi.security import HTTPAuthorizationCredentials
+from app.api.deps import get_current_active_user, security_scheme
 from app.models.user import UserDocument
 
 from app.core.rate_limit import rate_limit
@@ -69,11 +71,16 @@ async def refresh_tokens(req: RefreshTokenRequest):
 @router.post("/logout", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
 async def logout(
     req: LogoutRequest,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
     current_user: UserDocument = Depends(get_current_active_user),
 ):
-    # Server-side token revocation: blacklist the refresh token so it cannot be reused.
-    if req.refresh_token:
-        await AuthService.logout(req.refresh_token)
+    # Server-side token revocation: blacklist both refresh and access tokens
+    access_token = req.access_token or (credentials.credentials if credentials else None)
+    await AuthService.logout(
+        refresh_token=req.refresh_token,
+        access_token=access_token,
+        user=current_user
+    )
     return StandardResponse(
         success=True,
         message="Logged out successfully",
@@ -81,7 +88,12 @@ async def logout(
     )
 
 
-@router.post("/verify-email", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
+@router.post(
+    "/verify-email",
+    response_model=StandardResponse[MessageResponse],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit(requests_limit=10, window_seconds=60, key_prefix="auth_verify"))],
+)
 async def verify_email(req: VerifyEmailRequest):
     await AuthService.verify_email(req.token)
     return StandardResponse(

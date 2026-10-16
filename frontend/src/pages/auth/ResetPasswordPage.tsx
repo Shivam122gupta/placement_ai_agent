@@ -18,6 +18,12 @@ export const ResetPasswordPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const isLengthValid = newPassword.length >= 8;
+  const isComplexityValid =
+    isLengthValid &&
+    /[A-Z]/.test(newPassword) &&
+    /[a-z]/.test(newPassword) &&
+    /\d/.test(newPassword) &&
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(newPassword);
   const isMatch = newPassword.length > 0 && newPassword === confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,6 +34,10 @@ export const ResetPasswordPage: React.FC = () => {
     }
     if (!isLengthValid) {
       setError('Password must be at least 8 characters long.');
+      return;
+    }
+    if (!isComplexityValid) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
       return;
     }
     if (!isMatch) {
@@ -178,6 +188,10 @@ export const ResetPasswordPage: React.FC = () => {
                       <span className="text-xs">{isLengthValid ? '✓' : '•'}</span>
                       <span>At least 8 characters long</span>
                     </div>
+                    <div className={`flex items-center gap-1.5 ${isComplexityValid ? 'text-emerald-400' : 'text-neutral-500'}`}>
+                      <span className="text-xs">{isComplexityValid ? '✓' : '•'}</span>
+                      <span>Includes uppercase, lowercase, number & symbol</span>
+                    </div>
                     {confirmPassword.length > 0 && (
                       <div className={`flex items-center gap-1.5 ${isMatch ? 'text-emerald-400' : 'text-rose-400'}`}>
                         <span className="text-xs">{isMatch ? '✓' : '✗'}</span>
@@ -188,7 +202,7 @@ export const ResetPasswordPage: React.FC = () => {
 
                   <button
                     type="submit"
-                    disabled={isSubmitting || !isLengthValid || !isMatch}
+                    disabled={isSubmitting || !isLengthValid || !isComplexityValid || !isMatch}
                     className="w-full mt-2 py-3 px-6 rounded-xl bg-gradient-to-r from-[#FF6B6B] to-[#FA7268] hover:from-[#ff5757] hover:to-[#f96155] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm transition shadow-lg shadow-[#FF6B6B]/30 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <KeyRound className="w-4 h-4" />
