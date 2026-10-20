@@ -25,9 +25,21 @@ import { NotFoundPage } from './pages/NotFoundPage';
 
 
 
+import { useLocation } from 'react-router-dom';
+import { analytics } from './utils/analytics';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { CookieConsent } from './components/common/CookieConsent';
+
+const RouteAnalyticsTracker: React.FC = () => {
+  const location = useLocation();
+
+  React.useEffect(() => {
+    analytics.trackPageView(location.pathname);
+  }, [location.pathname]);
+
+  return null;
+};
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,6 +59,7 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <RouteAnalyticsTracker />
         <Routes>
           {/* Public Landing, Legal & Auth Routes */}
           <Route path="/" element={<LandingPage />} />

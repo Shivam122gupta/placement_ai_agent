@@ -80,6 +80,8 @@ backend/storage/resumes/*
 storage/qdrant_data/
 backend/storage/qdrant_data/
 storage/resumes/
+storage/backups/
+backend/storage/backups/
 plans/
 
 docs/ 

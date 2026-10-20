@@ -212,3 +212,78 @@ async def get_me(current_user: UserDocument = Depends(get_current_active_user)):
             created_at=current_user.created_at.isoformat(),
         )
     )
+
+
+@router.delete("/me", response_model=StandardResponse[MessageResponse], status_code=status.HTTP_200_OK)
+async def delete_my_account(
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
+    current_user: UserDocument = Depends(get_current_active_user),
+):
+    """
+    Self-service account deletion.
+    Permanently purges candidate account and cascades deletion across all user data,
+    resumes, vector embeddings, interviews, applications, and roadmaps (GDPR Right to Erasure).
+    """
+    from app.models.profile import ProfileDocument
+    from app.models.resume import ResumeDocument, ResumeVersionDocument
+    from app.models.application import ApplicationDocument
+    from app.models.interview import MockInterviewDocument
+    from app.models.notification import NotificationDocument
+    from app.models.matching import JobMatchDocument
+    from app.models.skill_gap import SkillGapRoadmapDocument
+    from app.models.agent_trace import AgentRunDocument, AgentToolCallDocument
+
+    user_id = current_user.id
+    email = current_user.email
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("User-Agent")
+
+    # 1. Cascade delete profile, resumes, applications, interviews, roadmaps, logs
+    await ProfileDocument.find(ProfileDocument.user_id == user_id).delete()
+    await ResumeDocument.find(ResumeDocument.user_id == user_id).delete()
+    await ResumeVersionDocument.find(ResumeVersionDocument.user_id == user_id).delete()
+    await ApplicationDocument.find(ApplicationDocument.user_id == user_id).delete()
+    await MockInterviewDocument.find(MockInterviewDocument.user_id == user_id).delete()
+    await NotificationDocument.find(NotificationDocument.user_id == user_id).delete()
+    await JobMatchDocument.find(JobMatchDocument.user_id == user_id).delete()
+    await SkillGapRoadmapDocument.find(SkillGapRoadmapDocument.user_id == user_id).delete()
+    await AgentRunDocument.find(AgentRunDocument.user_id == user_id).delete()
+    await AgentToolCallDocument.find(AgentToolCallDocument.user_id == user_id).delete()
+
+    # 2. Purge candidate vector memory in Qdrant
+    try:
+        from app.services.memory_service import memory_service
+        memory_service.delete_candidate_memory(user_id=str(user_id))
+    except Exception:
+        pass
+
+    # 3. Revoke access token in blacklist
+    access_token = credentials.credentials if credentials else None
+    if access_token:
+        try:
+            from app.services.redis_service import redis_service
+            token_hash = AuthService._hash_token(access_token)
+            await redis_service.set(f"blacklist:{token_hash}", "deleted_account", expire=3600)
+        except Exception:
+            pass
+
+    # 4. Delete user document
+    await current_user.delete()
+
+    security_logger.log_event(
+        event_type=SecurityEventType.AUTH_ACCOUNT_DELETED,
+        severity="INFO",
+        client_ip=client_ip,
+        user_agent=user_agent,
+        email=email,
+        endpoint="/api/v1/auth/me",
+        details={"action": "SELF_ACCOUNT_DELETED", "user_id": str(user_id)},
+    )
+
+    return StandardResponse(
+        success=True,
+        message="Your account and all associated personal data have been permanently deleted.",
+        data=MessageResponse(message="Account successfully deleted")
+    )
+

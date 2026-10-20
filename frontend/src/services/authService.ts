@@ -66,4 +66,11 @@ export const authService = {
     const response = await apiClient.post<StandardResponse<{ message: string }>>('/auth/resend-verification');
     return response.data.message;
   },
+
+  async deleteAccount(): Promise<void> {
+    await apiClient.delete('/auth/me');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+  },
 };
+

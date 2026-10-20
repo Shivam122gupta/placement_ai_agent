@@ -25,9 +25,12 @@ import { useNavigate } from 'react-router-dom';
 import { SEO } from '../components/common/SEO';
 
 export const ProfilePage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [autoSyncing, setAutoSyncing] = useState(false);
@@ -811,12 +814,107 @@ export const ProfilePage: React.FC = () => {
               navigate('/');
             }
           }}
-          className="inline-flex items-center gap-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 px-5 py-2.5 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 px-5 py-2.5 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-sm"
         >
           <LogOut className="h-4 w-4" />
           <span>Log Out of Hirxora</span>
         </button>
       </div>
+
+      {/* Danger Zone: Delete Account */}
+      <div className="rounded-2xl sm:rounded-3xl border border-red-500/25 bg-red-950/10 p-5 sm:p-7 shadow-xl space-y-4">
+        <div className="flex items-center gap-2.5 text-rose-400">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <h3 className="text-sm font-semibold text-rose-400">Danger Zone</h3>
+        </div>
+        <p className="text-xs text-neutral-400 max-w-2xl leading-relaxed">
+          Permanently delete your account, saved resumes, mock interview scores, application pipeline, and AI vector memories. This action is irreversible according to GDPR Right to Erasure.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setDeleteConfirmText('');
+            setShowDeleteModal(true);
+          }}
+          className="inline-flex items-center gap-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 hover:text-white border border-rose-500/40 px-5 py-2.5 text-xs font-semibold transition cursor-pointer active:scale-95 shadow-sm"
+        >
+          <Trash2 className="h-4 w-4" />
+          <span>Delete Account</span>
+        </button>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-rose-500/30 bg-[#141012] p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-rose-500/20 p-2.5 text-rose-400">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">Permanently Delete Account?</h3>
+                <p className="text-xs text-neutral-400">This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              All your personal profile data, resume versions, job matches, and AI mock interview histories will be permanently wiped from the database.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-mono text-neutral-400">
+                Type <strong className="text-rose-400">DELETE</strong> to confirm:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full rounded-xl border border-rose-500/30 bg-black/50 px-3.5 py-2 text-sm text-white placeholder-neutral-600 focus:border-rose-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeletingAccount}
+                onClick={() => setShowDeleteModal(false)}
+                className="rounded-xl border border-neutral-700 bg-neutral-800 px-4 py-2 text-xs font-semibold text-neutral-300 hover:bg-neutral-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleteConfirmText !== 'DELETE' || isDeletingAccount}
+                onClick={async () => {
+                  setIsDeletingAccount(true);
+                  try {
+                    await deleteAccount();
+                    alert('Your account has been deleted.');
+                    navigate('/');
+                  } catch (err: any) {
+                    alert(err.response?.data?.message || 'Failed to delete account. Please try again.');
+                    setIsDeletingAccount(false);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-rose-600/30 transition cursor-pointer"
+              >
+                {isDeletingAccount ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Confirm & Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -219,3 +219,47 @@ async def test_password_reset_expiration_and_session_invalidation(async_client: 
         json={"email": "reset_user@test.com", "password": "NewSecurePassword2026!"}
     )
     assert new_login.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_self_account_deletion(async_client: AsyncClient):
+    # 1. Register candidate
+    email = "delete_me_candidate@test.com"
+    pwd = "DeletePassword123!"
+    reg_res = await async_client.post("/api/v1/auth/register", json={
+        "email": email,
+        "password": pwd,
+        "full_name": "To Delete Candidate"
+    })
+    assert reg_res.status_code == 201
+
+    # Verify email
+    user = await UserDocument.find_one({"email": email})
+    user.is_verified = True
+    await user.save()
+
+    # Login to get token
+    login_res = await async_client.post("/api/v1/auth/login", json={
+        "email": email,
+        "password": pwd
+    })
+    token = login_res.json()["data"]["tokens"]["access_token"]
+    auth_headers = {"Authorization": f"Bearer {token}"}
+
+    # Verify session active
+    me_res = await async_client.get("/api/v1/auth/me", headers=auth_headers)
+    assert me_res.status_code == 200
+
+    # Execute DELETE /api/v1/auth/me
+    del_res = await async_client.delete("/api/v1/auth/me", headers=auth_headers)
+    assert del_res.status_code == 200
+    assert del_res.json()["success"] is True
+
+    # User record must no longer exist in DB
+    user_after = await UserDocument.find_one({"email": email})
+    assert user_after is None
+
+    # Subsequent access with same token must fail
+    follow_up_me = await async_client.get("/api/v1/auth/me", headers=auth_headers)
+    assert follow_up_me.status_code == 401
+

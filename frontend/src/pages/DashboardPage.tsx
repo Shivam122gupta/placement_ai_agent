@@ -19,10 +19,12 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '../components/common/SEO';
+import { OnboardingModal } from '../components/common/OnboardingModal';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -34,6 +36,12 @@ export const DashboardPage: React.FC = () => {
       }
     };
     fetchProfile();
+
+    // Check if user has not completed the onboarding tour yet
+    const completed = localStorage.getItem('hirxora_onboarding_completed');
+    if (!completed) {
+      setShowOnboarding(true);
+    }
   }, []);
 
   const completionScore = profile?.completion_score || 0;
@@ -50,9 +58,18 @@ export const DashboardPage: React.FC = () => {
         <div className="absolute top-0 right-0 -mt-8 -mr-8 h-64 w-64 rounded-full bg-white/[0.02] blur-3xl pointer-events-none" />
         
         <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5]/10 border border-[#FAF8F5]/25 px-3 py-1 text-[11px] sm:text-xs font-mono font-medium text-[#FAF8F5]">
-            <span className="h-2 w-2 rounded-full bg-[#FAF8F5] animate-ping" />
-            <span>AI Placement & Career Assistant Active</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5]/10 border border-[#FAF8F5]/25 px-3 py-1 text-[11px] sm:text-xs font-mono font-medium text-[#FAF8F5]">
+              <span className="h-2 w-2 rounded-full bg-[#FAF8F5] animate-ping" />
+              <span>AI Placement & Career Assistant Active</span>
+            </div>
+            <button
+              onClick={() => setShowOnboarding(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#FF6B6B]/15 hover:bg-[#FF6B6B]/25 border border-[#FF6B6B]/30 px-3 py-1 text-[11px] sm:text-xs font-mono font-medium text-[#FFA07A] transition cursor-pointer"
+            >
+              <Sparkles className="h-3 w-3 text-[#FFA07A]" />
+              <span>Guided Tour</span>
+            </button>
           </div>
 
           <h1 className="mt-4 sm:mt-5 text-2xl sm:text-4xl md:text-5xl font-normal tracking-tight text-[#FAF8F5] font-serif break-words">
@@ -307,6 +324,13 @@ export const DashboardPage: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        candidateName={candidateName}
+        initialRole={profile?.target_roles?.[0]}
+      />
     </div>
   );
 };
