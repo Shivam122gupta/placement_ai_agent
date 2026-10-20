@@ -24,10 +24,34 @@ export const ResumeUploadZone: React.FC<Props> = ({ onUpload, isUploading }) => 
   const validateAndUpload = async (file: File) => {
     setError(null);
     const validExtensions = ['.pdf', '.docx'];
-    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    const dangerousExtensions = [
+      '.exe', '.dll', '.so', '.bat', '.cmd', '.ps1', '.sh', '.php',
+      '.phtml', '.py', '.js', '.vbs', '.scr', '.pif', '.jar', '.docm'
+    ];
 
+    const fileNameLower = file.name.toLowerCase();
+    const lastDotIndex = fileNameLower.lastIndexOf('.');
+    if (lastDotIndex === -1) {
+      setError('File must have a valid extension (.pdf or .docx).');
+      return;
+    }
+
+    const ext = fileNameLower.substring(lastDotIndex);
     if (!validExtensions.includes(ext)) {
-      setError('Please upload a PDF (.pdf) or Word (.docx) document.');
+      setError('Unsupported file type. Only PDF (.pdf) and Word (.docx) documents are permitted.');
+      return;
+    }
+
+    // Check for double extension patterns
+    const nameWithoutExt = fileNameLower.substring(0, lastDotIndex);
+    const hasDangerousSecondaryExt = dangerousExtensions.some((bad) => nameWithoutExt.endsWith(bad));
+    if (hasDangerousSecondaryExt) {
+      setError('Suspicious double file extension detected. Executable or script extensions are forbidden.');
+      return;
+    }
+
+    if (file.size < 32) {
+      setError('Uploaded file is empty or corrupted.');
       return;
     }
 

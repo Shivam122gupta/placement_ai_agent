@@ -168,3 +168,56 @@ async def test_strict_role_enum_enforcement(async_client: AsyncClient, auth_head
     # Role must be strictly 'user' or 'admin'
     assert res.status_code in (422, 403)
 
+
+@pytest.mark.asyncio
+async def test_double_extension_attack_rejected_by_api(async_client: AsyncClient, auth_headers: dict):
+    """
+    Verifies that filenames with double extensions (e.g. resume.php.pdf, exploit.exe.docx)
+    are strictly blocked with HTTP 422.
+    """
+    valid_pdf_content = b"%PDF-1.4\n1 0 obj\n<< /Title (Test) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF"
+    double_ext_files = [
+        "resume.php.pdf",
+        "exploit.exe.docx",
+        "shell.sh.pdf",
+        "trojan.vbs.docx",
+    ]
+    for bad_name in double_ext_files:
+        files = {"file": (bad_name, valid_pdf_content, "application/pdf")}
+        res = await async_client.post("/api/v1/resumes", files=files, headers=auth_headers)
+        assert res.status_code == 422
+        assert res.json()["error"]["code"] == "DOUBLE_EXTENSION_BLOCKED"
+
+
+@pytest.mark.asyncio
+async def test_pdf_exploit_launch_action_rejected_by_api(async_client: AsyncClient, auth_headers: dict):
+    """
+    Verifies that PDFs containing malicious /Launch or /JavaScript active objects are blocked.
+    """
+    malicious_pdf = b"%PDF-1.4\n1 0 obj\n<< /Type /Action /S /Launch /F (calc.exe) >>\nendobj\n%%EOF"
+    files = {"file": ("malicious.pdf", malicious_pdf, "application/pdf")}
+    res = await async_client.post("/api/v1/resumes", files=files, headers=auth_headers)
+    assert res.status_code == 422
+    assert res.json()["error"]["code"] in ("MALICIOUS_PDF_OBJECT_BLOCKED", "UNSAFE_FILE_CONTENT")
+
+
+@pytest.mark.asyncio
+async def test_docx_vba_macro_rejected_by_api(async_client: AsyncClient, auth_headers: dict):
+    """
+    Verifies that macro-enabled Word documents (.docm) disguised as .docx are rejected.
+    """
+    import io
+    import zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", b"<Types></Types>")
+        zf.writestr("word/document.xml", b"<document></document>")
+        zf.writestr("word/vbaProject.bin", b"VBA_MACRO_BYTECODE_PAYLOAD")
+    docx_bytes = buf.getvalue()
+
+    files = {"file": ("macro_resume.docx", docx_bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
+    res = await async_client.post("/api/v1/resumes", files=files, headers=auth_headers)
+    assert res.status_code == 422
+    assert res.json()["error"]["code"] == "MACRO_CODE_BLOCKED"
+
+

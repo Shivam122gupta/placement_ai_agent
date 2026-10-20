@@ -61,15 +61,26 @@ async def get_resume(resume_id: str, current_user: UserDocument = Depends(get_cu
 
 @router.get("/{resume_id}/download")
 async def download_resume(resume_id: str, current_user: UserDocument = Depends(get_current_active_user)):
+    import re
     obj_id = _parse_resume_id(resume_id)
     file_bytes, filename, mime_type = await ResumeService.get_raw_file_for_download(
         user_id=current_user.id,
         resume_id=obj_id,
     )
+    # Sanitize filename against CRLF header injection and quote escaping
+    safe_filename = re.sub(r'[\r\n"\\\x00-\x1f]', '_', filename)
+
+    response_headers = {
+        "Content-Disposition": f'attachment; filename="{safe_filename}"',
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; sandbox",
+        "X-Frame-Options": "DENY",
+        "Cache-Control": "private, no-cache, no-store, must-revalidate",
+    }
     return StreamingResponse(
         io.BytesIO(file_bytes),
-        media_type=mime_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        media_type=mime_type or "application/octet-stream",
+        headers=response_headers,
     )
 
 
